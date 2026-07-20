@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "acquiredAt": "2026-07-21",
+  "assets": [
+    {
+      "file": "gugak-bgm-133.mp3",
+      "bytes": 2716096,
+      "sha256": "d053af861b1e775318b650aba5a3a0e1e1bf01a7095e0bd6795d4e38a3620f15",
+      "source": "https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200020&wrtSn=13379716",
+      "license": "CC BY 4.0"
+    },
+    {
+      "file": "card-deal.mp3",
+      "bytes": 21813,
+      "sha256": "024eea9ea74466dd14f1110923d0d6b0535d8de269409296a2537a0a7b2f0949",
+      "source": "https://freesound.org/people/el_boss/sounds/571575/",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "card-slide.mp3",
+      "bytes": 9602,
+      "sha256": "9cd8f76ddb4ac23a72ff32377dc96f88fb805fd12d058c4e9a3fc224beb18d23",
+      "source": "https://freesound.org/people/el_boss/sounds/571581/",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "card-contact.mp3",
+      "bytes": 3549,
+      "sha256": "b39b077f8293c2fcf2823b973aca7f2d553c55db95101ee41242bf028717e216",
+      "source": "https://freesound.org/people/BMacZero/sounds/96127/",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "wood-block.mp3",
+      "bytes": 9604,
+      "sha256": "a1c97a5d466bbafc6b93ddeb99faea491ee5e0269d9a3bd243b12b51d7e57ee9",
+      "source": "https://freesound.org/people/thomasjaunism/sounds/218460/",
+      "license": "CC0 1.0"
+    },
+    {
+      "file": "voices/verification.json",
+      "bytes": 9306,
+      "sha256": "e975ed45d7f4d2d9060840918fac662b158131af3a731e959d1feb27fcc6baf6",
+      "source": "https://huggingface.co/Supertone/supertonic-3",
+      "license": "Generated output; Supertonic 3 model under BigScience OpenRAIL-M"
+    }
+  ]
+}

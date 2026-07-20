@@ -1,24 +1,118 @@
-# Local settings and secrets
-appsettings.Local.json
-.env
-.env.*
-!.env.example
-
-# Frontend dependencies and build output
-node_modules/
-wwwroot/
-
-# .NET build output
-bin/
-obj/
-
-# Editor and OS files
+# Editor / OS
 .idea/
 .vscode/
-.DS_Store
+.agents/
+.codex/
+/AGENTS.md
 Thumbs.db
+.DS_Store
 *.swp
 *~
 
-# Logs
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+**/appsettings.*.json
+!**/appsettings.*.example.json
+**/secrets.json
+**/secrets/
+.npmrc.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+id_rsa
+id_ed25519
+**/node_modules/
+**/bin/
+**/obj/
+dist/
+
+# Generated frontend / test output
+**/wwwroot/
+coverage/
+.vite/
+.vitest/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.eslintcache
+
+# Licensed local / production-only media
+/apps/web/public/audio/private/
+
+# Local .NET / IDE state
+.vs/
+*.user
+*.suo
+
+# Local databases / runtime data
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.dump
+*.bak
+*.sql
+!/services/api/database/schema.sql
+*.sql.gz
+/backups/
+/data/
+/exports/
+/logs/
+/runtime/
+/tmp/
+/uploads/
+*.pid
+apps/web/public/audio/private/*
+
+# Private production deployment configuration
+/deploy/*
+!/deploy/examples/
+!/deploy/examples/**
+
+# Runtime logs
 *.log
+
+# Native platform workspace output
+apps/**/.gradle/
+apps/**/.gradle-user-home*/
+apps/**/.android-user-home/
+apps/**/.kotlin/
+apps/**/.idea/
+apps/**/local.properties
+apps/**/build/
+apps/**/.build/
+apps/**/out/
+apps/**/DerivedData/
+apps/**/Pods/
+apps/**/*.xcuserdata/
+apps/**/*.xcuserstate
+apps/**/.externalNativeBuild/
+apps/**/.cxx/
+apps/**/*.iml
+apps/**/*.apk
+apps/**/*.aab
+apps/**/*.jks
+apps/**/*.keystore
+apps/**/keystore.properties
+apps/**/google-services.json
+apps/**/GoogleService-Info.plist
+apps/**/Package.StoreAssociation.xml
+apps/**/*.mobileprovision
+apps/**/*.dmg
+apps/**/*.pkg
+apps/**/*.ipa
+apps/**/*.xcarchive
+apps/**/*.msi
+apps/**/*.msix
+apps/**/*.msixbundle
+apps/**/*.AppImage

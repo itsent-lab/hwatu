@@ -1,0 +1,35 @@
+# 최상위 설정임을 명시
+root = true
+
+# 모든 파일 공통 설정 (PHP, 리눅스 스크립트 등 포함)
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# 안드로이드 관련 (Java, Kotlin, XML, Gradle 등)
+[*.{java,kt,kts,xml,gradle}]
+indent_size = 4
+
+# C# 계열 (Visual Studio)
+[*.cs]
+indent_size = 4
+
+# PHP 파일 (질문하신 PHP 개발 환경용)
+[*.php]
+indent_size = 4
+
+# 파이썬 (문법적으로 공백 4칸 권장)
+[*.py]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+
+# 쉘 스크립트 (리눅스 실행을 위해 반드시 LF 필수)
+[*.{sh,bash}]
+end_of_line = lf
+indent_size = 2
+insert_final_newline = true
