@@ -92,6 +92,26 @@ describe('로그인 API 복구', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('고스톱 정산은 일시적인 서버 오류가 끝나면 자동으로 저장한다', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response(200, { ok: true, data: { csrfToken: 'settle-token' } }))
+      .mockResolvedValueOnce(new Response('Bad Gateway', { status: 502, headers: { 'Content-Type': 'text/html' } }))
+      .mockResolvedValueOnce(new Response('Unavailable', { status: 503, headers: { 'Content-Type': 'text/html' } }))
+      .mockResolvedValueOnce(response(200, {
+        ok: true,
+        data: { gameUuid: 'game-1', balance: 520000, computerABalance: 490000, computerBBalance: 490000 }
+      }));
+    vi.stubGlobal('fetch', fetchMock);
+    vi.useFakeTimers();
+    const { settleGostopRound } = await import('../lib/api');
+
+    const result = settleGostopRound({ gameUuid: 'game-1', winner: 'human', finalScore: 10, pointValue: 1_000 });
+    const assertion = expect(result).resolves.toMatchObject({ computerABalance: 490000, computerBBalance: 490000 });
+    await vi.runAllTimersAsync();
+    await assertion;
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
   it('프로필 사진은 보안 토큰과 multipart 형식으로 전송한다', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(response(200, { ok: true, data: { csrfToken: 'profile-token' } }))

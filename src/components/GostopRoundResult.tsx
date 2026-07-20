@@ -4,11 +4,13 @@ interface GostopRoundResultProps {
   room: GostopRoomState;
   winnerName: string;
   exitReserved?: boolean;
+  balanceEmpty?: boolean;
   onContinue: () => void;
   onExit: () => void;
+  onReturnLobby?: () => void;
 }
 
-export default function GostopRoundResult({ room, winnerName, exitReserved = false, onContinue, onExit }: GostopRoundResultProps) {
+export default function GostopRoundResult({ room, winnerName, exitReserved = false, balanceEmpty = false, onContinue, onExit, onReturnLobby }: GostopRoundResultProps) {
   const won = room.roundResult === 'win' && room.winner;
   const score = won ? scoreGostopPlayer(room, room.winner!) : null;
   const amount = Math.max(0, room.finalScore * room.pointValue);
@@ -34,8 +36,12 @@ export default function GostopRoundResult({ room, winnerName, exitReserved = fal
         {!won && <p className="nagari-note">{room.lastAction} 다음 판은 {room.roundMultiplier * 2}배로 진행됩니다.</p>}
       </div>
       <div className="result-footer">
-        <p className="result-question">{exitReserved ? '예약하신 대로 잠시 후 게임을 나갑니다.' : '한 판 더 진행할까요?'}</p>
-        {exitReserved
+        <p className={`result-question${balanceEmpty ? ' balance-empty-notice' : ''}`}>{balanceEmpty
+          ? '게임머니가 0냥입니다. 대기실에서 리필한 뒤 다시 시작해 주세요.'
+          : exitReserved ? '예약하신 대로 잠시 후 게임을 나갑니다.' : '한 판 더 진행할까요?'}</p>
+        {balanceEmpty
+          ? <button type="button" className="result-new-button refill-home-button" onClick={onReturnLobby ?? onExit}>대기실로 가서 리필 받기</button>
+          : exitReserved
           ? <button type="button" className="result-exit-button" onClick={onExit}>지금 나가기</button>
           : <div className="result-actions"><button type="button" className="result-new-button" onClick={onContinue}>한 판 더</button><button type="button" className="result-exit-button" onClick={onExit}>나가기</button></div>}
       </div>

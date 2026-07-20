@@ -55,8 +55,8 @@ export default function RoundResultOverlay({ game, opponentName = '상대', exit
       </div>
       {balanceEmpty ? <>
         <div className="result-footer">
-          <p className="result-question balance-empty-notice">게임머니가 0냥입니다. 메인 화면에서 리필한 뒤 다시 시작해 주세요.</p>
-          <button type="button" className="result-new-button refill-home-button" disabled={disabled} onClick={onReturnHome}>메인으로 가서 리필 받기</button>
+          <p className="result-question balance-empty-notice">게임머니가 0냥입니다. 대기실에서 리필한 뒤 다시 시작해 주세요.</p>
+          <button type="button" className="result-new-button refill-home-button" disabled={disabled} onClick={onReturnHome}>대기실로 가서 리필 받기</button>
         </div>
       </> : exitReserved ? <>
         <div className="result-footer">

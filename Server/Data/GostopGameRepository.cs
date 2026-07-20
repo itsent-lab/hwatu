@@ -7,6 +7,7 @@ namespace Hwatu.Server.Data;
 public sealed class GostopGameRepository(HwatuDb database)
 {
     private const long MaxVirtualBalance = 999_999_999_999;
+    private const long ComputerRefillBalance = 500_000;
 
     public async Task<GostopSettlementResult> SettleAsync(
         long userId,
@@ -63,6 +64,8 @@ public sealed class GostopGameRepository(HwatuDb database)
                 Transfer(ref computerA, ref computerB, amountPerOpponent);
                 break;
         }
+        if (computerA == 0) computerA = ComputerRefillBalance;
+        if (computerB == 0) computerB = ComputerRefillBalance;
         var humanDelta = human - balances.VirtualBalance;
         var summary = JsonSerializer.Serialize(new
         {

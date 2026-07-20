@@ -21,6 +21,13 @@ export interface GostopSettlementResult {
   settlementApplied: boolean;
 }
 
+export interface GostopSettlementRequest {
+  gameUuid: string;
+  winner: 'human' | 'computerA' | 'computerB';
+  finalScore: number;
+  pointValue: number;
+}
+
 export interface SessionData {
   user: UserProfile;
   csrfToken: string;

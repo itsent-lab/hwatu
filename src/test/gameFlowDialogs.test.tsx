@@ -70,13 +70,23 @@ describe('게임 종료 선택창', () => {
     expect(html).not.toContain('한 판 더</button>');
   });
 
+  it('고스톱 잔액이 0냥이면 다음 판 대신 대기실 리필 이동만 제공한다', () => {
+    const room = createGostopRoom(20260720, 100);
+    room.phase = 'round-ended';
+    room.roundResult = 'nagari';
+    const html = renderToStaticMarkup(<GostopRoundResult room={room} winnerName="" balanceEmpty onContinue={vi.fn()} onExit={vi.fn()} onReturnLobby={vi.fn()} />);
+    expect(html).toContain('게임머니가 0냥입니다');
+    expect(html).toContain('대기실로 가서 리필 받기');
+    expect(html).not.toContain('한 판 더</button>');
+  });
+
   it('잔액이 0냥이면 결과창에서 새 판이나 리필을 제공하지 않고 메인 이동만 제공한다', () => {
     const game = createInitialGame(20260719);
     game.phase = 'round-ended';
     game.roundResult = 'win';
     const html = renderToStaticMarkup(<RoundResultOverlay game={game} balanceEmpty onContinue={vi.fn()} onExit={vi.fn()} onReturnHome={vi.fn()} />);
     expect(html).toContain('게임머니가 0냥입니다');
-    expect(html).toContain('메인으로 가서 리필 받기');
+    expect(html).toContain('대기실로 가서 리필 받기');
     expect(html).not.toContain('확인 · 바로 시작');
     expect(html).not.toContain('500,000냥 리필 받기');
   });

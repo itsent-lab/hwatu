@@ -1,5 +1,5 @@
 import type { GameState } from '../engine/types';
-import type { FamilyUser, GostopSettlementResult, SaveGameResult, ServerGameSave, SessionData, UserProfile } from './types';
+import type { FamilyUser, GostopSettlementRequest, GostopSettlementResult, SaveGameResult, ServerGameSave, SessionData, UserProfile } from './types';
 
 interface ApiEnvelope<T> {
   ok: boolean;
@@ -17,7 +17,7 @@ interface LoginRetryOptions {
   onRetry?: (attempt: number) => void;
 }
 
-function isTransientLoginError(error: RequestError): boolean {
+function isTransientRequestError(error: RequestError): boolean {
   return error.code === 'NETWORK_ERROR' || [500, 502, 503, 504].includes(error.status ?? 0);
 }
 
@@ -105,7 +105,7 @@ export async function login(body: object, options: LoginRetryOptions = {}): Prom
     }
     catch (reason) {
       const error = reason as RequestError;
-      if (!isTransientLoginError(error)) throw reason;
+      if (!isTransientRequestError(error)) throw reason;
       attempt += 1;
       options.onRetry?.(attempt);
       await wait(loginRetryDelay(attempt), options.signal);
@@ -172,9 +172,16 @@ export async function saveMatgoServerGame(sessionData: SessionData, state: GameS
   return { ...result, balance, opponentBalance, opponentBalanceAfterSettlement };
 }
 
-export const settleGostopRound = (body: {
-  gameUuid: string;
-  winner: 'human' | 'computerA' | 'computerB';
-  finalScore: number;
-  pointValue: number;
-}) => write<GostopSettlementResult>('/api/games/gostop/settle', 'POST', body);
+export async function settleGostopRound(body: GostopSettlementRequest): Promise<GostopSettlementResult> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await write<GostopSettlementResult>('/api/games/gostop/settle', 'POST', body);
+    }
+    catch (reason) {
+      const error = reason as RequestError;
+      if (!isTransientRequestError(error) || attempt === 2) throw reason;
+      await wait(loginRetryDelay(attempt + 1));
+    }
+  }
+  throw new Error('고스톱 게임머니를 저장하지 못했습니다.');
+}

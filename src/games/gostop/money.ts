@@ -22,5 +22,7 @@ export function settleGostopBalances(
     next[loser] -= payment;
     next[winner] += payment;
   }
+  if (next.computerA === 0) next.computerA = DEFAULT_GOSTOP_COMPUTER_BALANCE;
+  if (next.computerB === 0) next.computerB = DEFAULT_GOSTOP_COMPUTER_BALANCE;
   return next;
 }

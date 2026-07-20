@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AiThinkingIndicator from '../components/AiThinkingIndicator';
 import AudioControls from '../components/AudioControls';
 import AutoPlayButton from '../components/AutoPlayButton';
 import CapturedCardRack from '../components/CapturedCardRack';
@@ -20,8 +19,10 @@ import Loading from '../components/Loading';
 import type { AiDifficulty } from '../engine/ai/types';
 import { getCard } from '../engine/cards';
 import { applyGostopAutomaticGookjinChoice, chooseGostopAiCard, chooseGostopAiDecision } from '../games/gostop/aiStrategy';
+import { loadGostopBalanceSnapshot, saveGostopBalanceSnapshot } from '../games/gostop/balanceSnapshot';
 import { getGostopTransitionEffect } from '../games/gostop/effects';
 import { DEFAULT_GOSTOP_COMPUTER_BALANCE, settleGostopBalances } from '../games/gostop/money';
+import { enqueuePendingGostopSettlement, loadPendingGostopSettlements, removePendingGostopSettlement } from '../games/gostop/pendingSettlement';
 import { nextRoundMultiplier } from '../engine/rules/nagari';
 import {
   chooseGostopAutomaticCard, chooseGostopAutomaticDecision, chooseGostopDecision, createGostopRoom,
@@ -39,7 +40,7 @@ import { animateCardFlight } from '../lib/effects';
 import { loadGostopAiDifficulty, loadGostopPointValue, saveGostopAiDifficulty } from '../lib/gamePreferences';
 import { useGameViewportFit } from '../lib/gameViewport';
 import { saveProfile } from '../lib/localStore';
-import type { UserProfile } from '../lib/types';
+import type { GostopSettlementRequest, UserProfile } from '../lib/types';
 
 const COMPUTER_PLAYERS = {
   computerA: { name: '정순이', icon: '🐶' },
@@ -104,6 +105,10 @@ export default function GostopGamePage() {
 
   useEffect(() => {
     const openRoom = (profile: UserProfile) => {
+      if (profile.virtualBalance <= 0) {
+        navigate('/gostop', { replace: true });
+        return;
+      }
       setUser(profile);
       setComputerBalances({
         computerA: profile.gostopComputerABalance ?? DEFAULT_GOSTOP_COMPUTER_BALANCE,
@@ -119,6 +124,37 @@ export default function GostopGamePage() {
       return;
     }
     dashboard().then(async result => {
+      const pendingSettlements = loadPendingGostopSettlements(result.user.id);
+      const balanceSnapshot = loadGostopBalanceSnapshot(result.user.id);
+      for (const pending of pendingSettlements) {
+        try {
+          await settleGostopRound(pending);
+          removePendingGostopSettlement(result.user.id, pending.gameUuid);
+        }
+        catch {
+          break;
+        }
+      }
+      if (pendingSettlements.length > 0) result = await dashboard();
+      const remainingSettlements = loadPendingGostopSettlements(result.user.id);
+      if (remainingSettlements.length > 0 && balanceSnapshot) {
+        result = {
+          ...result,
+          user: {
+            ...result.user,
+            virtualBalance: balanceSnapshot.human,
+            gostopComputerABalance: balanceSnapshot.computerA,
+            gostopComputerBBalance: balanceSnapshot.computerB
+          }
+        };
+      }
+      else {
+        saveGostopBalanceSnapshot(result.user.id, {
+          human: result.user.virtualBalance,
+          computerA: result.user.gostopComputerABalance ?? DEFAULT_GOSTOP_COMPUTER_BALANCE,
+          computerB: result.user.gostopComputerBBalance ?? DEFAULT_GOSTOP_COMPUTER_BALANCE
+        });
+      }
       await saveProfile(result.user);
       openRoom(result.user);
     }).catch(() => navigate('/login', { replace: true }));
@@ -203,15 +239,24 @@ export default function GostopGamePage() {
       computerA: computerBalances.computerA,
       computerB: computerBalances.computerB
     }, room.winner, room.finalScore * room.pointValue);
+    saveGostopBalanceSnapshot(user.id, optimistic);
     setUser(current => current ? { ...current, virtualBalance: optimistic.human } : current);
     setComputerBalances({ computerA: optimistic.computerA, computerB: optimistic.computerB });
     if (import.meta.env.DEV && user.id === 0) return;
-    void settleGostopRound({
+    const settlementRequest: GostopSettlementRequest = {
       gameUuid,
       winner: room.winner,
       finalScore: room.finalScore,
       pointValue: room.pointValue
-    }).then(result => {
+    };
+    enqueuePendingGostopSettlement(user.id, settlementRequest);
+    void settleGostopRound(settlementRequest).then(result => {
+      removePendingGostopSettlement(user.id, gameUuid);
+      saveGostopBalanceSnapshot(user.id, {
+        human: result.balance,
+        computerA: result.computerABalance,
+        computerB: result.computerBBalance
+      });
       setComputerBalances({ computerA: result.computerABalance, computerB: result.computerBBalance });
       setUser(current => {
         if (!current) return current;
@@ -224,7 +269,7 @@ export default function GostopGamePage() {
         void saveProfile(updated);
         return updated;
       });
-    }).catch(() => { /* 현재 판의 로컬 정산 금액은 유지합니다. */ });
+    }).catch(() => { /* 다음 접속 때 미정산 판을 다시 처리합니다. */ });
   }, [computerBalances.computerA, computerBalances.computerB, room, user]);
 
   useEffect(() => {
@@ -301,13 +346,20 @@ export default function GostopGamePage() {
   if (!user || !room) return <Loading message="고스톱 게임방을 열고 있습니다" />;
   const money = formatMoney(user.virtualBalance);
   const humanTurn = !dealing && room.phase === 'playing' && room.currentPlayer === 'human';
-  const computerThinking = room.phase === 'playing' && room.currentPlayer !== 'human';
   const humanScore = scoreGostopPlayer(room, 'human');
   const computerAScore = scoreGostopPlayer(room, 'computerA');
   const computerBScore = scoreGostopPlayer(room, 'computerB');
   const floorCardSplit = Math.ceil(room.floorCards.length / 2);
   const decidingPlayer = room.pendingDecision;
   const decidingScore = decidingPlayer ? scoreGostopPlayer(room, decidingPlayer) : null;
+  const balanceEmpty = user.virtualBalance <= 0 || (
+    room.phase === 'round-ended'
+    && room.roundResult === 'win'
+    && room.winner !== null
+    && room.winner !== 'human'
+    && settledRoundRef.current !== roundGameUuidRef.current
+    && room.finalScore * room.pointValue >= user.virtualBalance
+  );
 
   const playHumanCard = async (cardId: string, preferredPlayedMatchId?: string, preferredDrawnMatchId?: string, sourceElement?: HTMLButtonElement) => {
     if (!humanTurn || gookjinChoiceOpen || turnAnimationRef.current) return;
@@ -339,6 +391,10 @@ export default function GostopGamePage() {
   };
   const decide = (decision: 'go' | 'stop') => setRoom(chooseGostopDecision(room, 'human', decision));
   const newRound = () => {
+    if (balanceEmpty) {
+      navigate('/gostop');
+      return;
+    }
     setFloorChoice(null);
     setAutoPlay(false);
     setGookjinChoiceOpen(false);
@@ -390,7 +446,7 @@ export default function GostopGamePage() {
       <nav className="gostop-room-actions" aria-label="게임방 메뉴">
         <AudioControls compact settings={audioSettings} onChange={changeAudioSettings} />
         <button type="button" className={exitReserved ? 'exit-reserved' : ''} disabled={exitReserved} onClick={() => setExitDialogOpen(true)}>{exitReserved ? '나가기 예약됨' : '나가기'}</button>
-        <button type="button" onClick={newRound}>새 판</button>
+        <button type="button" disabled={balanceEmpty} onClick={newRound}>새 판</button>
       </nav>
       {dealing && <GostopDealAnimation />}
       <section ref={computerAHandRef} className={`gostop-seat opponent-a${room.currentPlayer === 'computerA' ? ' active' : ''}`}>
@@ -413,7 +469,6 @@ export default function GostopGamePage() {
         </div>
       </section>
       <div className="gostop-room-status" aria-live="polite"><strong>{room.phase === 'round-ended' ? '판 종료' : humanTurn ? '내 차례' : `${playerName(room.currentPlayer, user)} 차례`}</strong><span>{room.lastAction}</span></div>
-      {computerThinking && <AiThinkingIndicator plan={{ durationMs: COMPUTER_TURN_DELAY_MS, endsAt: Date.now() + COMPUTER_TURN_DELAY_MS, label: `${playerName(room.currentPlayer, user)} 님이 낼 패를 고르는 중…` }} placement="board" />}
       <section className={`gostop-human-seat${humanTurn ? ' active' : ''}`}>
         <div className="gostop-player-summary human"><span>🙂</span><b>{user.displayName}</b><small>{money}냥</small></div>
         <GostopScoreSummary key={`${humanScore.total}-${room.players.human.goCount}`} score={humanScore} capturedCount={room.players.human.captured.length} goCount={room.players.human.goCount} />
@@ -460,7 +515,7 @@ export default function GostopGamePage() {
         onDecision={decidingPlayer === 'human' ? decide : undefined}
       />}
     </main>
-    {room.phase === 'round-ended' && <GostopRoundResult room={room} winnerName={room.winner ? playerName(room.winner, user) : ''} exitReserved={exitReserved} onContinue={newRound} onExit={leaveNow} />}
+    {room.phase === 'round-ended' && <GostopRoundResult room={room} winnerName={room.winner ? playerName(room.winner, user) : ''} exitReserved={exitReserved} balanceEmpty={balanceEmpty} onContinue={newRound} onExit={leaveNow} onReturnLobby={() => navigate('/gostop')} />}
     {exitDialogOpen && <ExitChoiceDialog onReserve={reserveExit} onImmediate={leaveNow} onCancel={() => setExitDialogOpen(false)} guide="현재 판을 마친 뒤 나가거나, 지금 바로 나갈 수 있습니다." immediateDescription="현재 판을 중단하고 바로 나갑니다" />}
     {declaration && <GameDeclarationOverlay key={declaration.id} effect={declaration} />}
   </div>;

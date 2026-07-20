@@ -18,11 +18,19 @@ describe('고스톱 게임머니 정산', () => {
     });
   });
 
-  it('패자의 보유 금액보다 많이 가져가지 않는다', () => {
+  it('패자의 보유 금액보다 많이 가져가지 않고 0냥이 된 컴퓨터만 자동 리필한다', () => {
     expect(settleGostopBalances({ human: 5_000, computerA: 500_000, computerB: 3_000 }, 'computerA', 20_000)).toEqual({
       human: 0,
       computerA: 508_000,
-      computerB: 0
+      computerB: 500_000
+    });
+  });
+
+  it('컴퓨터에게 1냥이라도 남아 있으면 자동 리필하지 않는다', () => {
+    expect(settleGostopBalances({ human: 10_000, computerA: 20_000, computerB: 10_001 }, 'human', 10_000)).toEqual({
+      human: 30_000,
+      computerA: 10_000,
+      computerB: 1
     });
   });
 });
