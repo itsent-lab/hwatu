@@ -1,0 +1,27 @@
+{
+  "name": "hwatu-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets:hwatu": "node scripts/fetch-hwatu-assets.mjs",
+    "build": "vite build",
+    "dev": "vite",
+    "dev:server": "dotnet run",
+    "simulate:ai": "vitest run src/simulation/aiBalance.test.ts --reporter=verbose",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router-dom": "7.18.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "4.7.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "3.2.7"
+  }
+}

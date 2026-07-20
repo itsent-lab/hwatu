@@ -1,0 +1,199 @@
+.gostop-room-page { min-height: 100dvh; overflow: hidden; background: #142f2c; color: white; }
+.game-page.gostop-room-page { background: #142f2c; }
+.gostop-room-info { position: absolute; z-index: 6; bottom: 365px; left: 24px; display: grid; width: 190px; padding: 9px 10px; border-left: 3px solid rgba(255,226,94,.82); border-radius: 6px; background: linear-gradient(90deg, rgba(17,63,45,.78), rgba(17,63,45,.12)); box-shadow: 0 5px 13px rgba(9,34,24,.22); }
+.gostop-room-info strong { display: grid; padding: 2px 4px 5px; font-family: Georgia, "Nanum Myeongjo", serif; font-size: 1.02rem; text-shadow: 0 2px 3px rgba(9,34,24,.9); }
+.gostop-room-info strong span { margin-top: 3px; color: #ffe465; font-family: inherit; font-size: .76rem; }
+.gostop-room-difficulty { position: absolute; z-index: 6; bottom: 284px; left: 24px; display: grid; gap: 4px; width: 190px; padding: 6px; border: 2px solid rgba(223,202,105,.72); border-radius: 10px; background: rgba(18,59,46,.88); box-shadow: 0 3px 6px rgba(9,34,24,.22); }
+.gostop-room-difficulty > b { color: #ffe86c; font-size: .68rem; text-align: center; }
+.gostop-room-difficulty .difficulty-selector.compact { padding: 3px; border-color: rgba(221,201,105,.72); background: rgba(29,70,53,.82); }
+.gostop-room-difficulty .difficulty-selector.compact > div { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.gostop-room-difficulty .difficulty-selector.compact button { min-height: 32px; padding: 2px; }
+.gostop-room-difficulty .difficulty-selector.compact b { font-size: .58rem; white-space: nowrap; }
+.gostop-room-actions { position: absolute; z-index: 6; top: calc(50% - 16px); right: 24px; display: grid; gap: 6px; width: var(--gostop-side-control-width); transform: translateY(-50%); }
+.gostop-room-actions button { min-height: 36px; padding: 4px 6px; border: 2px solid #e2c76b; border-radius: 9px; background: rgba(49,23,19,.82); box-shadow: 0 3px 7px rgba(21,28,19,.26); color: #fff2a1; font-size: .78rem; font-weight: 900; cursor: pointer; }
+.gostop-room-actions button.exit-reserved:disabled { border-color: #ffe98a; background: linear-gradient(#f3d85a, #c39512); color: #493700; opacity: 1; }
+.gostop-room-actions .audio-controls.compact { grid-template-columns: 1fr; gap: 2px; padding: 3px; border-color: #d8bd67; border-radius: 9px; background: rgba(30,58,50,.9); }
+.gostop-room-actions .audio-controls.compact .audio-control-button { min-width: 0; min-height: 30px; flex-direction: column; gap: 0; padding: 2px 3px; border-color: #d8bd67; background: linear-gradient(#3b8e84, #226359); font-size: .56rem; text-shadow: 0 1px #173e38; }
+.gostop-room-actions .audio-controls.compact .audio-control-button b { white-space: nowrap; }
+.gostop-room-actions .audio-controls.compact .audio-control-button.muted { border-color: #9a9a86; background: linear-gradient(#777d72, #50594f); }
+.gostop-room-actions .audio-controls.compact .audio-control-button.active { color: #fff27a; box-shadow: inset 0 0 0 2px rgba(255,239,99,.34); }
+.gostop-room-actions .audio-controls.compact .audio-volume { grid-column: 1; grid-row: auto; min-height: 24px; color: #e9f6dc; }
+.gostop-room-actions .audio-controls.compact .audio-volume input { height: 16px; }
+.gostop-table { --gostop-side-control-width: 78px; position: relative; width: min(1220px, 100%); height: 100dvh; min-height: 610px; margin: 0 auto; overflow: hidden; border-right: 3px solid #426a5e; border-left: 3px solid #426a5e; background: radial-gradient(circle at center, rgba(116,168,86,.85), transparent 52%), linear-gradient(145deg, #3e8b51, #1d6046 64%, #174a3c); box-shadow: inset 0 0 70px rgba(10,46,28,.48); }
+.gostop-room-page .ai-thinking-indicator.board-ai-thinking { top: clamp(72px, 10%, 96px); }
+.gostop-table::before { content: "高"; position: absolute; top: 44%; left: 50%; color: rgba(234,246,176,.09); font-family: Georgia, serif; font-size: min(30vw, 300px); line-height: 1; transform: translate(-50%, -50%) rotate(-8deg); }
+.gostop-seat { position: absolute; z-index: 2; top: 20px; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: start; gap: 6px 12px; }
+.gostop-seat.opponent-a { left: 24px; }
+.gostop-seat.opponent-b { right: 24px; }
+.gostop-seat.opponent-a > .gostop-player-summary { grid-column: 1; grid-row: 1; }
+.gostop-seat.opponent-a > .gostop-hidden-hand { grid-column: 2; grid-row: 1; }
+.gostop-seat.opponent-a > .gostop-score-summary { grid-column: 1; grid-row: 2; justify-self: stretch; }
+.gostop-seat.opponent-a > .gostop-opponent-captured { grid-column: 1; grid-row: 3; }
+.gostop-seat.opponent-b > .gostop-hidden-hand { grid-column: 1; grid-row: 1; }
+.gostop-seat.opponent-b > .gostop-player-summary { grid-column: 2; grid-row: 1; }
+.gostop-seat.opponent-b > .gostop-score-summary { grid-column: 2; grid-row: 2; justify-self: stretch; }
+.gostop-seat.opponent-b > .gostop-opponent-captured { grid-column: 2; grid-row: 3; }
+.gostop-seat.active .gostop-player-summary, .gostop-human-seat.active .gostop-player-summary { box-shadow: inset 0 2px rgba(235,244,184,.25), 0 0 0 5px #ffeb55, 0 0 24px rgba(255,235,85,.72); }
+.gostop-player-summary { display: grid; grid-template-columns: auto 1fr; align-items: center; min-width: 145px; padding: 8px 11px; border: 3px solid #d9bd55; border-radius: 15px; background: rgba(33,67,54,.92); box-shadow: inset 0 2px rgba(235,244,184,.25), 0 5px 9px rgba(15,41,29,.34); }
+.gostop-player-summary > span { grid-row: 1 / 3; margin-right: 8px; font-size: 2rem; }
+.gostop-player-summary b { overflow: hidden; font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
+.gostop-player-summary small { color: #ffe25e; font-weight: 900; }
+.gostop-score-summary { position: relative; display: flex; flex-direction: column; justify-content: center; min-width: 124px; min-height: 68px; padding: 8px 11px; border: 2px solid rgba(221,225,130,.7); border-radius: 11px; background: rgba(20,65,47,.86); color: #f3f8df; font-size: .72rem; font-weight: 900; animation: gostop-score-pop .3s ease-out; }
+.gostop-score-summary strong { display: block; color: #ffeb5c; font-family: Georgia, serif; font-size: 1.55rem; line-height: 1; text-shadow: 0 1px 2px rgba(40,50,0,.7); }
+.gostop-score-summary strong small { margin-left: 3px; font-family: sans-serif; font-size: .7rem; }
+.gostop-score-summary span { display: block; margin-top: 7px; white-space: nowrap; }
+.gostop-score-summary b { position: absolute; top: -10px; right: -8px; padding: 3px 6px; border: 2px solid white; border-radius: 999px; background: #c9302f; color: #fff56e; }
+.gostop-opponent-captured { display: grid; grid-template-rows: auto minmax(0, 1fr); width: 100%; min-width: 145px; height: 58px; padding: 3px 5px; overflow: hidden; border: 2px solid rgba(221,225,130,.58); border-radius: 10px; background: rgba(18,58,44,.78); }
+.gostop-opponent-captured > b { color: #ffe570; font-size: .48rem; line-height: 1; text-align: center; }
+.gostop-opponent-captured > span { align-self: center; color: #a9c4b3; font-size: .5rem; font-weight: 800; text-align: center; }
+.gostop-opponent-captured .captured-rack { position: static; right: auto; left: auto; width: 100%; min-height: 0; height: 100%; gap: 2px; }
+.gostop-opponent-captured .captured-card-group { min-width: 24px; max-width: 52px; height: 100%; }
+.gostop-opponent-captured .captured-card-fan { inset: 0 0 10px; }
+.gostop-opponent-captured .captured-card-slot { width: 27px; }
+.gostop-opponent-captured .captured-group-count { padding: 0 3px; font-size: .4rem; }
+.gostop-opponent-captured .captured-card-slot:last-child .hwatu-card { animation: gostop-capture-in .38s cubic-bezier(.16,1.28,.34,1); }
+.gostop-hidden-hand { display: flex; padding-top: 3px; }
+.gostop-card-back { display: grid; place-items: center; width: clamp(28px, 3.4vw, 46px); aspect-ratio: 38 / 53; margin-left: clamp(-14px, -1vw, -7px); border: 2px solid #f0daa7; border-radius: 4px; background: repeating-linear-gradient(45deg, #dc1c27 0 5px, #9e1018 5px 10px); box-shadow: 0 3px 6px rgba(0,0,0,.35); }
+.gostop-card-back:first-child { margin-left: 0; }
+.gostop-card-back i { display: grid; place-items: center; width: 55%; height: 66%; border: 1px solid rgba(255,244,170,.72); color: #ffe36b; font-family: Georgia, serif; font-style: normal; }
+.gostop-card-flight-face { display: none; }
+.gostop-card-back.flying-card { overflow: visible; border-color: transparent; background: none; box-shadow: none; }
+.gostop-card-back.flying-card > i { display: none; }
+.gostop-card-back.flying-card > .gostop-card-flight-face { position: absolute; inset: 0; display: block; }
+.gostop-card-back.flying-card .hwatu-card { width: 100%; height: 100%; }
+.gostop-floor { position: absolute; z-index: 2; inset: 21% 10% 31%; display: flex; align-items: center; justify-content: center; }
+.gostop-floor-cards { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(18px, 2.5vw, 34px); width: 100%; }
+.gostop-floor-card-group { display: grid; grid-template-columns: repeat(3, clamp(56px, 6.3vw, 82px)); gap: clamp(12px, 2vw, 26px); }
+.gostop-floor-card-group.left { justify-content: end; }
+.gostop-floor-card-group.right { justify-content: start; }
+.gostop-draw-pile { position: relative; display: grid; place-items: center; width: clamp(58px, 6.5vw, 86px); aspect-ratio: 38 / 53; border: 4px solid #f2dc9f; border-radius: 7px; background: repeating-linear-gradient(45deg, #d91924 0 7px, #9f0b14 7px 14px); box-shadow: 5px 5px 0 #890c13, 9px 9px 0 #65080d, 0 12px 18px rgba(0,0,0,.3); color: #ffe165; font-family: Georgia, serif; font-size: 2rem; }
+.gostop-draw-pile b { position: absolute; right: -15px; bottom: -12px; display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid white; border-radius: 50%; background: #304e46; color: #ffea70; font-family: sans-serif; font-size: .75rem; }
+.gostop-room-status { position: absolute; z-index: 3; top: calc(clamp(98px, 14%, 135px) + 30px); left: 50%; width: min(620px, 90%); padding: 7px 17px; border: 2px solid rgba(239,224,139,.68); border-radius: 18px; background: rgba(24,70,50,.86); text-align: center; transform: translateX(-50%); }
+.gostop-room-status strong, .gostop-room-status span { display: block; }
+.gostop-room-status strong { color: #ffe56c; }
+.gostop-room-status span { margin-top: 2px; overflow: hidden; color: #d8e9c8; font-size: .66rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.gostop-human-seat { position: absolute; z-index: 3; right: 2%; bottom: 18px; left: 2%; display: grid; grid-template-columns: minmax(145px, 190px) minmax(0, 1fr) var(--gostop-side-control-width); grid-template-rows: auto auto; align-items: end; gap: 7px 12px; }
+.gostop-player-summary.human { grid-column: 1; grid-row: 1; border-color: #ffe55f; background: rgba(28,80,60,.96); }
+.gostop-human-seat > .gostop-score-summary { grid-column: 1; grid-row: 2; align-self: stretch; min-width: 0; }
+.gostop-human-seat > .gostop-score-summary strong { font-size: 2rem; }
+.gostop-human-seat > .gostop-score-summary strong small { font-size: .82rem; }
+.gostop-human-seat > .gostop-score-summary span { margin-top: 10px; font-size: .82rem; }
+.gostop-human-captured { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; height: clamp(60px, 8vh, 82px); min-width: 0; padding: 5px 10px; border: 2px solid rgba(230,203,105,.68); border-radius: 13px; background: rgba(18,57,44,.88); box-shadow: inset 0 3px 10px rgba(8,37,28,.32); }
+.gostop-human-captured > b { color: #ffe36b; font-size: .68rem; white-space: nowrap; }
+.gostop-human-captured > span { color: #bed5c6; font-size: .65rem; font-weight: 800; }
+.gostop-human-captured .captured-rack { position: static; width: 100%; min-height: 100%; height: 100%; gap: 6px; }
+.gostop-human-captured .captured-card-group { height: 100%; min-width: 38px; max-width: 180px; }
+.gostop-human-captured .captured-card-fan { inset: 0 0 13px; }
+.gostop-human-captured .captured-card-slot { width: clamp(30px, 3vw, 45px); }
+.gostop-human-captured .captured-card-slot:last-child .hwatu-card { animation: gostop-capture-in .38s cubic-bezier(.16,1.28,.34,1); }
+.gostop-human-captured .captured-group-count { padding: 1px 5px; font-size: .52rem; }
+.gostop-human-hand { grid-column: 2; grid-row: 2; display: flex; justify-content: space-evenly; gap: clamp(6px, 1vw, 14px); min-width: 0; padding: 18px 20px 12px; border: 3px solid rgba(209,225,115,.65); border-radius: 19px; background: rgba(20,73,47,.78); box-shadow: inset 0 4px 15px rgba(9,48,31,.35); }
+.gostop-hand-card-slot { position: relative; display: block; flex: 0 1 clamp(58px, 5.8vw, 90px); width: clamp(58px, 5.8vw, 90px); min-width: 0; aspect-ratio: 103.2 / 168.2; }
+.gostop-hand-card-slot .hwatu-card { width: 100%; height: 100%; }
+.gostop-hand-card-slot.gostop-match-hint::before, .gostop-hand-card-slot.gostop-bonus-hint::before { content: "▼"; position: absolute; z-index: 30; top: -16px; left: 50%; color: #60cfff; font-size: clamp(1.45rem, 2.8vw, 2.25rem); font-weight: 1000; line-height: 1; text-shadow: -2px -2px #174c6b, 2px -2px #174c6b, -2px 2px #174c6b, 2px 2px #174c6b, 0 4px 5px rgba(4,38,54,.6); transform: translateX(-50%); animation: play-hint-bounce .78s ease-in-out infinite; pointer-events: none; }
+.gostop-hand-card-slot.gostop-bonus-hint::before { content: "★"; color: #ffe853; text-shadow: -2px -2px #8b3500, 2px -2px #8b3500, -2px 2px #8b3500, 2px 2px #8b3500, 0 4px 5px rgba(65,30,0,.55); }
+.gostop-hand-card-slot.gostop-match-hint .hwatu-card, .gostop-hand-card-slot.gostop-bonus-hint .hwatu-card { outline: 4px solid rgba(111,218,255,.9); outline-offset: -1px; filter: brightness(1.08); }
+.gostop-hand-card-slot.gostop-bonus-hint .hwatu-card { outline-color: rgba(255,232,83,.95); }
+.gostop-hand-card-slot.selected .hwatu-card { z-index: 5; outline: 5px solid #fff36a; outline-offset: -2px; box-shadow: 0 0 20px 7px rgba(255,230,45,.68); filter: brightness(1.12); transform: translateY(-10px) scale(1.04); }
+.gostop-auto-zone { grid-column: 3; grid-row: 1 / 3; align-self: stretch; min-height: 0; }
+.gostop-auto-zone .auto-play-button { width: 100%; min-height: 100%; height: 100%; padding: 7px 5px; border-radius: 13px; }
+.gostop-auto-zone .auto-play-button > span { width: 40px; height: 40px; border-width: 4px; }
+.gostop-auto-zone .auto-play-button b { font-size: .72rem; }
+.gostop-auto-zone .auto-play-button small { font-size: .48rem; }
+.gostop-floor-choice, .gostop-decision, .gostop-round-result { position: absolute; z-index: 20; top: 50%; left: 50%; display: grid; justify-items: center; width: min(440px, 92%); padding: 22px; border: 4px solid #fff09a; border-radius: 20px; background: linear-gradient(#315f50, #173f35); box-shadow: 0 16px 38px rgba(6,27,20,.58); color: white; text-align: center; transform: translate(-50%, -50%); }
+.gostop-floor-choice strong, .gostop-decision strong, .gostop-round-result strong { color: #ffeb62; font-size: 1.45rem; }
+.gostop-floor-choice > div { display: flex; gap: 32px; margin: 20px 0; }
+.gostop-floor-choice > div .hwatu-card { width: 76px; cursor: pointer; }
+.gostop-drawn-card { display: grid; grid-template-columns: auto auto; align-items: center; gap: 8px; margin-top: 13px; color: #dcebd1; font-size: .72rem; font-weight: 900; }
+.gostop-drawn-card .hwatu-card { width: 48px; }
+.gostop-floor-choice > button, .gostop-decision button, .gostop-round-result button { min-width: 130px; min-height: 48px; border: 3px solid #f4dd7b; border-radius: 11px; background: linear-gradient(#d5513a, #942722); color: white; font-weight: 1000; cursor: pointer; }
+.gostop-decision > span { margin: 6px 0 18px; font-weight: 800; }
+.gostop-decision > div, .gostop-round-result > div { display: flex; gap: 12px; }
+.gostop-decision button:first-child { background: linear-gradient(#458cc7, #215f9f); }
+.gostop-round-result b { margin: 9px 0; color: #fff; font-size: 1.1rem; }
+.gostop-round-result > span { margin-bottom: 18px; color: #dcebd1; font-size: .82rem; font-weight: 800; }
+.gostop-result-card .money-transfer-card > small { position: relative; z-index: 2; display: block; font-weight: 900; }
+.gostop-deal-animation .deal-card-back { animation-duration: .68s; }
+.gostop-deal-to-computer-a { animation-name: gostop-deal-computer-a; }
+.gostop-deal-to-computer-b { animation-name: gostop-deal-computer-b; }
+.gostop-deal-to-human { animation-name: gostop-deal-human; }
+
+@keyframes gostop-score-pop { 0% { filter: brightness(1.8); transform: scale(.78); } 70% { transform: scale(1.08); } 100% { filter: none; transform: none; } }
+@keyframes gostop-capture-in { 0% { opacity: .2; filter: brightness(1.7); transform: translateY(-24px) scale(1.18); } 70% { opacity: 1; transform: translateY(3px) scale(.97); } 100% { filter: none; transform: none; } }
+@keyframes gostop-deal-computer-a {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.62); }
+  18%, 66% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% - 38vw + var(--gostop-deal-offset)), -26vh) rotate(-8deg) scale(.72); }
+}
+@keyframes gostop-deal-computer-b {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.62); }
+  18%, 66% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + 38vw + var(--gostop-deal-offset)), -26vh) rotate(8deg) scale(.72); }
+}
+@keyframes gostop-deal-human {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.62); }
+  18%, 66% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--gostop-deal-offset)), 43vh) rotate(2deg); }
+}
+
+@media (max-width: 720px) and (orientation: portrait) {
+  .gostop-table { --gostop-side-control-width: 56px; }
+  .gostop-room-page .ai-thinking-indicator.board-ai-thinking { top: 50%; }
+  .gostop-room-info { top: auto; bottom: 348px; left: 8px; width: 142px; padding: 6px 7px; transform: none; }
+  .gostop-room-info strong { padding-bottom: 3px; font-size: .8rem; }
+  .gostop-room-info strong span { margin-top: 1px; font-size: .62rem; }
+  .gostop-room-difficulty { bottom: 268px; left: 8px; width: 142px; padding: 4px; }
+  .gostop-room-difficulty .difficulty-selector.compact > div { grid-template-columns: repeat(2, 1fr); gap: 3px; }
+  .gostop-room-difficulty .difficulty-selector.compact button { min-height: 27px; padding: 1px; }
+  .gostop-room-actions { top: auto; right: 8px; bottom: 268px; gap: 3px; width: var(--gostop-side-control-width); transform: none; }
+  .gostop-room-actions button { min-height: 27px; padding: 2px 4px; font-size: .58rem; }
+  .gostop-room-actions .audio-controls.compact { gap: 2px; padding: 2px; }
+  .gostop-room-actions .audio-controls.compact .audio-control-button { min-height: 26px; font-size: .47rem; }
+  .gostop-room-actions .audio-controls.compact .audio-volume { min-height: 20px; }
+  .gostop-table { min-height: 560px; }
+  .gostop-seat { top: 10px; grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; gap: 4px; }
+  .gostop-seat.opponent-a > .gostop-player-summary, .gostop-seat.opponent-b > .gostop-player-summary { grid-column: 1; grid-row: 1; }
+  .gostop-seat.opponent-a > .gostop-hidden-hand, .gostop-seat.opponent-b > .gostop-hidden-hand { grid-column: 1; grid-row: 2; }
+  .gostop-seat.opponent-a > .gostop-score-summary, .gostop-seat.opponent-b > .gostop-score-summary { grid-column: 1; grid-row: 3; }
+  .gostop-seat.opponent-a > .gostop-opponent-captured, .gostop-seat.opponent-b > .gostop-opponent-captured { grid-column: 1; grid-row: 4; }
+  .gostop-seat.opponent-a { left: 8px; }
+  .gostop-seat.opponent-b { right: 8px; justify-items: end; }
+  .gostop-player-summary { min-width: 118px; padding: 5px 7px; border-width: 2px; }
+  .gostop-player-summary > span { font-size: 1.45rem; }
+  .gostop-player-summary b { font-size: .8rem; }
+  .gostop-player-summary small { font-size: .66rem; }
+  .gostop-hidden-hand { max-width: 142px; }
+  .gostop-card-back { width: 29px; margin-left: -9px; }
+  .gostop-seat .gostop-score-summary { min-width: 118px; padding: 4px 6px; }
+  .gostop-seat .gostop-score-summary strong { display: inline; font-size: 1rem; }
+  .gostop-seat .gostop-score-summary span { display: none; }
+  .gostop-opponent-captured { min-width: 118px; height: 48px; }
+  .gostop-opponent-captured .captured-card-slot { width: 22px; }
+  .gostop-floor { inset: 23% 2% 33%; }
+  .gostop-floor-cards { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; }
+  .gostop-floor-card-group { grid-template-columns: repeat(2, 48px); gap: 8px; }
+  .gostop-floor-cards .hwatu-card { width: 48px; }
+  .gostop-draw-pile { width: 52px; }
+  .gostop-human-seat { grid-template-columns: 148px minmax(0, 1fr) var(--gostop-side-control-width); gap: 5px; }
+  .gostop-player-summary.human { grid-column: 1; grid-row: 1; width: 148px; }
+  .gostop-human-seat > .gostop-score-summary { grid-column: 2; grid-row: 1; align-self: stretch; min-width: 0; }
+  .gostop-human-seat > .gostop-score-summary strong { font-size: 1.25rem; }
+  .gostop-human-seat > .gostop-score-summary strong small { font-size: .62rem; }
+  .gostop-human-seat > .gostop-score-summary span { margin-top: 5px; font-size: .58rem; }
+  .gostop-human-captured { grid-column: 1 / 3; grid-row: 2; height: 62px; padding: 4px 7px; }
+  .gostop-human-captured > b { font-size: .58rem; }
+  .gostop-human-captured .captured-card-slot { width: 31px; }
+  .gostop-human-hand { grid-column: 1 / 3; grid-row: 3; justify-content: space-between; gap: 0; overflow: visible; padding: 15px 8px 9px; }
+  .gostop-hand-card-slot { flex: 0 0 49px; width: 49px; }
+  .gostop-hand-card-slot.gostop-match-hint::before, .gostop-hand-card-slot.gostop-bonus-hint::before { top: -12px; font-size: 1.35rem; }
+  .gostop-auto-zone { grid-column: 3; grid-row: 2 / 4; }
+  .gostop-auto-zone .auto-play-button { min-height: 100%; padding: 4px 3px; border-width: 3px; }
+  .gostop-auto-zone .auto-play-button > span { width: 34px; height: 34px; border-width: 3px; font-size: .85rem; }
+  .gostop-auto-zone .auto-play-button b { font-size: .58rem; }
+  .gostop-auto-zone .auto-play-button small { display: none; }
+  .gostop-room-status { padding: 3px 12px; }
+  .gostop-floor-choice, .gostop-decision, .gostop-round-result { padding: 17px 12px; }
+}
+
+.scaled-game-page.gostop-room-page { width: var(--game-logical-width); height: var(--game-logical-height); min-height: var(--game-logical-height); }
+.scaled-game-page .gostop-table { width: 100%; max-width: none; height: var(--game-logical-height); min-height: var(--game-logical-height); }

@@ -1,0 +1,24 @@
+# Local settings and secrets
+appsettings.Local.json
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies and build output
+node_modules/
+wwwroot/
+
+# .NET build output
+bin/
+obj/
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs
+*.log

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#096ca1"/>
+      <stop offset="0.55" stop-color="#064f78"/>
+      <stop offset="1" stop-color="#073f43"/>
+    </linearGradient>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ed2d37"/>
+      <stop offset="1" stop-color="#9d0712"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ef3335"/>
+      <stop offset="1" stop-color="#a30d17"/>
+    </linearGradient>
+    <pattern id="stripes" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="9" height="18" fill="#ffffff" opacity="0.08"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#001f2c" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="246" r="206" fill="#2bc3dc" opacity="0.1"/>
+  <path d="M38 372C132 318 376 318 474 374V512H38Z" fill="#021f2c" opacity="0.28"/>
+
+  <g filter="url(#shadow)">
+    <g transform="rotate(-12 184 236)">
+      <rect x="82" y="72" width="204" height="340" rx="28" fill="url(#back)" stroke="#ffe172" stroke-width="12"/>
+      <rect x="103" y="96" width="162" height="292" rx="17" fill="url(#stripes)" stroke="#ff9e44" stroke-width="5"/>
+      <circle cx="184" cy="235" r="61" fill="#ba101b" stroke="#ffd85d" stroke-width="5"/>
+      <g fill="#ffe16c">
+        <circle cx="184" cy="199" r="24"/>
+        <circle cx="218" cy="225" r="24"/>
+        <circle cx="205" cy="265" r="24"/>
+        <circle cx="163" cy="265" r="24"/>
+        <circle cx="150" cy="225" r="24"/>
+      </g>
+      <circle cx="184" cy="235" r="22" fill="#c51a25"/>
+      <text x="184" y="342" fill="#fff2a3" font-family="Georgia,serif" font-size="58" font-weight="900" text-anchor="middle">花</text>
+    </g>
+
+    <g transform="rotate(10 328 232)">
+      <rect x="226" y="64" width="204" height="340" rx="28" fill="#fff9e9" stroke="#f13b3d" stroke-width="12"/>
+      <circle cx="337" cy="146" r="53" fill="#e83232"/>
+      <path d="M255 358C285 310 294 257 298 151M296 237C329 216 362 207 396 209M289 279C269 250 253 231 244 201" fill="none" stroke="#121a18" stroke-width="22" stroke-linecap="round"/>
+      <g fill="#ec3039" stroke="#8e0712" stroke-width="3">
+        <circle cx="375" cy="196" r="22"/><circle cx="397" cy="221" r="20"/><circle cx="360" cy="229" r="20"/>
+        <circle cx="259" cy="194" r="20"/><circle cx="278" cy="216" r="18"/><circle cx="245" cy="224" r="18"/>
+      </g>
+      <g fill="#ffd949">
+        <circle cx="375" cy="196" r="7"/><circle cx="397" cy="221" r="7"/><circle cx="360" cy="229" r="7"/>
+        <circle cx="259" cy="194" r="7"/><circle cx="278" cy="216" r="6"/><circle cx="245" cy="224" r="6"/>
+      </g>
+      <circle cx="380" cy="338" r="37" fill="#d51d28" stroke="#ffdc5f" stroke-width="6"/>
+      <text x="380" y="354" fill="#fff4a8" font-family="Georgia,serif" font-size="43" font-weight="900" text-anchor="middle">光</text>
+    </g>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="414" r="68" fill="#ffd95c" stroke="#fff1a6" stroke-width="8"/>
+    <circle cx="256" cy="414" r="56" fill="url(#badge)" stroke="#890812" stroke-width="5"/>
+    <text x="256" y="432" fill="#fff8c9" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="47" font-weight="900" text-anchor="middle">맞고</text>
+  </g>
+</svg>
