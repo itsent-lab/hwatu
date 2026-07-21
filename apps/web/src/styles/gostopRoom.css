@@ -142,12 +142,12 @@
   .gostop-room-info { top: auto; bottom: 348px; left: 8px; width: 142px; padding: 6px 7px; transform: none; }
   .gostop-room-info strong { padding-bottom: 3px; font-size: .8rem; }
   .gostop-room-info strong span { margin-top: 1px; font-size: .62rem; }
-  .gostop-room-difficulty { bottom: 268px; left: 8px; width: 142px; padding: 4px; }
+  .gostop-room-difficulty { bottom: 242px; left: 8px; width: 142px; padding: 4px; }
   .gostop-room-difficulty .difficulty-selector.compact > div { grid-template-columns: repeat(2, 1fr); gap: 3px; }
   .gostop-room-difficulty .difficulty-selector.compact button { min-height: 27px; padding: 1px; }
   .gostop-room-actions { top: auto; right: 8px; bottom: 268px; gap: 3px; width: var(--gostop-side-control-width); transform: none; }
   .gostop-room-actions button { min-height: 27px; padding: 2px 4px; font-size: .58rem; }
-  .gostop-room-actions .audio-controls.compact { gap: 2px; padding: 2px; }
+  .gostop-room-actions .audio-controls.compact { position: static; gap: 2px; padding: 2px; }
   .gostop-room-actions .audio-controls.compact .audio-control-button { min-height: 26px; font-size: .47rem; }
   .gostop-room-actions .audio-controls.compact .audio-volume { min-height: 20px; }
   .gostop-table { min-height: 560px; }
@@ -191,7 +191,7 @@
   .gostop-auto-zone .auto-play-button > span { width: 34px; height: 34px; border-width: 3px; font-size: .85rem; }
   .gostop-auto-zone .auto-play-button b { font-size: .58rem; }
   .gostop-auto-zone .auto-play-button small { display: none; }
-  .gostop-room-status { padding: 3px 12px; }
+  .gostop-room-status { width: min(220px, 58%); padding: 3px 12px; }
   .gostop-floor-choice, .gostop-decision, .gostop-round-result { padding: 17px 12px; }
 }
 
