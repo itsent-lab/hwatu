@@ -1,0 +1,807 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-21",
+  "generator": {
+    "name": "Supertonic 3",
+    "package": "supertonic 1.3.1",
+    "source": "https://github.com/supertone-inc/supertonic",
+    "model": "https://huggingface.co/Supertone/supertonic-3",
+    "modelLicense": "BigScience OpenRAIL-M",
+    "license": "https://huggingface.co/Supertone/supertonic-3/blob/main/LICENSE"
+  },
+  "notice": "AI-generated Korean voice. The model licensor claims no rights in generated output; output use remains subject to the OpenRAIL-M use restrictions.",
+  "assets": [
+    {
+      "file": "player-capture.wav",
+      "text": "딱! 잡았다!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 75200,
+      "sha256": "163696eb9369a435df107f3592a6d8006a41da75d68c13f68d3e4dae3c9b3b74"
+    },
+    {
+      "file": "opponent-capture.wav",
+      "text": "딱! 내가 잡았지!",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 106056,
+      "sha256": "fd0dfb301a968322c6ea1950b8d5104480c78c1e1490fe2d501429e99fb31672"
+    },
+    {
+      "file": "player-bonus-two.wav",
+      "text": "쌍피다! 좋았어!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 88964,
+      "sha256": "ad3377e28b556f7a879387ef2304f1e719d17861e2eae57f70772fffc05866d8"
+    },
+    {
+      "file": "opponent-bonus-two.wav",
+      "text": "쌍피! 부럽지?",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 79426,
+      "sha256": "8fe4e84b969cd8652420f190fa0397ba67542258caa8d22bda1bad907fa3209a"
+    },
+    {
+      "file": "player-bonus-three.wav",
+      "text": "쓰리피다! 좋았어!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 97852,
+      "sha256": "8713ae7316f558faa591ba4e97ef7d6268fc6b6f213b142249051fcd67be43df"
+    },
+    {
+      "file": "opponent-bonus-three.wav",
+      "text": "쓰리피! 부럽지?",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 85450,
+      "sha256": "4ae842b8a162d5f805070267f6862359d49d30ccace8a8b0fc50a5ecbb3eed30"
+    },
+    {
+      "file": "player-pee-transfer.wav",
+      "text": "피 뺏기! 잡았다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 87326,
+      "sha256": "c5f612550f00b9ab5b58c7238b40fad2975b55b55cbc36f944ef72afe92ab1bb"
+    },
+    {
+      "file": "opponent-pee-transfer.wav",
+      "text": "피 가져간다!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 69686,
+      "sha256": "024a135aa9a612f53fbf033d3c2afce0e7ba1c5a34e1ac5fe376d70101a1c960"
+    },
+    {
+      "file": "player-ppeok.wav",
+      "text": "뻑! 아깝다!",
+      "voice": "F2",
+      "speed": 1.08,
+      "bytes": 67648,
+      "sha256": "74e9ed55d77609458e25803441c6b663265bc7d10ddf555f6d29d552a58c86f5"
+    },
+    {
+      "file": "opponent-ppeok.wav",
+      "text": "뻑! 잘한다!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 79060,
+      "sha256": "cbbd67c075b0592fdbfe38357801011355adf388efab54ac090a58a3cf6d3b72"
+    },
+    {
+      "file": "double-ppeok.wav",
+      "text": "연속 뻑! 한 번 남았다!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 152008,
+      "sha256": "c70e04239d76de814ab1f5bc666c99dd918712c9d9dffd31e160ab9f36c22e05"
+    },
+    {
+      "file": "triple-ppeok.wav",
+      "text": "삼연 뻑! 판 끝났다!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 107320,
+      "sha256": "6d2d34aa2022d800c9cc39ea279e687dea10c595fd58241dbdc9e236dbe9143f"
+    },
+    {
+      "file": "player-bomb.wav",
+      "text": "폭탄이다! 받아라!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 102484,
+      "sha256": "4e371ae11ccc0d568fcb2ae75a9baa391846c15fef5bc14a5fe4d7ac6682b13c"
+    },
+    {
+      "file": "opponent-bomb.wav",
+      "text": "폭탄이다! 제대로 맞아라!",
+      "voice": "M1",
+      "speed": 1.12,
+      "bytes": 148212,
+      "sha256": "1d931d8be8619deb7bccfc972596ccdc7ba35eb836a72903b64ee435119b2668"
+    },
+    {
+      "file": "shake.wav",
+      "text": "흔들었다! 두 배 간다!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 105782,
+      "sha256": "d40c1b9377245a53041094c73e2671ec20b9ca472aa596e2335b19822a9d7e29"
+    },
+    {
+      "file": "player-jjok.wav",
+      "text": "쪽! 잡았다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 81978,
+      "sha256": "cf494d53730be222c50649c5f3983386f930e3b3d5fcb64f5f5ba97f98051b11"
+    },
+    {
+      "file": "opponent-jjok.wav",
+      "text": "쪽! 약 오르지?",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 82150,
+      "sha256": "3f4309a2ffe3da9f6243ad940bf84bafbe3a183b3052b22523315d7bd786eb61"
+    },
+    {
+      "file": "player-ttadak.wav",
+      "text": "따닥! 딱 걸렸어!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 106494,
+      "sha256": "cca36760b2be92d984b643eafeab4ff39c66b0f93528ddef50d92f1cc541c8df"
+    },
+    {
+      "file": "opponent-ttadak.wav",
+      "text": "따닥! 딱 걸렸지?",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 104408,
+      "sha256": "764f920be081f36b29ef564ccd9caf54c79d521b5d63a9ca2eb5fbc833e459a4"
+    },
+    {
+      "file": "player-sweep.wav",
+      "text": "싹쓸이! 다 내 거!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 81410,
+      "sha256": "05cf8cb77aab52c7a7142d4208d5aa00861059318f8cad40ec532a1cabfe4b2a"
+    },
+    {
+      "file": "opponent-sweep.wav",
+      "text": "싹쓸이! 하나도 없지?",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 105378,
+      "sha256": "c60bd86a23ec710bca94ea98adbeef875a599423735a19e2ac46046b0b826a31"
+    },
+    {
+      "file": "player-ppeok-capture.wav",
+      "text": "싼 패! 가져간다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 95682,
+      "sha256": "af3dd8b8a787ae02829d04afe228ee7482835b5a28f033da59a1999fbc74db68"
+    },
+    {
+      "file": "opponent-ppeok-capture.wav",
+      "text": "싼 패! 잘 먹을게!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 116342,
+      "sha256": "b97166ed5de5a0e6cc858afde105cfa9c66a181c9ba4de0028403c637b8842fa"
+    },
+    {
+      "file": "player-self-ppeok.wav",
+      "text": "자뻑! 좋았어!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 91064,
+      "sha256": "2ce6d2c54e76487d83b91654089cbf18a877084f00950aa530460b31a446dd57"
+    },
+    {
+      "file": "opponent-self-ppeok.wav",
+      "text": "자뻑! 운도 좋지!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 121552,
+      "sha256": "e9cbc7f3cd97d5e69b630a304b4c7292fa055981c1b0fa52d7a3d021ee8d3f7d"
+    },
+    {
+      "file": "player-mission.wav",
+      "text": "미션 성공! 크게 간다!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 139072,
+      "sha256": "b5989cd9896f561b233d6aea6984c735911e1e686fe72bbff14f5f70e00e1721"
+    },
+    {
+      "file": "opponent-mission.wav",
+      "text": "미션 성공! 어쩔 수 없지?",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 151096,
+      "sha256": "0f64fb30cb8fa9357457a43d78c9b257162647775e883a4b4825f2512cecea6f"
+    },
+    {
+      "file": "player-score.wav",
+      "text": "점수 났다! 좋았어!",
+      "voice": "F2",
+      "speed": 1.12,
+      "bytes": 107554,
+      "sha256": "75c1a522fa271ddfb6c8a4fa86ee8d674dc7bf12f7bada5dfb4ba7aec96b5f44"
+    },
+    {
+      "file": "opponent-score.wav",
+      "text": "점수 났다! 따라와 봐!",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 106272,
+      "sha256": "e6748a89c92aca82dd2e0674495c84ef5edf4b27157faca03c777717d961ae6f"
+    },
+    {
+      "file": "player-go.wav",
+      "text": "고! 더 가자!",
+      "voice": "F2",
+      "speed": 1.08,
+      "bytes": 57412,
+      "sha256": "8ca93a67c7261618fb2bfd642aca08010cf6eb0d91abc4d4407fbcf3a813b90e"
+    },
+    {
+      "file": "opponent-go.wav",
+      "text": "고! 어디까지 가나 보자!",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 124888,
+      "sha256": "9b2e93175c3a99cb5852621a126be61284975110c54e4e785b933148482270ee"
+    },
+    {
+      "file": "player-stop.wav",
+      "text": "스톱! 여기까지!",
+      "voice": "F2",
+      "speed": 1.08,
+      "bytes": 72298,
+      "sha256": "b7365258c7f5f2f510487ef69dd0f649df5ba77806f87c6bbd556b9b76c1788b"
+    },
+    {
+      "file": "opponent-stop.wav",
+      "text": "스톱! 게임 끝!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 101500,
+      "sha256": "8ee47b023355cc8dcc6595058525d9ae0f173d21c206fb32a89806bc4c4e8788"
+    },
+    {
+      "file": "win.wav",
+      "text": "좋았어! 승리!",
+      "voice": "F2",
+      "speed": 1.08,
+      "bytes": 76324,
+      "sha256": "fa119dfc3fd53e8d3c3f94b4b6c9fed905562cdef6b80bd574f23c8a9dc065f2"
+    },
+    {
+      "file": "lose.wav",
+      "text": "내가 이겼지!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 78046,
+      "sha256": "620d0298b4391f465e3d16087c2cd40114754bff38dcd266acd515f8f3e65854"
+    },
+    {
+      "file": "nagari.wav",
+      "text": "나가리! 다시 붙어!",
+      "voice": "M1",
+      "speed": 1.08,
+      "bytes": 110094,
+      "sha256": "346b9ca9587e46e54182fcfc97fda17da50111f2f7375f37adc1b1db64c077fb"
+    },
+    {
+      "file": "start.wav",
+      "text": "시작! 한 판 붙어 보자!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 108964,
+      "sha256": "2624f08c3355a555fd374a4902d05ae974e52e1eedc4cec5b4a0e41ea8305813"
+    },
+    {
+      "file": "player-chongtong.wav",
+      "text": "총통! 네 장 완성!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 99416,
+      "sha256": "60e63ffaeda76032d17e79250dbf10ee18e31d80ad3bcc7245c81ab359f9f4a6"
+    },
+    {
+      "file": "opponent-chongtong.wav",
+      "text": "총통! 네 장 다 모았다!",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 140854,
+      "sha256": "2219254bb45adf4640d8ec5fe87ac3308e244b0f620e8a9355cb6a1691d6cb60"
+    },
+    {
+      "file": "dealer-human.wav",
+      "text": "좋았어! 내가 선이다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 107744,
+      "sha256": "e57e4576eaa6e63614df4247f7bf3e57af79e213b583982f18899e87048ccaf3"
+    },
+    {
+      "file": "dealer-opponent.wav",
+      "text": "이번엔 내가 선이다!",
+      "voice": "M1",
+      "speed": 1.1,
+      "bytes": 101398,
+      "sha256": "456502d27d4c3779248d279d4d7c2acf7a844d8afb792a78740ef26488143ccd"
+    },
+    {
+      "file": "gookjin-double.wav",
+      "text": "국진은 쌍피로 간다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 95216,
+      "sha256": "1f157270b4e87d1fd990ba888e9e936edcbe6832422784ea87ae558e3918b773"
+    },
+    {
+      "file": "gookjin-animal.wav",
+      "text": "국진은 열끗으로 간다!",
+      "voice": "F2",
+      "speed": 1.1,
+      "bytes": 124910,
+      "sha256": "a9b224f245246cadb1105da077adc2c63cb1d1d73f83b1fbc951a18a613593ff"
+    },
+    {
+      "file": "undo.wav",
+      "text": "무르기! 다시 보자!",
+      "voice": "F2",
+      "speed": 1.08,
+      "bytes": 85060,
+      "sha256": "14927f81dccc8cc33765bac78e15586a1c8030667de4bdc5c1cdc699adc6d081"
+    },
+    {
+      "file": "gostop-computer-a-capture.wav",
+      "text": "앗, 이건 제가 먹을게요!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 102432,
+      "sha256": "12fac68c3ccf666d80fc8759ee4fbe7f30f394f0e949a9f8a7b2cc4015754048"
+    },
+    {
+      "file": "gostop-computer-a-bonus-two.wav",
+      "text": "쌍피예요! 완전 좋아!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 128172,
+      "sha256": "5c3998d8a08d14c8ff24a6bcd97583d650691427c7473275ee20809cedbd29ef"
+    },
+    {
+      "file": "gostop-computer-a-bonus-three.wav",
+      "text": "쓰리피예요! 대박이다!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 91476,
+      "sha256": "42ceab3c0e3333bc14e35f5335c5b9ffe7752fb6ba87392e8f12f8a710f79ba7"
+    },
+    {
+      "file": "gostop-computer-a-ppeok.wav",
+      "text": "앗, 뻑이에요!",
+      "voice": "F1",
+      "speed": 1.16,
+      "bytes": 31800,
+      "sha256": "1fa7dba697f3e1f6f2c4c40d005b0d061229aa0c7de73eaac710b8eac945cbf8"
+    },
+    {
+      "file": "gostop-computer-a-sweep.wav",
+      "text": "싹쓸이! 제가 다 가져갈게요!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 150062,
+      "sha256": "f274f86cd87492ea47b1c0bbc9ec97436ec153d23184d6a2c4140a62f46c720c"
+    },
+    {
+      "file": "gostop-computer-a-ppeok-capture.wav",
+      "text": "싼 패! 잘 먹을게요!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 119220,
+      "sha256": "3591a4ec9a5dea35831f1b02ae8af7b15bad87192a480d63ac6186a9fb4d2d6f"
+    },
+    {
+      "file": "gostop-computer-a-self-ppeok.wav",
+      "text": "자뻑! 오늘 운 좋은데요?",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 138294,
+      "sha256": "37af4d54ef5d2d166f94ed6a1568954699c19bed9b0b4fb0075ce3a8de3a6b5f"
+    },
+    {
+      "file": "gostop-computer-a-score.wav",
+      "text": "점수 났어요! 신난다!",
+      "voice": "F1",
+      "speed": 1.18,
+      "bytes": 108964,
+      "sha256": "074be3622b9d5684b53757a4a2758c7b9ed2213be4b4a03fd1ec4c5104bdc8c3"
+    },
+    {
+      "file": "gostop-computer-a-go.wav",
+      "text": "고! 한 번 더 가볼게요!",
+      "voice": "F1",
+      "speed": 1.16,
+      "bytes": 123888,
+      "sha256": "b755cbc50d3bb078da47cefef4d73dcbe8ecc7621e130cb9d384e4ff497e7f43"
+    },
+    {
+      "file": "gostop-computer-a-stop.wav",
+      "text": "스톱! 여기까지 할게요!",
+      "voice": "F1",
+      "speed": 1.16,
+      "bytes": 111122,
+      "sha256": "d2b6b450c0660866fe94b37d951ff40e29e24ecfc1ce631be8569d5d404e80e9"
+    },
+    {
+      "file": "gostop-computer-a-win.wav",
+      "text": "제가 이겼어요! 재밌었다!",
+      "voice": "F1",
+      "speed": 1.16,
+      "bytes": 129456,
+      "sha256": "8fe3bb02ff0f6b31b72b77d1f6d5b040cceadbdd1bfcbeed065ef7f5883ce836"
+    },
+    {
+      "file": "matgo-female-capture.wav",
+      "text": "딱! 제가 잡았어요!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 97600,
+      "sha256": "abfd8bb88770fcd39cb3a2c67fc04d360f33dc92a38faeef2defcb807e428da7"
+    },
+    {
+      "file": "matgo-female-bonus-two.wav",
+      "text": "쌍피예요! 신난다!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 92756,
+      "sha256": "6ecc1a780c3d15b5797960080e758ed92641437d31aeb6ea15ea259dd514dd82"
+    },
+    {
+      "file": "matgo-female-bonus-three.wav",
+      "text": "쓰리피예요! 대박!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 93646,
+      "sha256": "b21b47e187edc65c074ef547c7d232fc7233b8ba262179b7dc77c1be864b050b"
+    },
+    {
+      "file": "matgo-female-ppeok.wav",
+      "text": "어머, 뻑이에요!",
+      "voice": "F4",
+      "speed": 1.12,
+      "bytes": 76686,
+      "sha256": "19fabe98f59454b72db4c6955616b322769ad2d6f9edf92b08f41007971dc5e1"
+    },
+    {
+      "file": "matgo-female-sweep.wav",
+      "text": "싹쓸이! 다 가져갈게요!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 127588,
+      "sha256": "a185f2144a322f8adf50e97275d0ec74364a10db50765c5cfb577d2d197d2de8"
+    },
+    {
+      "file": "matgo-female-ppeok-capture.wav",
+      "text": "싼 패! 잘 먹을게요!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 119268,
+      "sha256": "98b04881cda394e7a179e20436f62a39d026666096eb5d6c51b4470025b368cb"
+    },
+    {
+      "file": "matgo-female-self-ppeok.wav",
+      "text": "자뻑! 운이 좋네요!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 98104,
+      "sha256": "6e7c0da06f5333a2150600c9915e088297ee98897320bad0dcd34239b67f795a"
+    },
+    {
+      "file": "matgo-female-score.wav",
+      "text": "점수 났어요! 좋아요!",
+      "voice": "F4",
+      "speed": 1.14,
+      "bytes": 100044,
+      "sha256": "8ca1dc001f4bd9adfd00ec7a20b88bc69ae1530ad086bfa6b0fcf8d302b6998a"
+    },
+    {
+      "file": "matgo-female-go.wav",
+      "text": "고! 더 가볼게요!",
+      "voice": "F4",
+      "speed": 1.12,
+      "bytes": 88128,
+      "sha256": "26009e00ffdb145808da844e087c0424eac8626f8bba1b23f9442289df8cfe65"
+    },
+    {
+      "file": "matgo-female-stop.wav",
+      "text": "스톱! 여기까지예요!",
+      "voice": "F4",
+      "speed": 1.12,
+      "bytes": 111326,
+      "sha256": "b029ab133d478ecc8b2032e1eff5922456642741f26facad2804b9c1635fb239"
+    },
+    {
+      "file": "matgo-female-win.wav",
+      "text": "제가 이겼어요! 신난다!",
+      "voice": "F4",
+      "speed": 1.12,
+      "bytes": 138938,
+      "sha256": "fb3ea4f70861bf8c0a4ed6ea8247c78eecf177ac20c9159600e894551f6663a4"
+    },
+    {
+      "file": "gostop-computer-b-capture.wav",
+      "text": "딱! 이건 내가 먹지!",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 107142,
+      "sha256": "e18ccce2e386412fef35b72ed06649e8167dfae738edf9bd5fc9accd022d2ebe"
+    },
+    {
+      "file": "gostop-computer-b-bonus-two.wav",
+      "text": "쌍피네! 약 오르지?",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 92650,
+      "sha256": "9e805fde4cf3c691341e3aefe0c6d13e1e220c5dd12a2dfe113a4c28e3ea7ea4"
+    },
+    {
+      "file": "gostop-computer-b-bonus-three.wav",
+      "text": "쓰리피다! 어때?",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 76026,
+      "sha256": "80df170a1ed49f2983f97f9b47f762f1f1215154a4d166b7a85d8286e56462d4"
+    },
+    {
+      "file": "gostop-computer-b-ppeok.wav",
+      "text": "뻑이네! 이것도 재미지!",
+      "voice": "M4",
+      "speed": 1.14,
+      "bytes": 129458,
+      "sha256": "c039326800a1da5c902f8298a16327730a2347bade6257690a5688d10b58da79"
+    },
+    {
+      "file": "gostop-computer-b-sweep.wav",
+      "text": "싹쓸이! 구경 잘했지?",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 117652,
+      "sha256": "c0e5e4b77b6edf0f00cad967cf903b58d4650a538e6318f026164c056265927c"
+    },
+    {
+      "file": "gostop-computer-b-ppeok-capture.wav",
+      "text": "싼 패! 내가 챙긴다!",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 116754,
+      "sha256": "8058fff1471bc814d0e5cdb8ac9280e9f965dc660415509d0d5719dbe2e8a3a1"
+    },
+    {
+      "file": "gostop-computer-b-self-ppeok.wav",
+      "text": "자뻑! 운까지 내 편이네!",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 133006,
+      "sha256": "9b519602125e5dfaa41104a04c189bff89c04ce071857e0cb00e6fafa16520fa"
+    },
+    {
+      "file": "gostop-computer-b-score.wav",
+      "text": "점수 났네! 따라와 봐!",
+      "voice": "M4",
+      "speed": 1.16,
+      "bytes": 111308,
+      "sha256": "aff7086c3cd13ee2cf9834da1ec6b9d3ea2a9ddcdce010185ff731a05f6626ba"
+    },
+    {
+      "file": "gostop-computer-b-go.wav",
+      "text": "고! 겁나면 빠져!",
+      "voice": "M4",
+      "speed": 1.14,
+      "bytes": 103482,
+      "sha256": "0af230d59226edc934c5937386d1cfcdc2044da982ecb22d71a2f81b826e7ae5"
+    },
+    {
+      "file": "gostop-computer-b-stop.wav",
+      "text": "스톱! 딱 여기까지!",
+      "voice": "M4",
+      "speed": 1.14,
+      "bytes": 110842,
+      "sha256": "e9b52070faf20ead283b975ed375f3e1cb45466e880ca8006c8314dacfa2be93"
+    },
+    {
+      "file": "gostop-computer-b-win.wav",
+      "text": "내가 이겼네! 다음 판도 콜?",
+      "voice": "M4",
+      "speed": 1.14,
+      "bytes": 140858,
+      "sha256": "258b427f40451807626112c72c1002e1cf517f2023943d2a41c94630acf7977f"
+    },
+    {
+      "file": "gostop-computer-c-capture.wav",
+      "text": "좋군. 이 패는 내가 가져가겠네.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 191198,
+      "sha256": "a925702e17e89720c73a1903ebc5afeda5199feb4d039d43d87d4d6b8de16171"
+    },
+    {
+      "file": "gostop-computer-c-bonus-two.wav",
+      "text": "쌍피로군. 운이 따르는군.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 168642,
+      "sha256": "35fbe80a1251337536ba7bf8b22553081bd83c4eb9f7042e4ce7c94888a54562"
+    },
+    {
+      "file": "gostop-computer-c-bonus-three.wav",
+      "text": "쓰리피라, 제법이군.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 105610,
+      "sha256": "b7b2052decb854ee13bdcfdd72d295b43dc8cfcd2b2446f938c7dc44a79b8be1"
+    },
+    {
+      "file": "gostop-computer-c-ppeok.wav",
+      "text": "허허, 뻑이로군.",
+      "voice": "M5",
+      "speed": 0.96,
+      "bytes": 88610,
+      "sha256": "921a8946d99e4e35f36a62f0deaf7eaba95d6904b1e5bd5b2da9e4098b4be857"
+    },
+    {
+      "file": "gostop-computer-c-sweep.wav",
+      "text": "싹쓸이군. 패가 잘 붙는군.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 194648,
+      "sha256": "81e994347c1b6ba98527966d7d4f6f098ce42e69a5f786ef767563e74267e3f9"
+    },
+    {
+      "file": "gostop-computer-c-ppeok-capture.wav",
+      "text": "싼 패로군. 잘 가져가겠네.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 177960,
+      "sha256": "512e1b464bbbe8d78559d423d722bf5e84721192774af7cc009455dcaef38aa1"
+    },
+    {
+      "file": "gostop-computer-c-self-ppeok.wav",
+      "text": "자뻑이라. 오늘 운이 좋군.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 169898,
+      "sha256": "0f3c921052af987963555487fb8a624263f525fcc03914fbb19234f09c19824f"
+    },
+    {
+      "file": "gostop-computer-c-score.wav",
+      "text": "점수가 났군. 흐름이 좋네.",
+      "voice": "M5",
+      "speed": 0.98,
+      "bytes": 178902,
+      "sha256": "0eed02f083806cc129f6799f9c4431954633d13009bb15a7fa04df62b37ab43b"
+    },
+    {
+      "file": "gostop-computer-c-go.wav",
+      "text": "고. 조금 더 가보겠네.",
+      "voice": "M5",
+      "speed": 0.96,
+      "bytes": 126672,
+      "sha256": "f37b7130a9226084e5cda952c2ffd1df44fcc9bc67ed3a917fc49f99b04b356a"
+    },
+    {
+      "file": "gostop-computer-c-stop.wav",
+      "text": "스톱. 여기서 마무리하지.",
+      "voice": "M5",
+      "speed": 0.96,
+      "bytes": 160686,
+      "sha256": "090fb31d07931d9ad37530fc0013c44c3b50c829bec3cb3a1a50fddb90d613fb"
+    },
+    {
+      "file": "gostop-computer-c-win.wav",
+      "text": "내가 이겼군. 좋은 승부였네.",
+      "voice": "M5",
+      "speed": 0.96,
+      "bytes": 188722,
+      "sha256": "e6f80443b719e9d475e87910c204b4f9b2a58409451a4e273266bf7e2f798938"
+    },
+    {
+      "file": "gostop-computer-d-capture.wav",
+      "text": "어머, 그 패는 제가 가져갈게요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 205794,
+      "sha256": "6ec33785a236bb2458a8aa7375ec0c9d3862dedd8c17310cdc58a0c0bedf4dcd"
+    },
+    {
+      "file": "gostop-computer-d-bonus-two.wav",
+      "text": "쌍피네요. 운도 제 편인가 봐요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 235876,
+      "sha256": "582b9335c1b74459acaced387dd095c77dad1713e752eadbfb37e4c8e6559e62"
+    },
+    {
+      "file": "gostop-computer-d-bonus-three.wav",
+      "text": "쓰리피라니, 꽤 마음에 드네요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 179402,
+      "sha256": "8b6287f6f17c51f2910809e58187136adc9050788f9545fe72af03c3026df89c"
+    },
+    {
+      "file": "gostop-computer-d-ppeok.wav",
+      "text": "어머, 뻑이네요.",
+      "voice": "F3",
+      "speed": 0.96,
+      "bytes": 89612,
+      "sha256": "66ec785377e4857d58aff57716c031f2764436c4cae3ab1be5c4548cbbd0d01c"
+    },
+    {
+      "file": "gostop-computer-d-sweep.wav",
+      "text": "싹쓸이네요. 전부 제 거예요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 204578,
+      "sha256": "47944138a395196f6eed5d4c2e174e6f53f08fb5089e13efee04d369e4d23506"
+    },
+    {
+      "file": "gostop-computer-d-ppeok-capture.wav",
+      "text": "싼 패네요. 제가 챙길게요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 208052,
+      "sha256": "9deea50e687a866391cfbc13cd46b77064e9359d0944a749a2c09f938a0fbed7"
+    },
+    {
+      "file": "gostop-computer-d-self-ppeok.wav",
+      "text": "자뻑이라니, 운이 따라주네요.",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 177000,
+      "sha256": "59aae2bba6382ba327f9d60e84985eb50949e61a015928b704b3feaec0b55578"
+    },
+    {
+      "file": "gostop-computer-d-score.wav",
+      "text": "점수가 났네요. 흐름이 좋은데요?",
+      "voice": "F3",
+      "speed": 0.98,
+      "bytes": 228174,
+      "sha256": "a9dea135f9eb38ee9aeb4c1ed2983900e7f3c837c723cb132eb2e03b40066da2"
+    },
+    {
+      "file": "gostop-computer-d-go.wav",
+      "text": "고. 조금 더 즐겨볼까요?",
+      "voice": "F3",
+      "speed": 0.96,
+      "bytes": 172934,
+      "sha256": "fbeee98d4c86cdd603861184727ff506b287d5f89cccc16a0371c0079292f1bf"
+    },
+    {
+      "file": "gostop-computer-d-stop.wav",
+      "text": "스톱. 여기서 끝낼게요.",
+      "voice": "F3",
+      "speed": 0.96,
+      "bytes": 164908,
+      "sha256": "b05feddb9fb640c5e0e3c004e914c4b27c3d4f5283bd69660fafcece4f0b5277"
+    },
+    {
+      "file": "gostop-computer-d-win.wav",
+      "text": "제가 이겼네요. 즐거운 승부였어요.",
+      "voice": "F3",
+      "speed": 0.96,
+      "bytes": 252072,
+      "sha256": "eeec696cf3ec472c4feac5b835fd89ddac049eea28bebd705dc935dc3233ed01"
+    }
+  ]
+}
