@@ -1,0 +1,28 @@
+{
+  "contract": "family-hwatu-error-codes",
+  "contractVersion": 1,
+  "codes": [
+    { "code": "NETWORK_ERROR", "httpStatus": null, "category": "transient", "action": "retry-with-backoff" },
+    { "code": "SERVER_ERROR", "httpStatus": 500, "category": "transient", "action": "retry-with-backoff" },
+    { "code": "LOGIN_RATE_LIMITED", "httpStatus": 429, "category": "rate-limit", "action": "wait-for-user" },
+    { "code": "CSRF_FAILED", "httpStatus": 419, "category": "session", "action": "refresh-csrf-once" },
+    { "code": "AUTH_REQUIRED", "httpStatus": 401, "category": "session", "action": "require-login" },
+    { "code": "LOGIN_FAILED", "httpStatus": 401, "category": "credentials", "action": "correct-input" },
+    { "code": "BOOTSTRAP_FORBIDDEN", "httpStatus": 403, "category": "authorization", "action": "correct-input" },
+    { "code": "BOOTSTRAP_CLOSED", "httpStatus": 409, "category": "conflict", "action": "reload-state" },
+    { "code": "USERNAME_EXISTS", "httpStatus": 409, "category": "conflict", "action": "correct-input" },
+    { "code": "REFILL_NOT_ALLOWED", "httpStatus": 409, "category": "conflict", "action": "reload-state" },
+    { "code": "BALANCE_EMPTY", "httpStatus": 409, "category": "conflict", "action": "refill-balance" },
+    { "code": "INVALID_USERNAME", "httpStatus": 422, "category": "validation", "action": "correct-input" },
+    { "code": "INVALID_DISPLAY_NAME", "httpStatus": 422, "category": "validation", "action": "correct-input" },
+    { "code": "INVALID_PASSWORD", "httpStatus": 422, "category": "validation", "action": "correct-input" },
+    { "code": "INVALID_MEMBER", "httpStatus": 422, "category": "validation", "action": "correct-input" },
+    { "code": "INVALID_GAME", "httpStatus": 422, "category": "validation", "action": "discard-invalid-state" },
+    { "code": "INVALID_STATE_META", "httpStatus": 422, "category": "validation", "action": "discard-invalid-state" },
+    { "code": "INVALID_SETTLEMENT", "httpStatus": 422, "category": "validation", "action": "stop-and-diagnose" },
+    { "code": "INVALID_PROFILE_IMAGE", "httpStatus": [413, 422], "category": "validation", "action": "reencode-or-reselect" },
+    { "code": "STATE_TOO_LARGE", "httpStatus": 413, "category": "validation", "action": "stop-and-diagnose" },
+    { "code": "USER_NOT_FOUND", "httpStatus": 404, "category": "not-found", "action": "reload-state" },
+    { "code": "SELF_DISABLE", "httpStatus": 422, "category": "validation", "action": "cancel-operation" }
+  ]
+}

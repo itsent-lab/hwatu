@@ -1,0 +1,172 @@
+{
+  "$schema": "./game-rule-vectors-v1.schema.json",
+  "contract": "family-hwatu-game-rule-vectors",
+  "version": 1,
+  "sourceDate": "2026-07-21",
+  "cases": [
+    {
+      "id": "score-three-brights",
+      "operation": "captured-score",
+      "description": "비광 없는 삼광은 3점이다.",
+      "input": { "cards": ["m01-01", "m03-01", "m08-01"] },
+      "expected": { "total": 3, "brightCount": 3, "junkCount": 0, "lines": [{ "code": "bright", "points": 3 }] }
+    },
+    {
+      "id": "score-rain-three-brights",
+      "operation": "captured-score",
+      "description": "비광이 포함된 삼광은 2점이다.",
+      "input": { "cards": ["m01-01", "m03-01", "m12-01"] },
+      "expected": { "total": 2, "brightCount": 3, "hasRainBright": true, "lines": [{ "code": "bright", "points": 2 }] }
+    },
+    {
+      "id": "score-godori",
+      "operation": "captured-score",
+      "description": "2월·4월·8월 새 패는 고도리 5점이다.",
+      "input": { "cards": ["m02-01", "m04-01", "m08-02"] },
+      "expected": { "total": 5, "animalCount": 3, "lines": [{ "code": "godori", "points": 5 }] }
+    },
+    {
+      "id": "score-gookjin-double-junk",
+      "operation": "captured-score",
+      "description": "국진을 쌍피로 선택하면 열끗에서 빠지고 피 2장으로 계산한다.",
+      "input": {
+        "cards": ["m09-01", "m02-01", "m04-01", "m05-01", "m06-01", "m01-03", "m01-04", "m02-03", "m02-04", "m03-03", "m03-04", "m04-03", "m04-04"],
+        "gookjinAsDoubleJunk": true
+      },
+      "expected": { "total": 1, "animalCount": 4, "junkCount": 10, "lines": [{ "code": "junk", "points": 1 }] }
+    },
+    {
+      "id": "matgo-basic-settlement",
+      "operation": "matgo-settlement",
+      "description": "삼광 3점에 점당 100냥을 적용한다.",
+      "input": {
+        "winnerCards": ["m01-01", "m03-01", "m08-01"],
+        "loserCards": ["m12-01"],
+        "winnerGoCount": 0,
+        "pointValue": 100
+      },
+      "expected": { "baseScore": 3, "finalScore": 3, "displayAmount": 300, "bakCodes": [] }
+    },
+    {
+      "id": "matgo-three-go",
+      "operation": "matgo-settlement",
+      "description": "4광 4점에 3고의 3점과 2배를 적용한다.",
+      "input": {
+        "winnerCards": ["m01-01", "m03-01", "m08-01", "m11-01"],
+        "loserCards": ["m02-01", "m12-01"],
+        "winnerGoCount": 3,
+        "pointValue": 100
+      },
+      "expected": { "baseScore": 4, "goBonus": 3, "goMultiplier": 2, "finalScore": 14, "displayAmount": 1400 }
+    },
+    {
+      "id": "matgo-stacked-baks",
+      "operation": "matgo-settlement",
+      "description": "피박·광박·멍박은 각각 2배로 중첩한다.",
+      "input": {
+        "winnerCards": ["m01-03", "m01-04", "m02-03", "m02-04", "m03-03", "m03-04", "m04-03", "m04-04", "m05-03", "m05-04", "m02-01", "m04-01", "m05-01", "m06-01", "m07-01", "m08-02", "m09-01", "m01-01", "m03-01", "m08-01"],
+        "loserCards": ["m06-03", "m06-04"],
+        "winnerGoCount": 0,
+        "pointValue": 100
+      },
+      "expected": { "bakMultiplier": 8, "bakCodes": ["pi-bak", "gwang-bak", "meong-bak"], "finalScore": 96, "displayAmount": 9600 }
+    },
+    {
+      "id": "matgo-multiplier-order",
+      "operation": "matgo-settlement",
+      "description": "고 점수, 흔들기, 미션과 나가리 이월을 정해진 순서로 적용한다.",
+      "input": {
+        "winnerCards": ["m01-01", "m03-01", "m08-01"],
+        "loserCards": ["m11-01"],
+        "winnerGoCount": 1,
+        "winnerShakeCount": 1,
+        "winnerMissionMultiplier": 4,
+        "roundMultiplier": 4,
+        "pointValue": 1000
+      },
+      "expected": { "goBonus": 1, "shakeMultiplier": 2, "missionMultiplier": 4, "roundMultiplier": 4, "finalScore": 128, "displayAmount": 128000 }
+    },
+    {
+      "id": "matgo-payment-exempt",
+      "operation": "matgo-settlement",
+      "description": "패자가 한 장도 획득하지 못하면 점수는 유지하고 지급만 면제한다.",
+      "input": {
+        "winnerCards": ["m01-02", "m02-02", "m03-02"],
+        "loserCards": [],
+        "winnerGoCount": 0,
+        "loserCapturedCount": 0,
+        "pointValue": 100
+      },
+      "expected": { "finalScore": 3, "displayAmount": 0, "paymentExempt": true, "bakCodes": [] }
+    },
+    {
+      "id": "gostop-all-common-multipliers",
+      "operation": "gostop-settlement",
+      "description": "3고·흔들기·폭탄·멍따·나가리 배수를 공통 점수에 적용한다.",
+      "input": {
+        "winner": "human",
+        "players": {
+          "human": { "score": { "total": 4, "animalCount": 7 }, "goCount": 3, "scoreAtLastGo": 0, "shakeCount": 1, "bombCount": 1 },
+          "computerA": { "score": { "total": 3 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 },
+          "computerB": { "score": { "total": 3 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 }
+        },
+        "lastGoPlayer": "human",
+        "roundMultiplier": 2,
+        "interimPointDeltas": { "human": 0, "computerA": 0, "computerB": 0 }
+      },
+      "expected": { "goMultiplier": 2, "shakeBombMultiplier": 4, "meongttaMultiplier": 2, "commonScore": 224, "pointDeltas": { "human": 448, "computerA": -224, "computerB": -224 } }
+    },
+    {
+      "id": "gostop-per-loser-baks",
+      "operation": "gostop-settlement",
+      "description": "피박과 광박은 패자별로 따로 계산한다.",
+      "input": {
+        "winner": "human",
+        "players": {
+          "human": { "score": { "total": 5, "brightCount": 3, "junkCount": 10 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 },
+          "computerA": { "score": { "total": 3, "brightCount": 0, "junkCount": 5 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 },
+          "computerB": { "score": { "total": 3, "brightCount": 1, "junkCount": 6 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 }
+        },
+        "lastGoPlayer": null,
+        "roundMultiplier": 1,
+        "interimPointDeltas": { "human": 0, "computerA": 0, "computerB": 0 }
+      },
+      "expected": {
+        "commonScore": 5,
+        "loserPayments": [
+          { "loser": "computerA", "payer": "computerA", "points": 20, "baks": ["pi-bak", "gwang-bak"] },
+          { "loser": "computerB", "payer": "computerB", "points": 5, "baks": [] }
+        ],
+        "pointDeltas": { "human": 25, "computerA": -20, "computerB": -5 }
+      }
+    },
+    {
+      "id": "gostop-dokbak",
+      "operation": "gostop-settlement",
+      "description": "점수를 올리지 못한 고 선언자가 두 패자의 몫을 부담한다.",
+      "input": {
+        "winner": "human",
+        "players": {
+          "human": { "score": { "total": 3 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 },
+          "computerA": { "score": { "total": 3 }, "goCount": 1, "scoreAtLastGo": 3, "shakeCount": 0, "bombCount": 0 },
+          "computerB": { "score": { "total": 3 }, "goCount": 0, "scoreAtLastGo": 0, "shakeCount": 0, "bombCount": 0 }
+        },
+        "lastGoPlayer": "computerA",
+        "roundMultiplier": 1,
+        "interimPointDeltas": { "human": 0, "computerA": 0, "computerB": 0 }
+      },
+      "expected": { "dokbakPlayer": "computerA", "pointDeltas": { "human": 6, "computerA": -6, "computerB": 0 } }
+    },
+    {
+      "id": "gostop-balance-capped-and-refilled",
+      "operation": "gostop-balance",
+      "description": "보유액까지만 이동하고 0냥이 된 컴퓨터만 500,000냥으로 충전한다.",
+      "input": {
+        "balances": { "human": 5000, "computerA": 500000, "computerB": 3000 },
+        "pointDeltas": { "human": -20, "computerA": 40, "computerB": -20 },
+        "pointValue": 1000
+      },
+      "expected": { "human": 0, "computerA": 508000, "computerB": 500000 }
+    }
+  ]
+}
