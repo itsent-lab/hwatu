@@ -9,10 +9,11 @@ interface StartingPlayerChoiceProps {
   disabled?: boolean;
   daytime?: boolean;
   onSelect: (player: PlayerId) => void;
+  onReveal?: (player: PlayerId) => void;
   onExit?: () => void;
 }
 
-export default function StartingPlayerChoice({ seed, disabled = false, daytime = new Date().getHours() >= 6 && new Date().getHours() < 18, onSelect, onExit }: StartingPlayerChoiceProps) {
+export default function StartingPlayerChoice({ seed, disabled = false, daytime = new Date().getHours() >= 6 && new Date().getHours() < 18, onSelect, onReveal, onExit }: StartingPlayerChoiceProps) {
   const cards = useMemo(() => createDealerSelectionCards(seed), [seed]);
   const [humanIndex, setHumanIndex] = useState<number | null>(null);
   const [computerIndex, setComputerIndex] = useState<number | null>(null);
@@ -29,6 +30,7 @@ export default function StartingPlayerChoice({ seed, disabled = false, daytime =
     const result = determineDealerWinner(cards[index], cards[opponentIndex], daytime);
     setHumanIndex(index);
     setComputerIndex(opponentIndex);
+    if (result) onReveal?.(result);
     if (result) timerRef.current = window.setTimeout(() => onSelect(result), 1800);
   };
 

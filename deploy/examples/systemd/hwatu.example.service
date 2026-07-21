@@ -1,14 +1,14 @@
 [Unit]
-Description=Family Hwatu API Server
+Description=Hwatu API Server
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=family-hwatu
-Group=family-hwatu
-WorkingDirectory=/opt/family-hwatu/current
-ExecStart=/usr/bin/dotnet /opt/family-hwatu/current/Hwatu.Server.dll
+User=hwatu
+Group=hwatu
+WorkingDirectory=/opt/hwatu/current
+ExecStart=/usr/bin/dotnet /opt/hwatu/current/Hwatu.Server.dll
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=ASPNETCORE_URLS=http://127.0.0.1:5233
 Restart=on-failure

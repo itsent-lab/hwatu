@@ -1,4 +1,5 @@
 import type { GameState } from '../engine/types';
+import { nextRoundMultiplier } from '../engine/rules/nagari';
 import SettlementImpact from './SettlementImpact';
 
 export interface MoneyTransfer {
@@ -46,11 +47,14 @@ export default function RoundResultOverlay({ game, opponentName = '상대', exit
           {moneyTransfer ? <div className={`money-transfer-card ${transferTone}${moneyTransfer.appliedNow ? ' money-animated' : ''}`} aria-live="polite">
             <div className="money-coins" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <i key={index}>냥</i>)}</div>
             <strong>{moneyTransfer.amount > 0 ? '+' : ''}{money(moneyTransfer.amount)}냥</strong>
+            {settlement.paymentExempt && <p className="opponent-refill-note payment-exempt-note"><b>게임머니 지급 면제</b><span>{settlement.paymentExemptReason}</span></p>}
             {moneyTransfer.amount > 0 && moneyTransfer.computerAfter === 0 && <p className="all-in-result"><b>ALL IN</b><span>{opponentName} 게임머니 전액 획득</span></p>}
             {moneyTransfer.computerRefillAfter !== undefined && <p className="opponent-refill-note"><b>{opponentName} 자동 리필</b><span>0 → {money(moneyTransfer.computerRefillAfter)}냥</span></p>}
-          </div> : <p className="money-pending">게임머니 {money(settlement.displayAmount)}냥을 정산하고 있습니다.</p>}
+          </div> : settlement.paymentExempt
+            ? <p className="money-pending">{settlement.paymentExemptReason}</p>
+            : <p className="money-pending">게임머니 {money(settlement.displayAmount)}냥을 정산하고 있습니다.</p>}
         </> : <p className="nagari-note">{game.roundResult === 'nagari' && game.lastAction
-          ? `${game.lastAction} 다음 판은 ${(game.roundMultiplier ?? 1) * 2}배로 진행됩니다.`
+          ? `${game.lastAction} 다음 판은 ${nextRoundMultiplier('nagari', game.roundMultiplier)}배로 진행됩니다.`
           : '승부가 나지 않아 정산 없이 새 판으로 넘어갑니다.'}</p>}
       </div>
       {balanceEmpty ? <>

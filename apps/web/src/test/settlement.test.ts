@@ -16,11 +16,30 @@ describe('고와 박 정산', () => {
 
   it('피박·광박·멍박은 각각 두 배이며 중첩된다', () => {
     const junk = ['m01-03', 'm01-04', 'm02-03', 'm02-04', 'm03-03', 'm03-04', 'm04-03', 'm04-04', 'm05-03', 'm05-04'];
-    const winner = score([...junk, 'm01-01', 'm03-01', 'm08-01']);
+    const animals = ['m02-01', 'm04-01', 'm05-01', 'm06-01', 'm07-01', 'm08-02', 'm09-01'];
+    const winner = score([...junk, ...animals, 'm01-01', 'm03-01', 'm08-01']);
     const loser = score(['m06-03', 'm06-04']);
     const result = calculateSettlement({ winnerScore: winner, loserScore: loser, winnerGoCount: 0 });
     expect(result.baks.map(bak => bak.code)).toEqual(['pi-bak', 'gwang-bak', 'meong-bak']);
     expect(result.bakMultiplier).toBe(8);
+  });
+
+  it('패자의 피가 0장이면 피박이 아니고 승자의 열끗이 7장 미만이면 멍박이 아니다', () => {
+    const junk = ['m01-03', 'm01-04', 'm02-03', 'm02-04', 'm03-03', 'm03-04', 'm04-03', 'm04-04', 'm05-03', 'm05-04'];
+    const result = calculateSettlement({ winnerScore: score(junk), loserScore: score([]), winnerGoCount: 0 });
+    expect(result.baks).toEqual([]);
+  });
+
+  it('패자가 획득한 패가 없으면 점수는 유지하고 게임머니 지급만 면제한다', () => {
+    const result = calculateSettlement({
+      winnerScore: score(['m01-02', 'm02-02', 'm03-02']),
+      loserScore: score([]),
+      winnerGoCount: 0,
+      loserCapturedCount: 0
+    });
+    expect(result.finalScore).toBe(3);
+    expect(result.displayAmount).toBe(0);
+    expect(result.paymentExempt).toBe(true);
   });
 
   it('오광은 상대 광 보유와 무관하게 광박이다', () => {
@@ -30,10 +49,10 @@ describe('고와 박 정산', () => {
     expect(result.baks.some(bak => bak.code === 'gwang-bak')).toBe(true);
   });
 
-  it('고 이후 추가 득점 전에 상대가 스톱하면 고박이다', () => {
+  it('고를 선언한 뒤 상대가 스톱하면 고박이다', () => {
     const winner = score(['m01-01', 'm03-01', 'm08-01']);
     const loser = score(['m01-02', 'm02-02', 'm03-02', 'm02-01']);
-    const result = calculateSettlement({ winnerScore: winner, loserScore: loser, winnerGoCount: 0, loserGoCount: 1, loserScoreAtLastGo: loser.total });
+    const result = calculateSettlement({ winnerScore: winner, loserScore: loser, winnerGoCount: 0, loserGoCount: 1 });
     expect(result.baks.some(bak => bak.code === 'go-bak')).toBe(true);
   });
 

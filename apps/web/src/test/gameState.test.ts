@@ -190,6 +190,19 @@ describe('기본 맞고 진행 상태', () => {
     expect(result.state.ppeokPiles).toHaveLength(0);
   });
 
+  it('마지막 손패로 상대가 만든 뻑을 먹으면 상대 피를 가져오지 않는다', () => {
+    const game = createArrangedGame({
+      humanHand: ['m01-04'], humanHandSize: 1,
+      floorCards: ['m01-01', 'm01-02', 'm01-03'], floorSize: 3,
+      drawFirst: ['m12-04'], computerCaptured: ['m02-03']
+    });
+    const result = playTurn(game, 'human', 'm01-04');
+    expect(result.specialEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: 'ppeok-capture', stolenPee: [] })
+    ]));
+    expect(result.state.computerCaptured).toEqual(['m02-03']);
+  });
+
   it('자기가 만든 뻑을 다시 먹는 자뻑은 상대 피 두 장을 가져온다', () => {
     const game = createArrangedGame({
       humanHand: ['m01-01', 'm01-04'], floorCards: ['m01-02'], drawFirst: ['m01-03', 'm12-04'],
@@ -399,6 +412,37 @@ describe('기본 맞고 진행 상태', () => {
     const flipped = playFlipOnlyTurn(result, 'human');
     expect(flipped.playedCardId).toBeNull();
     expect(flipped.state.humanBombSkips).toBe(0);
+  });
+
+  it('상대가 직전 차례에 버린 패를 폭탄으로 먹으면 핵폭탄으로 피 두 장을 가져온다', () => {
+    const game = createArrangedGame({
+      humanHand: ['m01-01', 'm01-02', 'm01-03'],
+      floorCards: ['m01-04'],
+      drawFirst: ['m12-04'],
+      computerCaptured: ['m02-03', 'm03-03']
+    });
+    game.lastDiscardedCardId = 'm01-04';
+    game.lastDiscardedBy = 'computer';
+    const result = playBomb(game, 'human', 1);
+    expect(result.specialEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: 'bomb', label: '핵폭탄', stolenPee: ['m02-03', 'm03-03'] })
+    ]));
+  });
+
+  it('같은 월 4장을 한꺼번에 내면 흔들기와 폭탄을 합쳐 4배와 빈 차례 3회를 저장한다', () => {
+    const game = createArrangedGame({
+      humanHand: ['m01-01', 'm01-02', 'm01-03', 'm01-04'],
+      floorCards: [],
+      drawFirst: ['m12-04'],
+      computerCaptured: ['m02-03']
+    });
+    const result = playBomb(game, 'human', 1);
+    expect(result.state.humanShakeCount).toBe(2);
+    expect(result.state.humanBombCount).toBe(1);
+    expect(result.state.humanBombSkips).toBe(3);
+    expect(result.specialEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: 'bomb', label: '4장 흔들기·폭탄' })
+    ]));
   });
 
   it('폭탄 빈 차례에 뒤집은 패와 맞는 바닥패가 두 장이면 선택한 패를 먹는다', () => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AudioControls from '../components/AudioControls';
 import AutoPlayButton from '../components/AutoPlayButton';
+import BombDecisionPanel from '../components/BombDecisionPanel';
 import CapturedCardRack from '../components/CapturedCardRack';
 import DifficultySelector from '../components/DifficultySelector';
 import ExitChoiceDialog from '../components/ExitChoiceDialog';
@@ -16,50 +17,68 @@ import GostopRoundResult from '../components/GostopRoundResult';
 import GostopScoreSummary from '../components/GostopScoreSummary';
 import HwatuCard from '../components/HwatuCard';
 import Loading from '../components/Loading';
+import ShakeDecisionPanel from '../components/ShakeDecisionPanel';
 import type { AiDifficulty } from '../engine/ai/types';
 import { getCard } from '../engine/cards';
 import { applyGostopAutomaticGookjinChoice, chooseGostopAiCard, chooseGostopAiDecision } from '../games/gostop/aiStrategy';
 import { loadGostopBalanceSnapshot, saveGostopBalanceSnapshot } from '../games/gostop/balanceSnapshot';
 import { getGostopTransitionEffect } from '../games/gostop/effects';
-import { DEFAULT_GOSTOP_COMPUTER_BALANCE, settleGostopBalances } from '../games/gostop/money';
+import { DEFAULT_GOSTOP_COMPUTER_BALANCE, settleGostopPointDeltas } from '../games/gostop/money';
 import { enqueuePendingGostopSettlement, loadPendingGostopSettlements, removePendingGostopSettlement } from '../games/gostop/pendingSettlement';
-import { nextRoundMultiplier } from '../engine/rules/nagari';
 import {
-  chooseGostopAutomaticCard, chooseGostopAutomaticDecision, chooseGostopDecision, createGostopRoom,
-  getGostopDrawFloorChoice, getGostopFloorChoice, getGostopMatchingFloorCards, playGostopTurn, scoreGostopPlayer, setGostopGookjinChoice,
+  chooseGostopAutomaticCard, chooseGostopAutomaticDecision, chooseGostopDecision, createGostopRoom, declareGostopShake,
+  getGostopBombOption, getGostopDrawFloorChoice, getGostopFlipOnlyDrawChoice, getGostopFloorChoice, getGostopMatchingFloorCards,
+  getGostopShakeOption, nextGostopRoundMultiplier, playGostopBomb, playGostopFlipOnlyTurn, playGostopTurn, previewGostopSettlement,
+  scoreGostopPlayer, setGostopGookjinChoice,
   type GostopPlayerId, type GostopRoomState
 } from '../games/gostop/gameState';
 import { dashboard, settleGostopRound } from '../lib/api';
 import {
-  applyAudioSettings, pauseGameAudio, playBonusPeeSound, playCaptureSound, playCardSound, playFlipSound,
-  playGoSound, playLoseSound, playNagariSound, playPpeokSound, playScoreSound, playSpecialMoveSound, playStartSound,
-  playStopSound, playWinSound, unlockAudio
+  applyAudioSettings, pauseGameAudio, playAutoPlaySound, playBonusPeeSound, playCancelSound, playCaptureSound, playCardSound,
+  playDealSound, playDecisionSound, playFlipSound, playGoSound, playGookjinSound, playLoseSound, playMoneySound,
+  playNagariSound, playPpeokSound, playScoreSound, playSelectSound, playSpecialMoveSound, playStartSound, playStopSound, playBombSound, playShakeSound,
+  playWinSound, unlockAudio, type VoiceActor
 } from '../lib/audio';
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from '../lib/audioSettings';
+import { useGostopComputerPlayers, voiceActorDisplayName, type GostopComputerPlayers } from '../lib/computerPlayers';
 import { animateCardFlight } from '../lib/effects';
 import { loadGostopAiDifficulty, loadGostopPointValue, saveGostopAiDifficulty } from '../lib/gamePreferences';
 import { useGameViewportFit } from '../lib/gameViewport';
 import { saveProfile } from '../lib/localStore';
 import type { GostopSettlementRequest, UserProfile } from '../lib/types';
 
-const COMPUTER_PLAYERS = {
-  computerA: { name: '정순이', icon: '🐶' },
-  computerB: { name: '박영수', icon: '🐯' }
-} as const;
 const COMPUTER_TURN_DELAY_MS = 1_700;
 const AUTO_HUMAN_TURN_DELAY_MS = 1_300;
 const formatMoney = (value: number) => new Intl.NumberFormat('ko-KR').format(value);
 
 interface FloorChoice {
-  stage: 'played' | 'drawn';
+  stage: 'played' | 'drawn' | 'flip-only';
   cardId: string;
   candidates: string[];
   playedMatchId?: string;
   drawnCardId?: string;
 }
 
-function playerName(player: GostopPlayerId, user: UserProfile) {
-  return player === 'human' ? user.displayName : COMPUTER_PLAYERS[player].name;
+interface GostopBombChoice {
+  month: number;
+  handCardIds: string[];
+  floorCardIds: string[];
+  selectedCardId: string;
+}
+
+interface GostopShakeChoice {
+  month: number;
+  cardIds: string[];
+  selectedCardId: string;
+}
+
+function playerName(player: GostopPlayerId, user: UserProfile, computerPlayers: GostopComputerPlayers) {
+  const actor = player === 'human' ? 'player' : computerPlayers[player].voiceActor;
+  return voiceActorDisplayName(actor, user.displayName);
+}
+
+function voiceActor(player: GostopPlayerId | null, computerPlayers: GostopComputerPlayers): VoiceActor {
+  return player === 'human' || player === null ? 'player' : computerPlayers[player].voiceActor;
 }
 
 function findPlayedCardTarget(container: HTMLElement | null, floorCards: string[], cardId: string, preferredMatchId?: string) {
@@ -76,9 +95,12 @@ function findPlayedCardTarget(container: HTMLElement | null, floorCards: string[
 export default function GostopGamePage() {
   const navigate = useNavigate();
   const viewportFit = useGameViewportFit();
+  const computerPlayers = useGostopComputerPlayers();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [room, setRoom] = useState<GostopRoomState | null>(null);
   const [floorChoice, setFloorChoice] = useState<FloorChoice | null>(null);
+  const [bombChoice, setBombChoice] = useState<GostopBombChoice | null>(null);
+  const [shakeChoice, setShakeChoice] = useState<GostopShakeChoice | null>(null);
   const [autoPlay, setAutoPlay] = useState(false);
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => loadAudioSettings());
   const [difficulty, setDifficulty] = useState<AiDifficulty>(() => loadGostopAiDifficulty());
@@ -96,7 +118,7 @@ export default function GostopGamePage() {
   const declarationSequenceRef = useRef(0);
   const computerAHandRef = useRef<HTMLElement | null>(null);
   const computerBHandRef = useRef<HTMLElement | null>(null);
-  const drawPileRef = useRef<HTMLDivElement | null>(null);
+  const drawPileRef = useRef<HTMLButtonElement | null>(null);
   const floorCardsRef = useRef<HTMLDivElement | null>(null);
   const humanHandRef = useRef<HTMLDivElement | null>(null);
   const turnAnimationRef = useRef(false);
@@ -116,7 +138,7 @@ export default function GostopGamePage() {
       });
       roundGameUuidRef.current = crypto.randomUUID();
       settledRoundRef.current = null;
-      setRoom(createGostopRoom(Date.now(), loadGostopPointValue()));
+      setRoom(createGostopRoom(Date.now(), loadGostopPointValue(), 1, 'human', computerPlayers));
       setDealing(true);
     };
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === '1') {
@@ -158,7 +180,7 @@ export default function GostopGamePage() {
       await saveProfile(result.user);
       openRoom(result.user);
     }).catch(() => navigate('/login', { replace: true }));
-  }, [navigate]);
+  }, [computerPlayers, navigate]);
 
   useEffect(() => {
     applyAudioSettings(audioSettings);
@@ -176,6 +198,7 @@ export default function GostopGamePage() {
 
   useEffect(() => {
     if (!room || !dealing) return;
+    playDealSound();
     const timer = window.setTimeout(() => setDealing(false), 1550);
     return () => window.clearTimeout(timer);
   }, [dealing, room?.randomSeed]);
@@ -186,25 +209,30 @@ export default function GostopGamePage() {
     const effect = getGostopTransitionEffect(previousRoom, room);
     previousRoomRef.current = room;
     if (!effect) return;
-    const opponent = effect.player !== null && effect.player !== 'human';
+    const actor = voiceActor(effect.player, room.computerPlayers);
     if (previousRoom?.phase !== 'round-ended' && room.phase === 'round-ended') {
       if (room.roundResult === 'nagari') playNagariSound();
+      else if (effect.kind === 'stop') playStopSound(actor);
       else if (room.winner === 'human') playWinSound(room.finalScore, room.players.human.goCount);
-      else playLoseSound();
+      else playLoseSound([], voiceActor(room.winner, room.computerPlayers));
     } else if (effect.kind === 'go' && effect.player) {
-      playGoSound(room.players[effect.player].goCount, opponent);
+      playGoSound(room.players[effect.player].goCount, actor);
     } else if (effect.kind === 'double-pee' || effect.kind === 'triple-pee') {
-      playBonusPeeSound(effect.kind === 'triple-pee' ? 3 : 2, opponent);
+      playBonusPeeSound(effect.kind === 'triple-pee' ? 3 : 2, actor);
     } else if (effect.kind === 'ppeok') {
-      playPpeokSound(opponent);
-    } else if (effect.kind === 'sweep' || effect.kind === 'ppeok-capture' || effect.kind === 'self-ppeok') {
-      playSpecialMoveSound(effect.kind, opponent);
+      playPpeokSound(actor);
+    } else if (effect.kind === 'bomb') {
+      playBombSound(actor);
+    } else if (effect.kind === 'shake') {
+      playShakeSound(actor);
+    } else if (effect.kind === 'jjok' || effect.kind === 'ttadak' || effect.kind === 'sweep' || effect.kind === 'ppeok-capture' || effect.kind === 'self-ppeok') {
+      playSpecialMoveSound(effect.kind, actor);
     } else if (effect.kind === 'score' && effect.player) {
-      playScoreSound(effect.text.replace('!', ''), scoreGostopPlayer(room, effect.player).total, opponent);
+      playScoreSound(effect.text.replace('!', ''), scoreGostopPlayer(room, effect.player).total, actor);
     } else if (effect.kind === 'capture') {
-      playCaptureSound(opponent);
+      playCaptureSound(actor);
     } else if (effect.kind === 'stop') {
-      playStopSound(opponent);
+      playStopSound(actor);
     }
     if (declarationTimerRef.current !== null) window.clearTimeout(declarationTimerRef.current);
     declarationSequenceRef.current += 1;
@@ -230,24 +258,31 @@ export default function GostopGamePage() {
   }, [room?.phase]);
 
   useEffect(() => {
-    if (!user || !room || room.phase !== 'round-ended' || room.roundResult !== 'win' || !room.winner) return;
+    if (!user || !room || room.phase !== 'round-ended') return;
+    const pointDeltas = room.settlement?.pointDeltas ?? room.interimPointDeltas;
+    if (Object.values(pointDeltas).every(points => points === 0)) return;
     const gameUuid = roundGameUuidRef.current;
     if (settledRoundRef.current === gameUuid) return;
     settledRoundRef.current = gameUuid;
-    const optimistic = settleGostopBalances({
+    const optimistic = settleGostopPointDeltas({
       human: user.virtualBalance,
       computerA: computerBalances.computerA,
       computerB: computerBalances.computerB
-    }, room.winner, room.finalScore * room.pointValue);
+    }, pointDeltas, room.pointValue);
     saveGostopBalanceSnapshot(user.id, optimistic);
+    playMoneySound(pointDeltas.human > 0);
     setUser(current => current ? { ...current, virtualBalance: optimistic.human } : current);
     setComputerBalances({ computerA: optimistic.computerA, computerB: optimistic.computerB });
     if (import.meta.env.DEV && user.id === 0) return;
     const settlementRequest: GostopSettlementRequest = {
       gameUuid,
+      roundResult: room.roundResult ?? 'nagari',
       winner: room.winner,
       finalScore: room.finalScore,
-      pointValue: room.pointValue
+      pointValue: room.pointValue,
+      humanPoints: pointDeltas.human,
+      computerAPoints: pointDeltas.computerA,
+      computerBPoints: pointDeltas.computerB
     };
     enqueuePendingGostopSettlement(user.id, settlementRequest);
     void settleGostopRound(settlementRequest).then(result => {
@@ -280,12 +315,15 @@ export default function GostopGamePage() {
         try {
           const computerPlayer = room.currentPlayer === 'computerA' ? 'computerA' : 'computerB';
           const seat = computerPlayer === 'computerA' ? computerAHandRef.current : computerBHandRef.current;
-          const cardId = chooseGostopAiCard(room, computerPlayer, difficulty);
+          const flipOnly = room.players[computerPlayer].flipOnlyTurns > 0;
+          const cardId = flipOnly ? null : chooseGostopAiCard(room, computerPlayer, difficulty);
           const bonusMove = Boolean(cardId && getCard(cardId)?.tags.includes('bonus-pee'));
           const source = cardId ? seat?.querySelector(`.gostop-card-back[data-card-id="${cardId}"]`) ?? null : null;
           const playedTarget = cardId ? findPlayedCardTarget(floorCardsRef.current, room.floorCards, cardId) : null;
-          playCardSound();
-          await animateCardFlight(source, bonusMove ? seat?.querySelector('.gostop-score-summary') ?? null : playedTarget, -7, 280);
+          if (!flipOnly) {
+            playCardSound();
+            await animateCardFlight(source, bonusMove ? seat?.querySelector('.gostop-score-summary') ?? null : playedTarget, -7, 280);
+          }
           await animateCardFlight(drawPileRef.current, bonusMove ? seat : floorCardsRef.current, 7, 230);
           playFlipSound();
         } finally { turnAnimationRef.current = false; }
@@ -294,11 +332,16 @@ export default function GostopGamePage() {
         if (!current || current.phase === 'round-ended' || current.pendingDecision === 'human' || current.currentPlayer === 'human') return current;
         const player = current.currentPlayer;
         if (current.phase === 'awaiting-go-stop') return chooseGostopDecision(current, player, chooseGostopAiDecision(current, player, difficulty));
+        if (current.players[player].flipOnlyTurns > 0) return playGostopFlipOnlyTurn(current, player).state;
         const cardId = chooseGostopAiCard(current, player, difficulty);
         if (!cardId) return current;
         const hadGookjin = current.players[player].captured.includes('m09-01');
-        const next = playGostopTurn(current, player, cardId).state;
-        return !hadGookjin && next.players[player].captured.includes('m09-01')
+        const bomb = getGostopBombOption(current, player, cardId);
+        const shaken = bomb ? current : getGostopShakeOption(current, player, cardId)
+          ? declareGostopShake(current, player, getCard(cardId)?.month ?? 0)
+          : current;
+        const next = bomb ? playGostopBomb(current, player, bomb.month).state : playGostopTurn(shaken, player, cardId).state;
+        return next.phase !== 'round-ended' && !hadGookjin && next.players[player].captured.includes('m09-01')
           ? applyGostopAutomaticGookjinChoice(next, player)
           : next;
       });
@@ -311,14 +354,17 @@ export default function GostopGamePage() {
     const timer = window.setTimeout(async () => {
       setFloorChoice(null);
       if (room.phase === 'playing' && !turnAnimationRef.current) {
-        const cardId = chooseGostopAutomaticCard(room, 'human');
+        const flipOnly = room.players.human.flipOnlyTurns > 0;
+        const cardId = flipOnly ? null : chooseGostopAutomaticCard(room, 'human');
         const bonusMove = Boolean(cardId && getCard(cardId)?.tags.includes('bonus-pee'));
         const source = cardId ? humanHandRef.current?.querySelector(`[data-card-id="${cardId}"]`) ?? null : null;
         const playedTarget = cardId ? findPlayedCardTarget(floorCardsRef.current, room.floorCards, cardId, getGostopFloorChoice(room, 'human', cardId)[0]) : null;
         turnAnimationRef.current = true;
         try {
-          playCardSound();
-          await animateCardFlight(source, bonusMove ? document.querySelector('.gostop-human-captured') : playedTarget, -7, 280);
+          if (!flipOnly) {
+            playCardSound();
+            await animateCardFlight(source, bonusMove ? document.querySelector('.gostop-human-captured') : playedTarget, -7, 280);
+          }
           await animateCardFlight(drawPileRef.current, bonusMove ? humanHandRef.current : floorCardsRef.current, 7, 230);
           playFlipSound();
         } finally { turnAnimationRef.current = false; }
@@ -329,13 +375,20 @@ export default function GostopGamePage() {
           return chooseGostopDecision(current, 'human', chooseGostopAutomaticDecision(current, 'human'));
         }
         if (current.phase !== 'playing' || current.currentPlayer !== 'human') return current;
+        if (current.players.human.flipOnlyTurns > 0) return playGostopFlipOnlyTurn(current, 'human').state;
         const cardId = chooseGostopAutomaticCard(current, 'human');
         if (!cardId) return current;
         const playedMatchId = getGostopFloorChoice(current, 'human', cardId)[0];
         const drawnMatchId = getGostopDrawFloorChoice(current, 'human', cardId, playedMatchId)?.candidates[0];
         const hadGookjin = current.players.human.captured.includes('m09-01');
-        const next = playGostopTurn(current, 'human', cardId, playedMatchId, drawnMatchId).state;
-        return !hadGookjin && next.players.human.captured.includes('m09-01')
+        const bomb = getGostopBombOption(current, 'human', cardId);
+        const shaken = bomb ? current : getGostopShakeOption(current, 'human', cardId)
+          ? declareGostopShake(current, 'human', getCard(cardId)?.month ?? 0)
+          : current;
+        const next = bomb
+          ? playGostopBomb(current, 'human', bomb.month).state
+          : playGostopTurn(shaken, 'human', cardId, playedMatchId, drawnMatchId).state;
+        return next.phase !== 'round-ended' && !hadGookjin && next.players.human.captured.includes('m09-01')
           ? applyGostopAutomaticGookjinChoice(next, 'human')
           : next;
       });
@@ -344,7 +397,14 @@ export default function GostopGamePage() {
   }, [autoPlay, dealing, room]);
 
   if (!user || !room) return <Loading message="고스톱 게임방을 열고 있습니다" />;
-  const money = formatMoney(user.virtualBalance);
+  const liveBalances = room.phase === 'round-ended'
+    ? { human: user.virtualBalance, computerA: computerBalances.computerA, computerB: computerBalances.computerB }
+    : settleGostopPointDeltas({
+      human: user.virtualBalance,
+      computerA: computerBalances.computerA,
+      computerB: computerBalances.computerB
+    }, room.interimPointDeltas, room.pointValue);
+  const money = formatMoney(liveBalances.human);
   const humanTurn = !dealing && room.phase === 'playing' && room.currentPlayer === 'human';
   const humanScore = scoreGostopPlayer(room, 'human');
   const computerAScore = scoreGostopPlayer(room, 'computerA');
@@ -352,42 +412,121 @@ export default function GostopGamePage() {
   const floorCardSplit = Math.ceil(room.floorCards.length / 2);
   const decidingPlayer = room.pendingDecision;
   const decidingScore = decidingPlayer ? scoreGostopPlayer(room, decidingPlayer) : null;
+  const decidingSettlement = decidingPlayer ? previewGostopSettlement(room, decidingPlayer) : null;
   const balanceEmpty = user.virtualBalance <= 0 || (
     room.phase === 'round-ended'
     && room.roundResult === 'win'
     && room.winner !== null
     && room.winner !== 'human'
     && settledRoundRef.current !== roundGameUuidRef.current
-    && room.finalScore * room.pointValue >= user.virtualBalance
+    && -(room.settlement?.pointDeltas.human ?? room.interimPointDeltas.human) * room.pointValue >= user.virtualBalance
   );
 
-  const playHumanCard = async (cardId: string, preferredPlayedMatchId?: string, preferredDrawnMatchId?: string, sourceElement?: HTMLButtonElement) => {
-    if (!humanTurn || gookjinChoiceOpen || turnAnimationRef.current) return;
-    const candidates = getGostopFloorChoice(room, 'human', cardId);
+  const playHumanCard = async (
+    cardId: string,
+    preferredPlayedMatchId?: string,
+    preferredDrawnMatchId?: string,
+    sourceElement?: HTMLButtonElement,
+    baseRoom: GostopRoomState = room
+  ) => {
+    if (baseRoom.phase !== 'playing' || baseRoom.currentPlayer !== 'human' || gookjinChoiceOpen || turnAnimationRef.current) return;
+    const candidates = getGostopFloorChoice(baseRoom, 'human', cardId);
     if (!preferredPlayedMatchId && candidates.length === 2) {
+      playDecisionSound();
       setFloorChoice({ stage: 'played', cardId, candidates });
       return;
     }
-    const drawChoice = getGostopDrawFloorChoice(room, 'human', cardId, preferredPlayedMatchId);
+    const drawChoice = getGostopDrawFloorChoice(baseRoom, 'human', cardId, preferredPlayedMatchId);
     if (!preferredDrawnMatchId && drawChoice) {
+      playDecisionSound();
       setFloorChoice({ stage: 'drawn', cardId, candidates: drawChoice.candidates, playedMatchId: preferredPlayedMatchId, drawnCardId: drawChoice.drawnCardId });
       return;
     }
     setFloorChoice(null);
+    setBombChoice(null);
+    setShakeChoice(null);
     turnAnimationRef.current = true;
     try {
       await unlockAudio();
       const bonusMove = Boolean(getCard(cardId)?.tags.includes('bonus-pee'));
       const source = sourceElement ?? humanHandRef.current?.querySelector(`[data-card-id="${cardId}"]`) ?? null;
-      const playedTarget = findPlayedCardTarget(floorCardsRef.current, room.floorCards, cardId, preferredPlayedMatchId);
+      const playedTarget = findPlayedCardTarget(floorCardsRef.current, baseRoom.floorCards, cardId, preferredPlayedMatchId);
       playCardSound();
       await animateCardFlight(source, bonusMove ? document.querySelector('.gostop-human-captured') : playedTarget, -7, 280);
       await animateCardFlight(drawPileRef.current, bonusMove ? humanHandRef.current : floorCardsRef.current, 7, 230);
       playFlipSound();
     } finally { turnAnimationRef.current = false; }
-    const result = playGostopTurn(room, 'human', cardId, preferredPlayedMatchId, preferredDrawnMatchId);
+    const result = playGostopTurn(baseRoom, 'human', cardId, preferredPlayedMatchId, preferredDrawnMatchId);
     setRoom(result.state);
-    if (!room.players.human.captured.includes('m09-01') && result.state.players.human.captured.includes('m09-01')) setGookjinChoiceOpen(true);
+    if (result.state.phase !== 'round-ended' && !baseRoom.players.human.captured.includes('m09-01') && result.state.players.human.captured.includes('m09-01')) { playDecisionSound(); setGookjinChoiceOpen(true); }
+  };
+  const requestHumanCard = (cardId: string, source: HTMLButtonElement) => {
+    if (!humanTurn || room.players.human.flipOnlyTurns > 0 || bombChoice || shakeChoice) return;
+    const bomb = getGostopBombOption(room, 'human', cardId);
+    if (bomb) {
+      playDecisionSound();
+      setBombChoice({ month: bomb.month, handCardIds: bomb.handCardIds, floorCardIds: bomb.floorCardIds, selectedCardId: cardId });
+      return;
+    }
+    const shake = getGostopShakeOption(room, 'human', cardId);
+    if (shake) {
+      playDecisionSound();
+      setShakeChoice({ month: shake.month, cardIds: shake.handCardIds, selectedCardId: cardId });
+      return;
+    }
+    void playHumanCard(cardId, undefined, undefined, source);
+  };
+  const decideHumanBomb = (decision: 'bomb' | 'plain') => {
+    if (!bombChoice) return;
+    const choice = bombChoice;
+    setBombChoice(null);
+    if (decision === 'bomb') {
+      const result = playGostopBomb(room, 'human', choice.month).state;
+      setRoom(result);
+      if (result.phase !== 'round-ended' && !room.players.human.captured.includes('m09-01') && result.players.human.captured.includes('m09-01')) {
+        playDecisionSound();
+        setGookjinChoiceOpen(true);
+      }
+      return;
+    }
+    playCancelSound();
+    const source = humanHandRef.current?.querySelector<HTMLButtonElement>(`button[data-card-id="${choice.selectedCardId}"]`);
+    void playHumanCard(choice.selectedCardId, undefined, undefined, source ?? undefined);
+  };
+  const decideHumanShake = (decision: 'shake' | 'plain') => {
+    if (!shakeChoice) return;
+    const choice = shakeChoice;
+    setShakeChoice(null);
+    const source = humanHandRef.current?.querySelector<HTMLButtonElement>(`button[data-card-id="${choice.selectedCardId}"]`);
+    if (decision === 'plain') {
+      playCancelSound();
+      void playHumanCard(choice.selectedCardId, undefined, undefined, source ?? undefined);
+      return;
+    }
+    const shaken = declareGostopShake(room, 'human', choice.month);
+    setRoom(shaken);
+    void playHumanCard(choice.selectedCardId, undefined, undefined, source ?? undefined, shaken);
+  };
+  const playHumanFlipOnly = async (preferredDrawnMatchId?: string) => {
+    if (!humanTurn || room.players.human.flipOnlyTurns <= 0 || turnAnimationRef.current) return;
+    const choice = getGostopFlipOnlyDrawChoice(room, 'human');
+    if (!preferredDrawnMatchId && choice) {
+      playDecisionSound();
+      setFloorChoice({ stage: 'flip-only', cardId: '', candidates: choice.candidates, drawnCardId: choice.drawnCardId });
+      return;
+    }
+    setFloorChoice(null);
+    turnAnimationRef.current = true;
+    try {
+      await animateCardFlight(drawPileRef.current, floorCardsRef.current, 7, 230);
+      playFlipSound();
+    } finally { turnAnimationRef.current = false; }
+    const result = playGostopFlipOnlyTurn(room, 'human', preferredDrawnMatchId).state;
+    setRoom(result);
+    if (result.phase !== 'round-ended' && !room.players.human.captured.includes('m09-01') && result.players.human.captured.includes('m09-01')) {
+      playDecisionSound();
+      setGookjinChoiceOpen(true);
+    }
   };
   const decide = (decision: 'go' | 'stop') => setRoom(chooseGostopDecision(room, 'human', decision));
   const newRound = () => {
@@ -396,6 +535,8 @@ export default function GostopGamePage() {
       return;
     }
     setFloorChoice(null);
+    setBombChoice(null);
+    setShakeChoice(null);
     setAutoPlay(false);
     setGookjinChoiceOpen(false);
     setExitDialogOpen(false);
@@ -403,7 +544,8 @@ export default function GostopGamePage() {
     setDealing(true);
     roundGameUuidRef.current = crypto.randomUUID();
     settledRoundRef.current = null;
-    setRoom(createGostopRoom(Date.now(), room.pointValue, nextRoundMultiplier(room.roundResult, room.roundMultiplier)));
+    const nextStarter = room.roundResult === 'win' && room.winner ? room.winner : room.startingPlayer;
+    setRoom(createGostopRoom(Date.now(), room.pointValue, nextGostopRoundMultiplier(room.roundResult), nextStarter, room.computerPlayers));
     void unlockAudio().then(playStartSound);
   };
   const reserveExit = () => {
@@ -416,8 +558,14 @@ export default function GostopGamePage() {
   };
   const toggleAutoPlay = () => {
     setFloorChoice(null);
-    setAutoPlay(current => !current);
-    void unlockAudio();
+    setBombChoice(null);
+    setShakeChoice(null);
+    setAutoPlay(current => {
+      const next = !current;
+      if (next) void unlockAudio().then(() => playAutoPlaySound(true));
+      else playAutoPlaySound(false);
+      return next;
+    });
   };
   const changeAudioSettings = (next: AudioSettings) => {
     setAudioSettings(next);
@@ -430,6 +578,7 @@ export default function GostopGamePage() {
     saveGostopAiDifficulty(next);
   };
   const decideGookjin = (asDoubleJunk: boolean) => {
+    playGookjinSound(asDoubleJunk);
     setRoom(current => current ? setGostopGookjinChoice(current, 'human', asDoubleJunk) : current);
     setGookjinChoiceOpen(false);
   };
@@ -450,25 +599,32 @@ export default function GostopGamePage() {
       </nav>
       {dealing && <GostopDealAnimation />}
       <section ref={computerAHandRef} className={`gostop-seat opponent-a${room.currentPlayer === 'computerA' ? ' active' : ''}`}>
-        <div className="gostop-player-summary"><span>{COMPUTER_PLAYERS.computerA.icon}</span><b>{COMPUTER_PLAYERS.computerA.name}</b><small>{formatMoney(computerBalances.computerA)}냥</small></div>
+        <div className="gostop-player-summary"><span>{room.computerPlayers.computerA.icon}</span><b>{room.computerPlayers.computerA.name}</b><small>{formatMoney(liveBalances.computerA)}냥</small></div>
         <GostopHiddenHand cardIds={room.players.computerA.hand} />
         <GostopScoreSummary key={`${computerAScore.total}-${room.players.computerA.goCount}`} score={computerAScore} capturedCount={room.players.computerA.captured.length} goCount={room.players.computerA.goCount} />
-        <GostopOpponentCaptured cardIds={room.players.computerA.captured} name={COMPUTER_PLAYERS.computerA.name} gookjinAsDoubleJunk={room.players.computerA.gookjinAsDoubleJunk} />
+        <GostopOpponentCaptured cardIds={room.players.computerA.captured} name={room.computerPlayers.computerA.name} gookjinAsDoubleJunk={room.players.computerA.gookjinAsDoubleJunk} />
       </section>
       <section ref={computerBHandRef} className={`gostop-seat opponent-b${room.currentPlayer === 'computerB' ? ' active' : ''}`}>
-        <div className="gostop-player-summary"><span>{COMPUTER_PLAYERS.computerB.icon}</span><b>{COMPUTER_PLAYERS.computerB.name}</b><small>{formatMoney(computerBalances.computerB)}냥</small></div>
+        <div className="gostop-player-summary"><span>{room.computerPlayers.computerB.icon}</span><b>{room.computerPlayers.computerB.name}</b><small>{formatMoney(liveBalances.computerB)}냥</small></div>
         <GostopHiddenHand cardIds={room.players.computerB.hand} />
         <GostopScoreSummary key={`${computerBScore.total}-${room.players.computerB.goCount}`} score={computerBScore} capturedCount={room.players.computerB.captured.length} goCount={room.players.computerB.goCount} />
-        <GostopOpponentCaptured cardIds={room.players.computerB.captured} name={COMPUTER_PLAYERS.computerB.name} gookjinAsDoubleJunk={room.players.computerB.gookjinAsDoubleJunk} />
+        <GostopOpponentCaptured cardIds={room.players.computerB.captured} name={room.computerPlayers.computerB.name} gookjinAsDoubleJunk={room.players.computerB.gookjinAsDoubleJunk} />
       </section>
       <section className="gostop-floor" aria-label={`바닥패 ${room.floorCards.length}장`}>
         <div ref={floorCardsRef} className="gostop-floor-cards">
           <div className="gostop-floor-card-group left">{room.floorCards.slice(0, floorCardSplit).map(cardId => <HwatuCard key={cardId} cardId={cardId} />)}</div>
-          <div ref={drawPileRef} className="gostop-draw-pile" aria-label={`더미 ${room.drawPile.length}장`}><span>花</span><b>{room.drawPile.length}</b></div>
+          <button
+            ref={drawPileRef}
+            type="button"
+            className="gostop-draw-pile"
+            aria-label={`더미 ${room.drawPile.length}장${room.players.human.flipOnlyTurns > 0 ? ', 폭탄으로 비워 둔 차례에 뒤집기' : ''}`}
+            disabled={!humanTurn || room.players.human.flipOnlyTurns <= 0}
+            onClick={() => void playHumanFlipOnly()}
+          ><span>花</span><b>{room.drawPile.length}</b></button>
           <div className="gostop-floor-card-group right">{room.floorCards.slice(floorCardSplit).map(cardId => <HwatuCard key={cardId} cardId={cardId} />)}</div>
         </div>
       </section>
-      <div className="gostop-room-status" aria-live="polite"><strong>{room.phase === 'round-ended' ? '판 종료' : humanTurn ? '내 차례' : `${playerName(room.currentPlayer, user)} 차례`}</strong><span>{room.lastAction}</span></div>
+      <div className="gostop-room-status" aria-live="polite"><strong>{room.phase === 'round-ended' ? '판 종료' : humanTurn ? '내 차례' : `${playerName(room.currentPlayer, user, room.computerPlayers)} 차례`}</strong><span>{room.lastAction}</span></div>
       <section className={`gostop-human-seat${humanTurn ? ' active' : ''}`}>
         <div className="gostop-player-summary human"><span>🙂</span><b>{user.displayName}</b><small>{money}냥</small></div>
         <GostopScoreSummary key={`${humanScore.total}-${room.players.human.goCount}`} score={humanScore} capturedCount={room.players.human.captured.length} goCount={room.players.human.goCount} />
@@ -479,7 +635,7 @@ export default function GostopGamePage() {
                 cardIds={room.players.human.captured}
                 owner="human"
                 gookjinAsDoubleJunk={room.players.human.gookjinAsDoubleJunk}
-                onToggleGookjin={room.phase !== 'round-ended' ? () => setGookjinChoiceOpen(true) : undefined}
+                onToggleGookjin={room.phase !== 'round-ended' ? () => { playDecisionSound(); setGookjinChoiceOpen(true); } : undefined}
               />
             : <span>아직 획득한 패가 없습니다</span>}
         </div>
@@ -487,21 +643,40 @@ export default function GostopGamePage() {
           ref={humanHandRef}
           cardIds={room.players.human.hand}
           floorCardIds={room.floorCards}
-          disabled={!humanTurn || gookjinChoiceOpen}
-          showHints={humanTurn && !floorChoice && !gookjinChoiceOpen}
+          disabled={!humanTurn || gookjinChoiceOpen || room.players.human.flipOnlyTurns > 0 || Boolean(bombChoice) || Boolean(shakeChoice)}
+          showHints={humanTurn && !floorChoice && !gookjinChoiceOpen && room.players.human.flipOnlyTurns === 0}
           selectedCardId={floorChoice?.stage === 'played' ? floorChoice.cardId : null}
-          onPlay={(cardId, source) => void playHumanCard(cardId, undefined, undefined, source)}
+          onPlay={requestHumanCard}
         />
         <div className="gostop-auto-zone"><AutoPlayButton active={autoPlay} disabled={room.phase === 'round-ended'} onToggle={toggleAutoPlay} /></div>
       </section>
       {floorChoice && <div className="gostop-floor-choice" role="dialog" aria-label="먹을 바닥패 선택">
         <strong>{floorChoice.stage === 'drawn' ? `뒤집은 패로 어느 패를 먹을까요?` : '어느 패를 먹을까요?'}</strong>
         {floorChoice.drawnCardId && <span className="gostop-drawn-card"><HwatuCard cardId={floorChoice.drawnCardId} />뒤집은 패</span>}
-        <div>{floorChoice.candidates.map(cardId => <HwatuCard key={cardId} cardId={cardId} onClick={() => floorChoice.stage === 'played'
-          ? playHumanCard(floorChoice.cardId, cardId)
-          : playHumanCard(floorChoice.cardId, floorChoice.playedMatchId, cardId)} />)}</div>
-        <button type="button" onClick={() => setFloorChoice(null)}>다른 손패 고르기</button>
+        <div>{floorChoice.candidates.map(cardId => <HwatuCard key={cardId} cardId={cardId} onClick={() => {
+          playSelectSound();
+          return floorChoice.stage === 'played'
+            ? playHumanCard(floorChoice.cardId, cardId)
+            : floorChoice.stage === 'drawn'
+            ? playHumanCard(floorChoice.cardId, floorChoice.playedMatchId, cardId)
+            : playHumanFlipOnly(cardId);
+        }} />)}</div>
+        <button type="button" onClick={() => { playCancelSound(); setFloorChoice(null); }}>다른 손패 고르기</button>
       </div>}
+      {bombChoice && <BombDecisionPanel
+        month={bombChoice.month}
+        kind="three-card-bomb"
+        handCardIds={bombChoice.handCardIds}
+        floorCardIds={bombChoice.floorCardIds}
+        selectedCardId={bombChoice.selectedCardId}
+        onDecision={decideHumanBomb}
+      />}
+      {shakeChoice && <ShakeDecisionPanel
+        month={shakeChoice.month}
+        cardIds={shakeChoice.cardIds}
+        selectedCardId={shakeChoice.selectedCardId}
+        onDecision={decideHumanShake}
+      />}
       {gookjinChoiceOpen && room.players.human.captured.includes('m09-01') && <GookjinDecisionPanel
         currentAsDoubleJunk={room.players.human.gookjinAsDoubleJunk}
         onDecision={decideGookjin}
@@ -510,12 +685,12 @@ export default function GostopGamePage() {
         owner={decidingPlayer === 'human' ? 'human' : 'computer'}
         score={decidingScore.total}
         nextGoCount={room.players[decidingPlayer].goCount + 1}
-        stopScore={(decidingScore.total + room.players[decidingPlayer].goCount) * room.roundMultiplier}
-        stopAmount={(decidingScore.total + room.players[decidingPlayer].goCount) * room.roundMultiplier * room.pointValue}
+        stopScore={decidingSettlement?.commonScore ?? decidingScore.total}
+        stopAmount={(decidingSettlement?.commonScore ?? decidingScore.total) * room.pointValue}
         onDecision={decidingPlayer === 'human' ? decide : undefined}
       />}
     </main>
-    {room.phase === 'round-ended' && <GostopRoundResult room={room} winnerName={room.winner ? playerName(room.winner, user) : ''} exitReserved={exitReserved} balanceEmpty={balanceEmpty} onContinue={newRound} onExit={leaveNow} onReturnLobby={() => navigate('/gostop')} />}
+    {room.phase === 'round-ended' && <GostopRoundResult room={room} winnerName={room.winner ? playerName(room.winner, user, room.computerPlayers) : ''} exitReserved={exitReserved} balanceEmpty={balanceEmpty} onContinue={newRound} onExit={leaveNow} onReturnLobby={() => navigate('/gostop')} />}
     {exitDialogOpen && <ExitChoiceDialog onReserve={reserveExit} onImmediate={leaveNow} onCancel={() => setExitDialogOpen(false)} guide="현재 판을 마친 뒤 나가거나, 지금 바로 나갈 수 있습니다." immediateDescription="현재 판을 중단하고 바로 나갑니다" />}
     {declaration && <GameDeclarationOverlay key={declaration.id} effect={declaration} />}
   </div>;

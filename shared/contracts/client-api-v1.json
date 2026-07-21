@@ -1,0 +1,30 @@
+{
+  "contract": "family-hwatu-client-api",
+  "apiVersion": 1,
+  "compatibilityEndpoint": {
+    "method": "GET",
+    "path": "/api/client/status",
+    "requestHeaders": {
+      "X-Hwatu-Client": {
+        "required": true,
+        "macOSValue": "macos-native"
+      },
+      "X-Hwatu-Client-Version": {
+        "required": true,
+        "type": "positive-integer"
+      }
+    },
+    "responseHeader": {
+      "X-Hwatu-Api-Version": "positive-integer"
+    },
+    "responseData": {
+      "apiVersion": "positive-integer",
+      "minimumMacClientVersion": "positive-integer",
+      "client": "string",
+      "clientVersion": "non-negative-integer",
+      "compatible": "boolean",
+      "authentication": "cookie-csrf",
+      "serverTime": "ISO-8601"
+    }
+  }
+}

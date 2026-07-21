@@ -37,9 +37,10 @@ export default function CreditsPage() {
     <section className="panel-card sound-credit">
       <div><p className="eyebrow">게임 사운드</p><h2>효과음과 배경음</h2></div>
       <div>
-        <p>패 치기·이동·짝 맞춤에는 Freesound의 CC0 녹음 효과음을 사용하고, 기본 배경음은 한국저작권위원회 공유마당의 CC BY 4.0 「국악 배경음악 #133」을 사용합니다. 뻑·자뻑·쪽·따닥·싹쓸이·폭탄·미션·고·스톱·승패 효과는 Web Audio API 합성음을 함께 사용합니다.</p>
-        <p>한국어 선언 음성은 OpenRAIL-M으로 공개된 Supertonic 3 모델의 F2·M1 음색으로 생성한 AI 음성입니다. 모델 제공자는 생성 결과에 권리를 주장하지 않지만 결과 사용에는 OpenRAIL-M의 사용 제한이 적용되며, 음성 파일을 불러오지 못한 경우에만 기기의 한국어 TTS로 대체합니다.</p>
+        <p>패 치기·이동·짝 맞춤에는 Freesound의 CC0 녹음 효과음을 사용합니다. 뻑·자뻑·쪽·따닥·싹쓸이·폭탄·미션·고·스톱·승패를 포함한 특수 효과는 Kenney의 Casino Audio, Impact Sounds, Interface Sounds CC0 음원을 사용합니다. Web Audio API는 파일 재생·음량·압축과 게임 상황에 따른 배경음 재생 속도 조절에만 사용하며 런타임 합성음을 만들지 않습니다.</p>
+        <p>기본 배경음은 한국저작권위원회 공유마당의 CC BY 4.0 「국악 배경음악 #133」을 사용합니다. 한국어 선언 음성은 OpenRAIL-M으로 공개된 Supertonic 3 모델로 생성했으며, 음색별 이름은 F2 사용자, F1 이서윤, F3 한서진, F4 김영숙, M1 이정호, M4 박영수, M5 최동철입니다. 기기의 한국어 TTS는 사용하지 않습니다.</p>
         <p><a href="https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200020&wrtSn=13379716" target="_blank" rel="noreferrer">국악 배경음악 #133 · 공유마당</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a></p>
+        <p><a href="https://kenney.nl/assets/casino-audio" target="_blank" rel="noreferrer">Kenney Casino Audio</a> · <a href="https://kenney.nl/assets/impact-sounds" target="_blank" rel="noreferrer">Impact Sounds</a> · <a href="https://kenney.nl/assets/interface-sounds" target="_blank" rel="noreferrer">Interface Sounds</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0 1.0</a></p>
         <p><a href="https://huggingface.co/Supertone/supertonic-3" target="_blank" rel="noreferrer">Supertonic 3 모델</a> · <a href="https://huggingface.co/Supertone/supertonic-3/blob/main/LICENSE" target="_blank" rel="noreferrer">BigScience OpenRAIL-M</a></p>
         <p>효과음별 제작자·출처는 <a href="/audio/ATTRIBUTION.txt" target="_blank" rel="noreferrer">오디오 자산 고지</a>에서 확인할 수 있습니다.</p>
       </div>

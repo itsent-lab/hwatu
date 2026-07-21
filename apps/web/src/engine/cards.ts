@@ -40,6 +40,7 @@ export const HWATU_CARDS: readonly HwatuCard[] = Object.freeze(DEFINITIONS.map((
 
 export const BONUS_PEE_CARDS: readonly HwatuCard[] = Object.freeze([
   { id: 'bonus-pee-1', month: 0, monthName: '보너스', familyName: '보너스', type: 'doubleJunk', typeLabel: '쌍피', name: '보너스 쌍피', imageKey: 'bonus-pee-1', tags: Object.freeze(['junk', 'double-junk', 'bonus-pee']) },
+  { id: 'bonus-pee-2', month: 0, monthName: '보너스', familyName: '보너스', type: 'doubleJunk', typeLabel: '쌍피', name: '보너스 쌍피', imageKey: 'bonus-pee-2', tags: Object.freeze(['junk', 'double-junk', 'bonus-pee']) },
   { id: 'bonus-double-pee-1', month: 0, monthName: '보너스', familyName: '보너스', type: 'doubleJunk', typeLabel: '삼피', name: '보너스 삼피', imageKey: 'bonus-double-pee-1', tags: Object.freeze(['junk', 'double-junk', 'triple-junk', 'bonus-pee']) }
 ]);
 

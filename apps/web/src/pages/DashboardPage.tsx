@@ -6,6 +6,7 @@ import PointEntryButtons from '../components/PointEntryButtons';
 import { dashboard, refillBalance } from '../lib/api';
 import { savePointValue } from '../lib/gamePreferences';
 import { saveProfile } from '../lib/localStore';
+import { resetMatgoOpponentSession } from '../lib/opponentNames';
 import type { UserProfile } from '../lib/types';
 
 interface DashboardData {
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const [refillError, setRefillError] = useState('');
 
   useEffect(() => {
+    resetMatgoOpponentSession();
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === '1') {
       setData({
         user: { id: 0, username: 'preview', displayName: '어머니', role: 'member', virtualBalance: 136000 },

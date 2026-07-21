@@ -7,6 +7,7 @@ describe('나가리 다음 판 배율', () => {
     const fourTimes = nextRoundMultiplier('nagari', twice);
     const eightTimes = nextRoundMultiplier('nagari', fourTimes);
     expect([twice, fourTimes, eightTimes]).toEqual([2, 4, 8]);
+    expect(nextRoundMultiplier('nagari', eightTimes)).toBe(8);
   });
 
   it('승부가 나면 다음 판은 1배로 초기화한다', () => {

@@ -35,7 +35,9 @@ describe('서비스 정책과 라이선스 페이지', () => {
     const html = renderToStaticMarkup(<MemoryRouter><CreditsPage /></MemoryRouter>);
     expect(html).toContain('개별 SVG 제작·공개');
     expect(html).not.toContain('개별 SVG 추출·최적화');
-    expect(html).toContain('Web Audio API');
+    expect(html).toContain('런타임 합성음을 만들지 않습니다');
+    expect(html).toContain('Kenney Casino Audio');
+    expect(html).toContain('기기의 한국어 TTS는 사용하지 않습니다');
     expect(html).toContain('국악 배경음악 #133');
     expect(html).toContain('CC BY 4.0');
     expect(html).toContain('/audio/ATTRIBUTION.txt');

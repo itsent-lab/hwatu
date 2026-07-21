@@ -23,9 +23,13 @@ export interface GostopSettlementResult {
 
 export interface GostopSettlementRequest {
   gameUuid: string;
-  winner: 'human' | 'computerA' | 'computerB';
+  roundResult?: 'win' | 'nagari';
+  winner: 'human' | 'computerA' | 'computerB' | null;
   finalScore: number;
   pointValue: number;
+  humanPoints?: number;
+  computerAPoints?: number;
+  computerBPoints?: number;
 }
 
 export interface SessionData {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nsj-hwatu-shell-v8';
+const CACHE_NAME = 'nsj-hwatu-shell-v9';
 const HWATU_CARDS = Array.from({ length: 12 }, (_, month) =>
   Array.from({ length: 4 }, (_, card) => `/cards/hwatu/m${String(month + 1).padStart(2, '0')}-${String(card + 1).padStart(2, '0')}.svg`)
 ).flat();

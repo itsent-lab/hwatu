@@ -72,7 +72,6 @@ playwright-report/
 /tmp/
 /uploads/
 *.pid
-apps/web/public/audio/private/*
 
 # Private production deployment configuration
 /deploy/*

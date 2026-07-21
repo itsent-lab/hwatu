@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyBonusPeeCapture, evaluateChongtong, findBombOptions, findShakeOptions, isThreePpeok, stealPeeCards, stealPeeForBonus } from '../engine/rules/specialRules';
+import { applyBonusPeeCapture, evaluateChongtong, findBombOptions, findShakeOptions, isThreePpeok, stealPeeByValue, stealPeeCards, stealPeeForBonus } from '../engine/rules/specialRules';
 
 describe('맞고 특수 규칙', () => {
   it('손패 2장과 바닥 2장으로 두장폭탄을 허용한다', () => {
@@ -10,6 +10,11 @@ describe('맞고 특수 규칙', () => {
   it('손패 3장과 바닥 1장으로 일반 폭탄을 허용한다', () => {
     const options = findBombOptions(['m02-01', 'm02-02', 'm02-03'], ['m02-04']);
     expect(options[0]?.kind).toBe('three-card-bomb');
+  });
+
+  it('손패에 같은 월 4장이 있으면 4장 흔들기·폭탄을 허용한다', () => {
+    const options = findBombOptions(['m02-01', 'm02-02', 'm02-03', 'm02-04'], []);
+    expect(options[0]?.kind).toBe('four-card-bomb');
   });
 
   it('손패 같은 월 3장에 맞는 바닥패가 없으면 흔들기를 허용한다', () => {
@@ -57,6 +62,12 @@ describe('맞고 특수 규칙', () => {
   it('자뻑처럼 피 두 장을 뺏을 때도 낮은 가치의 피부터 순서대로 가져온다', () => {
     const result = stealPeeCards(['bonus-double-pee-1', 'm01-03', 'm02-03'], 2);
     expect(result.stolenCardIds).toEqual(['m01-03', 'm02-03']);
+    expect(result.remaining).toEqual(['bonus-double-pee-1']);
+  });
+
+  it('자뻑의 피 2장 값은 일반 피가 없으면 쌍피나 삼피 한 장만 가져온다', () => {
+    const result = stealPeeByValue(['bonus-double-pee-1', 'm11-02'], 2);
+    expect(result.stolenCardIds).toEqual(['m11-02']);
     expect(result.remaining).toEqual(['bonus-double-pee-1']);
   });
 

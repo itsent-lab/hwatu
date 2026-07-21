@@ -9,10 +9,10 @@ import { calculateSettlement } from './rules/settlement';
 import { capturedMissionCards, createCardMission, missionMultiplierFor } from './rules/missions';
 import type { RoundMultiplier } from './rules/nagari';
 import { DEFAULT_MATGO_RULES, isMatgoPointValue, matgoRulesForPointValue, type MatgoPointValue } from './rules/settings';
-import { evaluateChongtong, findBombOptions, findShakeOptions, isThreePpeok, stealPeeCards } from './rules/specialRules';
+import { evaluateChongtong, findBombOptions, findShakeOptions, isThreePpeok, stealPeeByValue, stealPeeCards } from './rules/specialRules';
 import type { GameState, PlayerId, PpeokPile, TurnResult, TurnSpecialEvent, TurnSpecialKind } from './types';
 
-export { nextRoundMultiplier } from './rules/nagari';
+export { MAX_NAGARI_MULTIPLIER, nextRoundMultiplier } from './rules/nagari';
 
 export const GAME_STATE_VERSION = 3;
 
@@ -60,6 +60,7 @@ export function createInitialGame(
     humanUndoCount: 0,
     humanShakenMonths: [], computerShakenMonths: [],
     humanPendingShakeMonth: null, computerPendingShakeMonth: null,
+    lastDiscardedCardId: null, lastDiscardedBy: null,
     humanGookjinAsDoubleJunk: false, computerGookjinAsDoubleJunk: false,
     chongtongOwner: chongtong.owner,
     chongtongMonth: chongtong.month,
@@ -178,14 +179,29 @@ function stealPee(state: GameState, player: PlayerId, count: number): string[] {
   return result.stolenCardIds;
 }
 
+function stealPeeValue(state: GameState, player: PlayerId, targetValue: number): string[] {
+  const actorKey = player === 'human' ? 'humanCaptured' : 'computerCaptured';
+  const opponentKey = player === 'human' ? 'computerCaptured' : 'humanCaptured';
+  const result = stealPeeByValue(state[opponentKey], targetValue);
+  state[opponentKey] = result.remaining;
+  state[actorKey].push(...result.stolenCardIds);
+  return result.stolenCardIds;
+}
+
 function makeSpecialEvent(state: GameState, player: PlayerId, kind: TurnSpecialKind, label: string, stealCount: number): TurnSpecialEvent {
   return { kind, label, stolenPee: stealPee(state, player, stealCount) };
 }
 
-function ppeokCaptureEvent(state: GameState, player: PlayerId, pile: PpeokPile | null): TurnSpecialEvent | null {
+function ppeokCaptureEvent(state: GameState, player: PlayerId, pile: PpeokPile | null, isLastHandCard = false): TurnSpecialEvent | null {
   if (!pile) return null;
   const isSelfPpeok = pile.owner === player;
-  return makeSpecialEvent(state, player, isSelfPpeok ? 'self-ppeok' : 'ppeok-capture', isSelfPpeok ? '자뻑' : '싼 패 먹기', isSelfPpeok ? 2 : 1);
+  return {
+    kind: isSelfPpeok ? 'self-ppeok' : 'ppeok-capture',
+    label: isSelfPpeok ? '자뻑' : '싼 패 먹기',
+    stolenPee: isSelfPpeok
+      ? stealPeeValue(state, player, 2)
+      : isLastHandCard ? [] : stealPee(state, player, 1)
+  };
 }
 
 function missionOutcome(state: GameState, player: PlayerId, capturedCardIds: string[]) {
@@ -248,6 +264,7 @@ function finishThreePpeok(state: GameState, player: PlayerId) {
   state.roundResult = 'win';
   state.settlement = calculateSettlement({
     winnerScore, loserScore, winnerGoCount: 0,
+    loserCapturedCount: state[keysFor(otherPlayer(player)).captured].length,
     settings: matgoRulesForPointValue(state.pointValue),
     roundMultiplier: state.roundMultiplier,
     suppressMultipliers: true,
@@ -266,7 +283,7 @@ function finishScoredRound(state: GameState, player: PlayerId, message: string) 
     winnerShakeCount: state[winnerKeys.shake] ?? 0,
     winnerMissionMultiplier: missionMultiplierFor(state.mission, state.humanCaptured, state.computerCaptured, player),
     loserGoCount: state[loserKeys.go],
-    loserScoreAtLastGo: state[loserKeys.lastGo],
+    loserCapturedCount: state[loserKeys.captured].length,
     settings: matgoRulesForPointValue(state.pointValue),
     roundMultiplier: state.roundMultiplier
   });
@@ -355,8 +372,8 @@ export function playTurn(state: GameState, player: PlayerId, cardId: string, opt
   } else {
     const played = captureOrPlace(next, cardId, keys.captured, options.playedMatchId);
     const drawn = drawnCardId ? captureOrPlace(next, drawnCardId, keys.captured, options.drawnMatchId) : null;
-    const playedPpeok = ppeokCaptureEvent(next, player, played.ppeokPile);
-    const drawnPpeok = ppeokCaptureEvent(next, player, drawn?.ppeokPile ?? null);
+    const playedPpeok = ppeokCaptureEvent(next, player, played.ppeokPile, isLastHandCard);
+    const drawnPpeok = ppeokCaptureEvent(next, player, drawn?.ppeokPile ?? null, isLastHandCard);
     if (playedPpeok) specialEvents.push(playedPpeok);
     if (drawnPpeok) specialEvents.push(drawnPpeok);
 
@@ -388,6 +405,10 @@ export function playTurn(state: GameState, player: PlayerId, cardId: string, opt
   const mission = missionOutcome(next, player, captured);
   actionMessage += missionMessage(mission);
 
+  const leftDiscardOnFloor = initialMatches.length === 0 && next.floorCards.includes(cardId);
+  next.lastDiscardedCardId = leftDiscardOnFloor ? cardId : null;
+  next.lastDiscardedBy = leftDiscardOnFloor ? player : null;
+
   advanceAfterAction(next, player, actionMessage);
 
   return {
@@ -407,15 +428,24 @@ export function playBomb(state: GameState, player: PlayerId, month: number): Tur
   if (!option) throw new Error('선택한 월에는 사용할 수 있는 폭탄이 없습니다.');
   const next = structuredClone(state);
   const emptiesHand = next[keys.hand].length === option.handCardIds.length;
-  next[keys.shake] = (next[keys.shake] ?? 0) + 1;
+  const isFourCardBomb = option.kind === 'four-card-bomb';
+  const alreadyShaken = (next[keys.shakenMonths] ?? []).includes(month);
+  const isNuclearBomb = option.kind === 'three-card-bomb'
+    && state.lastDiscardedBy === otherPlayer(player)
+    && Boolean(state.lastDiscardedCardId && option.floorCardIds.includes(state.lastDiscardedCardId));
+  next[keys.shake] = (next[keys.shake] ?? 0) + (isFourCardBomb && !alreadyShaken ? 2 : 1);
+  if (isFourCardBomb && !alreadyShaken) next[keys.shakenMonths] = [...(next[keys.shakenMonths] ?? []), month];
   next[keys.bombCount] = (next[keys.bombCount] ?? 0) + 1;
+  next.lastDiscardedCardId = null;
+  next.lastDiscardedBy = null;
   const handSet = new Set(option.handCardIds);
   const floorSet = new Set(option.floorCardIds);
   next[keys.hand] = next[keys.hand].filter(id => !handSet.has(id));
   next[keys.bombSkips] = (next[keys.bombSkips] ?? 0) + option.handCardIds.length - 1;
   next.floorCards = next.floorCards.filter(id => !floorSet.has(id));
   next[keys.captured].push(...option.handCardIds, ...option.floorCardIds);
-  const specialEvents: TurnSpecialEvent[] = [makeSpecialEvent(next, player, 'bomb', option.kind === 'two-card-bomb' ? '두장폭탄' : '폭탄', 1)];
+  const bombLabel = isNuclearBomb ? '핵폭탄' : option.kind === 'two-card-bomb' ? '두장폭탄' : isFourCardBomb ? '4장 흔들기·폭탄' : '폭탄';
+  const specialEvents: TurnSpecialEvent[] = [makeSpecialEvent(next, player, 'bomb', bombLabel, isNuclearBomb ? 2 : 1)];
   const bonusDraw = drawThroughBonusPee(next, player);
   const drawnCardId = bonusDraw.drawnCardId;
   const drawn = drawnCardId ? captureOrPlace(next, drawnCardId, keys.captured) : null;
@@ -427,7 +457,7 @@ export function playBomb(state: GameState, player: PlayerId, month: number): Tur
   const mission = missionOutcome(next, player, captured);
   const bonusMessage = bonusDraw.bonusCards.length ? ` 보너스패 ${bonusDraw.bonusCards.length}장을 얻었습니다.` : '';
   const stolenMessage = specialStolenPee.length ? ` 상대 피 ${specialStolenPee.length}장을 가져왔습니다.` : '';
-  advanceAfterAction(next, player, `${month}월 ${option.kind === 'two-card-bomb' ? '두장폭탄' : '폭탄'}을 사용했습니다.${stolenMessage}${bonusMessage}${drawn ? ` 뒤집은 패로 ${drawn.message}` : ''}${missionMessage(mission)}`);
+  advanceAfterAction(next, player, `${month}월 ${bombLabel}을 사용했습니다.${stolenMessage}${bonusMessage}${drawn ? ` 뒤집은 패로 ${drawn.message}` : ''}${missionMessage(mission)}`);
   return {
     state: next, playedCardId: option.handCardIds[0], drawnCardId, captured, ppeok: false,
     bonusCards: bonusDraw.bonusCards,
@@ -444,6 +474,8 @@ export function playFlipOnlyTurn(state: GameState, player: PlayerId, drawnMatchI
   if ((state[keys.bombSkips] ?? 0) <= 0) throw new Error('폭탄으로 비워 둔 차례가 없습니다.');
   if (state[keys.pendingShake]) throw new Error('흔들기를 선언한 패 중 한 장을 먼저 내야 합니다.');
   const next = structuredClone(state);
+  next.lastDiscardedCardId = null;
+  next.lastDiscardedBy = null;
   next[keys.bombSkips] = (next[keys.bombSkips] ?? 0) - 1;
   const bonusDraw = drawThroughBonusPee(next, player);
   const drawnCardId = bonusDraw.drawnCardId;
@@ -511,6 +543,7 @@ export function chooseChongtong(state: GameState, player: PlayerId, decision: 'c
     winnerScore: scoreFor(next, player),
     loserScore: scoreFor(next, otherPlayer(player)),
     winnerGoCount: 0,
+    loserCapturedCount: next[keysFor(otherPlayer(player)).captured].length,
     settings: matgoRulesForPointValue(next.pointValue),
     roundMultiplier: next.roundMultiplier,
     forcedBaseScore: DEFAULT_MATGO_RULES.targetScore,

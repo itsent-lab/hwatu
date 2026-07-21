@@ -1,8 +1,9 @@
 import HwatuCard from './HwatuCard';
+import type { BombOption } from '../engine/rules/specialRules';
 
 interface BombDecisionPanelProps {
   month: number;
-  kind: 'two-card-bomb' | 'three-card-bomb';
+  kind: BombOption['kind'];
   handCardIds: string[];
   floorCardIds: string[];
   selectedCardId: string;
@@ -19,7 +20,9 @@ export default function BombDecisionPanel({
   disabled = false,
   onDecision
 }: BombDecisionPanelProps) {
-  const label = kind === 'two-card-bomb' ? '두장폭탄' : '폭탄';
+  const isFourCardBomb = kind === 'four-card-bomb';
+  const label = kind === 'two-card-bomb' ? '두장폭탄' : isFourCardBomb ? '4장 흔들기·폭탄' : '폭탄';
+  const multiplier = isFourCardBomb ? 4 : 2;
 
   return <div className="shake-choice-overlay bomb-choice-overlay">
     <section className="shake-choice-panel bomb-choice-panel" role="dialog" aria-modal="true" aria-labelledby="bomb-choice-title">
@@ -33,10 +36,10 @@ export default function BombDecisionPanel({
           {floorCardIds.map(cardId => <span key={cardId}><HwatuCard cardId={cardId} /></span>)}
         </div></div>
       </div>
-      <p className="shake-choice-guide">폭탄으로 내면 같은 월 패를 한꺼번에 먹고 이번 판 점수가 <b>2배</b>가 됩니다.</p>
+      <p className="shake-choice-guide">{isFourCardBomb ? '같은 월 네 장을 공개하고 한꺼번에 내면 흔들기와 폭탄이 함께 적용됩니다.' : '폭탄으로 내면 같은 월 패를 한꺼번에 먹습니다.'} 이번 판 점수가 <b>{multiplier}배</b>가 됩니다.</p>
       <div className="shake-choice-buttons">
         <button className="bomb-confirm-button" type="button" disabled={disabled} onClick={() => onDecision('bomb')}>
-          <span>한꺼번에 먹기</span><strong>{label}!</strong><small>같은 월 패 모두 획득 · 점수 ×2</small>
+          <span>한꺼번에 먹기</span><strong>{label}!</strong><small>같은 월 패 모두 획득 · 점수 ×{multiplier}</small>
         </button>
         <button className="shake-plain-button" type="button" disabled={disabled} onClick={() => onDecision('plain')}>
           <span>그대로 진행</span><strong>그냥 내기</strong><small>선택한 패 한 장만 냅니다</small>

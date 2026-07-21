@@ -8,6 +8,7 @@ import { DEFAULT_GOSTOP_COMPUTER_BALANCE } from '../games/gostop/money';
 import { loadPendingGostopSettlements, removePendingGostopSettlement } from '../games/gostop/pendingSettlement';
 import type { GostopPointValue } from '../games/gostop/settings';
 import { dashboard, refillBalance, settleGostopRound } from '../lib/api';
+import { resetGostopOpponentSession } from '../lib/computerPlayers';
 import { saveGostopPointValue } from '../lib/gamePreferences';
 import { saveProfile } from '../lib/localStore';
 import type { UserProfile } from '../lib/types';
@@ -19,6 +20,7 @@ export default function GostopLobbyPage() {
   const [refillError, setRefillError] = useState('');
 
   useEffect(() => {
+    resetGostopOpponentSession();
     if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === '1') {
       setUser({ id: 0, username: 'preview', displayName: '어머니', role: 'member', virtualBalance: 136000 });
       return;

@@ -1,4 +1,4 @@
-FamilyHwatu audio asset attribution
+Hwatu audio asset attribution
 Acquired: 2026-07-21
 
 1. gugak-bgm-133.mp3
@@ -8,7 +8,8 @@ Acquired: 2026-07-21
    Source: https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200020&wrtSn=13379716
    License: Creative Commons Attribution 4.0 International (CC BY 4.0)
    License: https://creativecommons.org/licenses/by/4.0/
-   Changes: Audio content unchanged; local filename only.
+   Changes: Audio file content unchanged; local filename only. During gameplay,
+   Web Audio adjusts playback rate and gain according to the game situation.
 
 2. card-deal.mp3
    Title: Playing Card Deal Variation 3
@@ -43,9 +44,9 @@ Acquired: 2026-07-21
    Included file: Freesound high-quality MP3 preview; local filename changed.
 
 6. voices/*.wav
-   Content: Korean game declaration voice set (37 clips)
+   Content: Korean game declaration voice set (99 clips)
    Generated with: Supertonic 3, supertonic Python package 1.3.1
-   Preset voices: F2 and M1
+   Preset voices: F1, F2, F3, F4, M1, M4, and M5
    Model provider: Supertone Inc.
    Source code: https://github.com/supertone-inc/supertonic
    Model: https://huggingface.co/Supertone/supertonic-3
@@ -56,10 +57,73 @@ Acquired: 2026-07-21
    states that the model licensor claims no rights in generated output. Output
    use must still comply with the license use restrictions, including clear
    disclosure that the content is machine generated.
-   Changes: Generated for FamilyHwatu, silence-trimmed, and peak-normalized.
+   Changes: Generated for Hwatu, silence-trimmed, and peak-normalized.
    File-by-file text, voice, size, and SHA-256:
    /audio/voices/verification.json
 
+7. effects/*.wav — Kenney Casino Audio 1.1
+   Creator: Kenney Vleugels (Kenney.nl)
+   Source: https://kenney.nl/assets/casino-audio
+   License: CC0 1.0 Universal
+   License: https://creativecommons.org/publicdomain/zero/1.0/
+   Local file <- original file:
+   bonus-two.wav <- Audio/chips-stack-2.ogg
+   bonus-three.wav <- Audio/chips-stack-6.ogg
+   pee-transfer-two.wav <- Audio/chips-handle-3.ogg
+   pee-transfer-three.wav <- Audio/chips-handle-6.ogg
+   shake.wav <- Audio/dice-shake-2.ogg
+   ttadak.wav <- Audio/card-shuffle.ogg
+   sweep.wav <- Audio/card-fan-2.ogg
+   deal.wav <- Audio/card-fan-1.ogg
+   money-win.wav <- Audio/chips-collide-4.ogg
+
+8. effects/*.wav — Kenney Impact Sounds 1.0
+   Creator: Kenney (Kenney.nl)
+   Source: https://kenney.nl/assets/impact-sounds
+   License: CC0 1.0 Universal
+   License: https://creativecommons.org/publicdomain/zero/1.0/
+   Local file <- original file:
+   ppeok.wav <- Audio/impactWood_heavy_001.ogg
+   double-ppeok.wav <- Audio/impactWood_heavy_003.ogg
+   triple-ppeok.wav <- Audio/impactPunch_heavy_004.ogg
+   bomb.wav <- Audio/impactPunch_heavy_000.ogg
+   jjok.wav <- Audio/impactPlate_light_002.ogg
+   ppeok-capture.wav <- Audio/impactMetal_medium_003.ogg
+   self-ppeok.wav <- Audio/impactBell_heavy_001.ogg
+   chongtong.wav <- Audio/impactBell_heavy_004.ogg
+
+9. effects/*.wav — Kenney Interface Sounds 1.0
+   Creator: Kenney (Kenney.nl)
+   Source: https://kenney.nl/assets/interface-sounds
+   License: CC0 1.0 Universal
+   License: https://creativecommons.org/publicdomain/zero/1.0/
+   Local file <- original file:
+   mission.wav <- Audio/confirmation_002.ogg
+   score.wav <- Audio/confirmation_004.ogg
+   go.wav <- Audio/confirmation_001.ogg
+   go-high.wav <- Audio/maximize_006.ogg
+   stop.wav <- Audio/close_004.ogg
+   win.wav <- Audio/maximize_005.ogg
+   lose.wav <- Audio/minimize_005.ogg
+   nagari.wav <- Audio/question_004.ogg
+   money-lose.wav <- Audio/error_007.ogg
+   start.wav <- Audio/open_004.ogg
+   decision.wav <- Audio/question_001.ogg
+   select.wav <- Audio/select_006.ogg
+   cancel.wav <- Audio/back_002.ogg
+   undo.wav <- Audio/back_004.ogg
+   gookjin-double.wav <- Audio/switch_005.ogg
+   gookjin-animal.wav <- Audio/switch_002.ogg
+   autoplay-on.wav <- Audio/toggle_001.ogg
+   autoplay-off.wav <- Audio/toggle_004.ogg
+   dealer-human.wav <- Audio/confirmation_003.ogg
+   dealer-opponent.wav <- Audio/minimize_003.ogg
+
+   Changes for all Kenney effect files: decoded from the distributed OGG Vorbis
+   file, saved as 44.1 kHz PCM-16 WAV for browser compatibility, and renamed.
+   No additional creative edit was applied. File sizes and SHA-256 values are in
+   /audio/effects/verification.json.
+
 These files remain subject to their licenses and are not relicensed under the
-FamilyHwatu MIT License. See the source pages, verification.json, and
+Hwatu MIT License. See the source pages, verification.json, and
 THIRD_PARTY_NOTICES.md.

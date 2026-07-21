@@ -97,14 +97,22 @@ public static class GameEndpoints
             !result.TryGetProperty("pointValue", out var pointValueElement) ||
             !pointValueElement.TryGetInt32(out var pointValue) || !MatgoPointValues.Contains(pointValue) ||
             !result.TryGetProperty("displayAmount", out var amountElement) ||
-            !amountElement.TryGetInt64(out var amount) || amount <= 0 || amount > MaxSettlementAmount ||
-            amount != (long)finalScore * pointValue)
+            !amountElement.TryGetInt64(out var amount) || amount < 0 || amount > MaxSettlementAmount)
         {
             return false;
         }
 
         var winnerName = winner.GetString();
         if (winnerName is not ("human" or "computer")) return false;
+        var loserCapturedProperty = winnerName == "human" ? "computerCaptured" : "humanCaptured";
+        if (!state.TryGetProperty(loserCapturedProperty, out var loserCaptured) || loserCaptured.ValueKind != JsonValueKind.Array)
+            return false;
+        var loserCapturedNothing = loserCaptured.GetArrayLength() == 0;
+        var paymentExempt = result.TryGetProperty("paymentExempt", out var exemptElement)
+            && exemptElement.ValueKind == JsonValueKind.True;
+        var expectedAmount = paymentExempt ? 0 : (long)finalScore * pointValue;
+        if (paymentExempt != loserCapturedNothing || amount != expectedAmount) return false;
+
         settlement = new MatgoSettlement(
             winnerName == "human" ? "win" : "loss",
             finalScore,

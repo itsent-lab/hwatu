@@ -84,8 +84,8 @@ public sealed class UserRepository(HwatuDb database)
         string displayName,
         string passwordHash)
     {
-        const string acquireLockSql = "SELECT GET_LOCK(CONCAT(DATABASE(), ':family-hwatu-bootstrap'), 5)";
-        const string releaseLockSql = "SELECT RELEASE_LOCK(CONCAT(DATABASE(), ':family-hwatu-bootstrap'))";
+        const string acquireLockSql = "SELECT GET_LOCK(CONCAT(DATABASE(), ':hwatu-bootstrap'), 5)";
+        const string releaseLockSql = "SELECT RELEASE_LOCK(CONCAT(DATABASE(), ':hwatu-bootstrap'))";
         const string insertSql = """
             INSERT INTO users
                 (username, display_name, password_hash, role, virtual_balance, opponent_balance)

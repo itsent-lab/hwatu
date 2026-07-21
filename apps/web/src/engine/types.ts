@@ -76,6 +76,8 @@ export interface GameState {
   computerShakenMonths?: number[];
   humanPendingShakeMonth?: number | null;
   computerPendingShakeMonth?: number | null;
+  lastDiscardedCardId?: string | null;
+  lastDiscardedBy?: PlayerId | null;
   humanGookjinAsDoubleJunk: boolean;
   computerGookjinAsDoubleJunk: boolean;
   chongtongOwner: PlayerId | null;

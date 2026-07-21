@@ -25,7 +25,7 @@ const parameters = new URLSearchParams({
   formatversion: '2'
 });
 const apiUrl = `https://commons.wikimedia.org/w/api.php?${parameters}`;
-const userAgent = 'NSJ-FamilyHwatu/1.0 (asset verifier; itsent@itsent.co.kr; https://github.com/itsent-lab/hwatu)';
+const userAgent = 'NSJ-Hwatu/1.0 (asset verifier; itsent@itsent.co.kr; https://github.com/itsent-lab/hwatu)';
 const pause = milliseconds => new Promise(resolvePromise => setTimeout(resolvePromise, milliseconds));
 const fetchWithRetry = async url => {
   for (let attempt = 1; attempt <= 5; attempt += 1) {

@@ -1,17 +1,46 @@
-const OPPONENT_NAMES = [
-  '김영숙', '이정희', '박순자', '최경자', '정미자', '강영희',
-  '조옥순', '윤정자', '장명숙', '임순희', '한정숙', '오경희',
-  '서미숙', '신영자', '권순옥', '황정희', '안영숙', '송미자',
-  '김영수', '이정호', '박성호', '최상철', '정영일', '강태수',
-  '조경수', '윤재호', '장성민', '임동수', '한기철', '오상호',
-  '서정식', '신광수', '권영호', '황병철', '안재수', '송정남'
-] as const;
+import { useRef } from 'react';
+import type { VoiceActor } from './audio';
+import { MATGO_OPPONENTS } from './computerPlayers';
+const MATGO_OPPONENT_SESSION_KEY = 'hwatu.matgo.opponent-session';
 
-export function opponentNameForGame(gameUuid: string): string {
+export interface MatgoOpponentProfile {
+  name: string;
+  voiceActor: VoiceActor;
+}
+
+export function opponentProfileForSession(sessionId: string): MatgoOpponentProfile {
   let hash = 0x811c9dc5;
-  for (const character of gameUuid) {
+  for (const character of sessionId) {
     hash ^= character.charCodeAt(0);
     hash = Math.imul(hash, 0x01000193);
   }
-  return OPPONENT_NAMES[(hash >>> 0) % OPPONENT_NAMES.length];
+  return MATGO_OPPONENTS[(hash >>> 0) % MATGO_OPPONENTS.length];
+}
+
+export function opponentNameForGame(gameUuid: string): string {
+  return opponentProfileForSession(gameUuid).name;
+}
+
+export function getMatgoOpponentSessionId(): string {
+  try {
+    const stored = window.sessionStorage.getItem(MATGO_OPPONENT_SESSION_KEY);
+    if (stored) return stored;
+    const created = crypto.randomUUID();
+    window.sessionStorage.setItem(MATGO_OPPONENT_SESSION_KEY, created);
+    return created;
+  }
+  catch {
+    return crypto.randomUUID();
+  }
+}
+
+export function resetMatgoOpponentSession() {
+  try { window.sessionStorage.removeItem(MATGO_OPPONENT_SESSION_KEY); }
+  catch { /* 저장소를 사용할 수 없으면 현재 화면 생명주기만 사용 */ }
+}
+
+export function useMatgoOpponent(): MatgoOpponentProfile {
+  const opponentRef = useRef<MatgoOpponentProfile | null>(null);
+  opponentRef.current ??= opponentProfileForSession(getMatgoOpponentSessionId());
+  return opponentRef.current;
 }

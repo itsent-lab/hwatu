@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { settleGostopBalances } from '../games/gostop/money';
+import { settleGostopBalances, settleGostopPointDeltas } from '../games/gostop/money';
 
 describe('고스톱 게임머니 정산', () => {
   it('내가 이기면 두 컴퓨터에게서 각각 정산받는다', () => {
@@ -32,5 +32,13 @@ describe('고스톱 게임머니 정산', () => {
       computerA: 10_000,
       computerB: 1
     });
+  });
+
+  it('피박과 독박이 반영된 플레이어별 점수 증감을 정산한다', () => {
+    expect(settleGostopPointDeltas(
+      { human: 500_000, computerA: 500_000, computerB: 500_000 },
+      { human: 25, computerA: -20, computerB: -5 },
+      1_000
+    )).toEqual({ human: 525_000, computerA: 480_000, computerB: 495_000 });
   });
 });

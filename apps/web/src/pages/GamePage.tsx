@@ -39,7 +39,7 @@ import { normalizeMatgoPointValue, type MatgoPointValue } from '../engine/rules/
 import { findBombOptions, findShakeOptions, type BombOption } from '../engine/rules/specialRules';
 import type { GameState, TurnResult, TurnSpecialEvent } from '../engine/types';
 import { loadMatgoServerGame, saveMatgoServerGame, session } from '../lib/api';
-import { applyAudioSettings, pauseGameAudio, playBombSound, playBonusPeeSound, playCaptureSound, playCardSound, playFlipSound, playGoSound, playLoseSound, playMissionSound, playMoneySound, playNagariSound, playPeeTransferSound, playPpeokSound, playScoreSound, playShakeSound, playSpecialMoveSound, playStartSound, playStopSound, playWinSound, unlockAudio } from '../lib/audio';
+import { applyAudioSettings, pauseGameAudio, playAutoPlaySound, playBombSound, playBonusPeeSound, playCancelSound, playCaptureSound, playCardSound, playChongtongSound, playDealerResultSound, playDealSound, playDecisionSound, playFlipSound, playGoSound, playGookjinSound, playLoseSound, playMissionSound, playMoneySound, playNagariSound, playPeeTransferSound, playPpeokSound, playScoreSound, playSelectSound, playShakeSound, playSpecialMoveSound, playStartSound, playStopSound, playUndoSound, playWinSound, unlockAudio, type VoiceActor } from '../lib/audio';
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from '../lib/audioSettings';
 import { animateCapturedCardTransfers, animateCardFlight } from '../lib/effects';
 import { loadAiDifficulty, loadDiscardConfirmation, loadPointValue, saveAiDifficulty, saveDiscardConfirmation, savePointValue } from '../lib/gamePreferences';
@@ -47,30 +47,21 @@ import { chooseLatestGame, shouldResumeSavedGame } from '../lib/gameResume';
 import { useGameViewportFit } from '../lib/gameViewport';
 import { remainingTurnUndos, useTurnUndo } from '../lib/useTurnUndo';
 import { useProfileImageUpload } from '../lib/useProfileImageUpload';
-import { opponentNameForGame } from '../lib/opponentNames';
+import { useMatgoOpponent } from '../lib/opponentNames';
 import { handCardIndexFromKey, isTextEntryTarget } from '../lib/gameShortcuts';
 import { loadLocalGame, loadProfile, saveLocalGame, saveProfile } from '../lib/localStore';
-import { describePeeTransfer, summarizePeeTransfer } from '../lib/peeEffects';
+import { bonusPeeBurst, describePeeTransfer, summarizePeeTransfer } from '../lib/peeEffects';
 import { getPpeokDeclaration } from '../lib/ppeokEffects';
 import { getScoreCelebration, getScoreHeadline, getSettlementCelebration } from '../lib/scoreEffects';
 import type { SessionData, UserProfile } from '../lib/types';
 
 const ROUND_RESULT_REVEAL_DELAY_MS = 2200;
 
-function bonusPeeBurst(cardIds: string[]) {
-  const values = cardIds.map(cardId => getCard(cardId)?.tags.includes('triple-junk') ? 3 : 2);
-  const strongest = values.includes(3) ? 3 : 2;
-  return {
-    kind: strongest === 3 ? 'triple-pee' as const : 'double-pee' as const,
-    strongest: strongest as 2 | 3,
-    totalValue: values.reduce((total, value) => total + value, 0)
-  };
-}
-
 export default function GamePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const viewportFit = useGameViewportFit();
+  const { name: opponentName, voiceActor: opponentVoiceActor } = useMatgoOpponent();
   const [game, setGame] = useState<GameState | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [onlineSession, setOnlineSession] = useState<SessionData | null>(null);
@@ -132,13 +123,13 @@ export default function GamePage() {
 
   const showDealAnimation = () => {
     if (dealTimerRef.current !== null) window.clearTimeout(dealTimerRef.current);
-    setDealing(true);
+    playDealSound(); setDealing(true);
     dealTimerRef.current = window.setTimeout(() => {
       setDealing(false);
     }, 1700);
   };
 
-  const announceBonus = (result: TurnResult, opponent = false, delay = 0) => {
+  const announceBonus = (result: TurnResult, opponent: false | VoiceActor = false, delay = 0) => {
     const count = result.bonusCards?.length ?? 0;
     if (!count) return false;
     const burst = bonusPeeBurst(result.bonusCards ?? []);
@@ -154,7 +145,7 @@ export default function GamePage() {
     return true;
   };
 
-  const announceSpecialCapture = (result: TurnResult, opponent = false, delay = 0) => {
+  const announceSpecialCapture = (result: TurnResult, opponent: false | VoiceActor = false, delay = 0) => {
     const candidates = (result.specialEvents ?? []).filter(event => event.kind !== 'ppeok' && event.kind !== 'bomb') as Array<TurnSpecialEvent & {
       kind: 'jjok' | 'ttadak' | 'sweep' | 'ppeok-capture' | 'self-ppeok';
     }>;
@@ -164,7 +155,7 @@ export default function GamePage() {
     const secondary = candidates.filter(event => event !== primary).map(event => event.label);
     const stolenPee = candidates.flatMap(event => event.stolenPee);
     const transfer = summarizePeeTransfer(stolenPee);
-    const detail = [secondary.length ? `${secondary.join(' · ')}까지` : '', describePeeTransfer(stolenPee, opponent), result.missionCards?.length ? `미션 ×${result.missionMultiplier ?? 1}` : '']
+    const detail = [secondary.length ? `${secondary.join(' · ')}까지` : '', describePeeTransfer(stolenPee, Boolean(opponent)), result.missionCards?.length ? `미션 ×${result.missionMultiplier ?? 1}` : '']
       .filter(Boolean).join(' · ');
     const show = () => {
       playSpecialMoveSound(primary.kind, opponent);
@@ -179,7 +170,7 @@ export default function GamePage() {
     return true;
   };
 
-  const announceMission = (result: TurnResult, opponent = false, delay = 0) => {
+  const announceMission = (result: TurnResult, opponent: false | VoiceActor = false, delay = 0) => {
     const count = result.missionCards?.length ?? 0;
     if (!count) return false;
     const multiplier = result.missionMultiplier ?? 1;
@@ -225,14 +216,13 @@ export default function GamePage() {
     }
     catch { /* 로컬 저장으로 계속 */ }
   };
-
   const undoLastTurn = async () => {
     if (!game || !profile || busy || dealing || floorCardChoice || bombChoice || shakeChoice) return;
     const restored = turnUndo.restore(game);
     if (!restored) return;
     if (aiTimerRef.current !== null) window.clearTimeout(aiTimerRef.current);
     setAiThinking(null); setAutoPlay(false); setGookjinChoiceOpen(false); setStakeSelectorOpen(false);
-    setDeclaration(null); setGame(restored); setBusy(true);
+    playUndoSound(); setDeclaration(null); setGame(restored); setBusy(true);
     try { await persist(restored, profile, onlineSession); }
     finally { setBusy(false); }
   };
@@ -291,7 +281,7 @@ export default function GamePage() {
       if (!choice.move) { setBusy(false); return; }
       if (choice.move.kind === 'shake') {
         const next = declareShake(working, 'computer', choice.move.month);
-        playShakeSound(true);
+        playShakeSound(opponentVoiceActor);
         showDeclaration('shake', '흔들기!', `상대가 ${choice.move.month}월 세 장을 공개했습니다.`, 1100);
         setGame(next); await persist(next, profile, onlineSession); setBusy(false);
         return;
@@ -307,11 +297,12 @@ export default function GamePage() {
         const flightTarget = bonusMove ? document.querySelector('.opponent-rack') : floorRef.current;
         await animateCardFlight(source ?? null, flightTarget, 6, 360);
         if (choice.move.kind === 'bomb') {
-          playBombSound(true);
+          playBombSound(opponentVoiceActor);
           result = playBomb(working, 'computer', choice.move.month);
-          const bombStolen = result.specialEvents?.find(event => event.kind === 'bomb')?.stolenPee ?? [];
+          const bombEvent = result.specialEvents?.find(event => event.kind === 'bomb');
+          const bombStolen = bombEvent?.stolenPee ?? [];
           const mission = result.missionCards?.length ? ` · 미션 ×${result.missionMultiplier ?? 1}` : '';
-          showDeclaration('bomb', '폭탄!', `상대가 패를 한꺼번에 냈습니다.${bombStolen.length ? ` · ${describePeeTransfer(bombStolen, true)}` : ''}${mission}`, 1100);
+          showDeclaration('bomb', `${bombEvent?.label ?? '폭탄'}!`, `상대가 패를 한꺼번에 냈습니다.${bombStolen.length ? ` · ${describePeeTransfer(bombStolen, true)}` : ''}${mission}`, 1100);
         } else {
           playCardSound();
           result = playTurn(working, 'computer', choice.move.cardId, { playedMatchId: choice.move.playedMatchId });
@@ -321,24 +312,24 @@ export default function GamePage() {
       await animateCapturedCardTransfers(result.stolenPee ?? [], document.querySelector('.human-rack'), document.querySelector('.opponent-rack'));
       setGame(result.state);
       if (result.drawnCardId && choice.move.kind !== 'flip-only') window.setTimeout(playFlipSound, 100);
-      const showedBonus = announceBonus(result, true, choice.move.kind === 'bomb' ? 620 : 0);
+      const showedBonus = announceBonus(result, opponentVoiceActor, choice.move.kind === 'bomb' ? 620 : 0);
       const scoreEffect = getScoreCelebration(working, result.state, 'computer');
       if (result.ppeok) {
         window.setTimeout(() => {
           const effect = getPpeokDeclaration(result.state.computerPpeokCount);
-          playPpeokSound(true, effect.count);
+          playPpeokSound(opponentVoiceActor, effect.count);
           showDeclaration(effect.kind, effect.text, effect.detail, effect.duration);
         }, showedBonus ? 1120 : 190);
-      } else if (announceSpecialCapture(result, true, showedBonus ? (choice.move.kind === 'bomb' ? 1720 : 1120) : choice.move.kind === 'bomb' ? 1180 : 190)) {
+      } else if (announceSpecialCapture(result, opponentVoiceActor, showedBonus ? (choice.move.kind === 'bomb' ? 1720 : 1120) : choice.move.kind === 'bomb' ? 1180 : 190)) {
         // 특수 패 선언이 일반 짝 효과를 대신합니다.
-      } else if (!showedBonus && choice.move.kind !== 'bomb' && announceMission(result, true, 190)) {
+      } else if (!showedBonus && choice.move.kind !== 'bomb' && announceMission(result, opponentVoiceActor, 190)) {
         // 미션 성공 선언이 일반 짝 효과를 대신합니다.
       } else if (result.captured.length && choice.move.kind !== 'bomb' && !showedBonus) {
         if (scoreEffect) {
-          window.setTimeout(() => playScoreSound(scoreEffect.label, scoreEffect.score, true), 190);
+          window.setTimeout(() => playScoreSound(scoreEffect.label, scoreEffect.score, opponentVoiceActor), 190);
           showDeclaration('score', `${scoreEffect.label}!`, `+${scoreEffect.points}점 · 현재 ${scoreEffect.score}점`, 1250);
         } else {
-          window.setTimeout(() => playCaptureSound(true), 190);
+          window.setTimeout(() => playCaptureSound(opponentVoiceActor), 190);
           showDeclaration('capture', '짝!', `${result.captured.length}장을 먹었습니다.`, 620);
         }
       }
@@ -360,9 +351,10 @@ export default function GamePage() {
       if (drawChoice) {
         if (autoChooseDraw) drawnMatchId = chooseAiFloorMatch(drawChoice.candidateIds, game.computerCaptured);
         else {
-          drawnMatchId = await new Promise<string>(resolve => {
-            drawChoiceResolverRef.current = resolve;
-            setFloorCardChoice({ playedCardId: drawChoice.drawnCardId, candidateIds: drawChoice.candidateIds, source: 'draw' });
+        drawnMatchId = await new Promise<string>(resolve => {
+          drawChoiceResolverRef.current = resolve;
+          playDecisionSound();
+          setFloorCardChoice({ playedCardId: drawChoice.drawnCardId, candidateIds: drawChoice.candidateIds, source: 'draw' });
           });
           drawChoiceResolverRef.current = null;
         }
@@ -370,7 +362,7 @@ export default function GamePage() {
       const result = playFlipOnlyTurn(game, 'human', drawnMatchId);
       await animateCapturedCardTransfers(result.stolenPee ?? [], document.querySelector('.opponent-rack'), document.querySelector('.human-rack'));
       setGame(result.state);
-      if (!game.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) setGookjinChoiceOpen(true);
+      if (!game.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) { playDecisionSound(); setGookjinChoiceOpen(true); }
       const showedBonus = announceBonus(result);
       const showedSpecial = announceSpecialCapture(result, false, showedBonus ? 1120 : 150);
       const showedMission = !showedBonus && !showedSpecial && announceMission(result, false, 150);
@@ -394,11 +386,10 @@ export default function GamePage() {
       const working = structuredClone(game);
       const decision = chooseAiChongtong(working, working.computerDifficulty ?? preferredDifficulty);
       const next = chooseChongtong(working, 'computer', decision);
+      playChongtongSound(opponentVoiceActor);
       if (decision === 'continue') {
-        playShakeSound(true);
         showDeclaration('shake', '흔들기!', '상대가 총통을 공개했습니다.', 1100);
       } else {
-        playStopSound(true);
         showDeclaration('stop', '스톱!', '총통으로 7점 승리', 1200);
       }
       setGame(next); await persist(next, profile, onlineSession); setBusy(false);
@@ -419,10 +410,10 @@ export default function GamePage() {
       const next = decision === 'go' ? chooseGo(working, 'computer') : chooseStop(working, 'computer');
       if (decision === 'go') {
         const scoreHeadline = getScoreHeadline(next, 'computer');
-        playGoSound(next.computerGoCount, true);
+        playGoSound(next.computerGoCount, opponentVoiceActor);
         showDeclaration('go', `${next.computerGoCount}고!`, scoreHeadline ? `${scoreHeadline.label} · 현재 ${scoreHeadline.score}점` : '상대가 승부를 계속합니다.', next.computerGoCount >= 5 ? 1800 : 1150);
       } else {
-        playStopSound(true);
+        playStopSound(opponentVoiceActor);
         const settlementEffect = getSettlementCelebration(next, 'computer');
         showDeclaration('settlement', settlementEffect.text, settlementEffect.detail, 1600);
       }
@@ -436,7 +427,7 @@ export default function GamePage() {
     announcedResultRef.current = game.gameUuid;
     const timer = window.setTimeout(() => {
       if (game.winner === 'human') playWinSound(game.settlement?.finalScore ?? 7, game.humanGoCount);
-      else if (game.winner === 'computer') playLoseSound(game.settlement?.baks.map(bak => bak.label) ?? []);
+      else if (game.winner === 'computer') playLoseSound(game.settlement?.baks.map(bak => bak.label) ?? [], opponentVoiceActor);
       else playNagariSound();
     }, 520);
     return () => window.clearTimeout(timer);
@@ -485,6 +476,7 @@ export default function GamePage() {
       else {
         drawnMatchId = await new Promise<string>(resolve => {
           drawChoiceResolverRef.current = resolve;
+          playDecisionSound();
           setFloorCardChoice({ playedCardId: drawChoice.drawnCardId, candidateIds: drawChoice.candidateIds, source: 'draw' });
         });
         drawChoiceResolverRef.current = null;
@@ -495,7 +487,7 @@ export default function GamePage() {
     else if (result.drawnCardId && !drawAnimated) { await animateCardFlight(deckRef.current, floorRef.current, 8, 260); playFlipSound(); }
     await animateCapturedCardTransfers(result.stolenPee ?? [], document.querySelector('.opponent-rack'), document.querySelector('.human-rack'));
     setGame(result.state);
-    if (!activeGame.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) setGookjinChoiceOpen(true);
+    if (!activeGame.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) { playDecisionSound(); setGookjinChoiceOpen(true); }
     const showedBonus = announceBonus(result);
     const scoreEffect = getScoreCelebration(activeGame, result.state, 'human');
     if (result.ppeok) {
@@ -520,30 +512,28 @@ export default function GamePage() {
     await persist(result.state, profile, onlineSession);
     setBusy(false);
   };
-
   const requestHumanCard = (cardId: string, source: HTMLButtonElement) => {
     if (!game || busy || dealing || floorCardChoice || bombChoice || shakeChoice || gookjinChoiceOpen) return;
     const cardMonth = getCard(cardId)?.month;
     const bomb = findBombOptions(game.humanHand, game.floorCards)
       .find(option => option.month === cardMonth);
     if (bomb) {
-      setBombChoice({ ...bomb, selectedCardId: cardId });
+      playDecisionSound(); setBombChoice({ ...bomb, selectedCardId: cardId });
       return;
     }
     const shake = findShakeOptions(game.humanHand, game.floorCards, game.humanShakenMonths ?? [])
       .find(option => option.month === cardMonth);
     if (shake) {
-      setShakeChoice({ month: shake.month, cardIds: shake.handCardIds, selectedCardId: cardId });
+      playDecisionSound(); setShakeChoice({ month: shake.month, cardIds: shake.handCardIds, selectedCardId: cardId });
       return;
     }
     const candidateIds = getMatchingFloorCards(game.floorCards, cardId);
     if (candidateIds.length === 2) {
-      setFloorCardChoice({ playedCardId: cardId, candidateIds, source: 'hand' });
+      playDecisionSound(); setFloorCardChoice({ playedCardId: cardId, candidateIds, source: 'hand' });
       return;
     }
     void playHumanCard(cardId, source);
   };
-
   const decideHumanShake = (decision: 'shake' | 'plain') => {
     if (!game || !shakeChoice || busy || dealing) return;
     const choice = shakeChoice;
@@ -551,6 +541,7 @@ export default function GamePage() {
     setShakeChoice(null);
     if (!source) return;
     if (decision === 'plain') {
+      playCancelSound();
       void playHumanCard(choice.selectedCardId, source);
       return;
     }
@@ -561,9 +552,9 @@ export default function GamePage() {
     setGame(next);
     void playHumanCard(choice.selectedCardId, source, undefined, false, next);
   };
-
   const selectFloorCard = (floorCardId: string) => {
     if (!floorCardChoice || !floorCardChoice.candidateIds.includes(floorCardId)) return;
+    playSelectSound();
     if (floorCardChoice.source === 'draw') {
       const resolve = drawChoiceResolverRef.current;
       setFloorCardChoice(null);
@@ -615,17 +606,17 @@ export default function GamePage() {
     setBusy(true);
     const result = playBomb(game, 'human', month);
     playBombSound();
-    const bombStolen = result.specialEvents?.find(event => event.kind === 'bomb')?.stolenPee ?? [];
+    const bombEvent = result.specialEvents?.find(event => event.kind === 'bomb');
+    const bombStolen = bombEvent?.stolenPee ?? [];
     const mission = result.missionCards?.length ? ` · 미션 ×${result.missionMultiplier ?? 1}` : '';
-    showDeclaration('bomb', '폭탄!', `${month}월 패를 한꺼번에 냈습니다.${bombStolen.length ? ` · ${describePeeTransfer(bombStolen, false)}` : ''}${mission}`, 1100);
+    showDeclaration('bomb', `${bombEvent?.label ?? '폭탄'}!`, `${month}월 패를 한꺼번에 냈습니다.${bombStolen.length ? ` · ${describePeeTransfer(bombStolen, false)}` : ''}${mission}`, 1100);
     await animateCapturedCardTransfers(result.stolenPee ?? [], document.querySelector('.opponent-rack'), document.querySelector('.human-rack'));
     setGame(result.state);
-    if (!game.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) setGookjinChoiceOpen(true);
+    if (!game.humanCaptured.includes('m09-01') && result.state.humanCaptured.includes('m09-01')) { playDecisionSound(); setGookjinChoiceOpen(true); }
     const showedBonus = announceBonus(result, false, 1180);
     announceSpecialCapture(result, false, showedBonus ? 2360 : 1180);
     await persist(result.state, profile, onlineSession); setBusy(false);
   };
-
   const decideHumanBomb = (decision: 'bomb' | 'plain') => {
     if (!game || !bombChoice || busy || dealing) return;
     const choice = bombChoice;
@@ -636,9 +627,10 @@ export default function GamePage() {
       void useBomb(choice.month);
       return;
     }
+    playCancelSound();
     const candidateIds = getMatchingFloorCards(game.floorCards, choice.selectedCardId);
     if (candidateIds.length === 2) {
-      setFloorCardChoice({ playedCardId: choice.selectedCardId, candidateIds, source: 'hand' });
+      playDecisionSound(); setFloorCardChoice({ playedCardId: choice.selectedCardId, candidateIds, source: 'hand' });
       return;
     }
     void playHumanCard(choice.selectedCardId, source);
@@ -662,11 +654,10 @@ export default function GamePage() {
     if (!game || !profile || busy || game.pendingDecision !== 'human') return;
     setBusy(true);
     const next = chooseChongtong(game, 'human', decision);
+    playChongtongSound();
     if (decision === 'continue') {
-      playShakeSound();
       showDeclaration('shake', '흔들기!', '총통을 공개하고 계속합니다.', 1100);
     } else {
-      playStopSound();
       showDeclaration('stop', '스톱!', '총통으로 7점 승리', 1200);
     }
     setGame(next); await persist(next, profile, onlineSession);
@@ -678,6 +669,7 @@ export default function GamePage() {
     setBusy(true);
     try {
       const next = setGookjinChoice(game, 'human', asDoubleJunk);
+      playGookjinSound(asDoubleJunk);
       setGame(next); setGookjinChoiceOpen(false); await persist(next, profile, onlineSession);
     }
     finally { setBusy(false); }
@@ -786,7 +778,8 @@ export default function GamePage() {
     if (!started || !game || game.phase === 'round-ended') return;
     const next = !autoPlay;
     setAutoPlay(next);
-    if (next) void unlockAudio();
+    if (next) void unlockAudio().then(() => playAutoPlaySound(true));
+    else playAutoPlaySound(false);
   };
 
   useEffect(() => {
@@ -836,7 +829,6 @@ export default function GamePage() {
   const humanScore = calculateCapturedScore(game.humanCaptured, { gookjinAsDoubleJunk: game.humanGookjinAsDoubleJunk }).total;
   const computerScore = calculateCapturedScore(game.computerCaptured, { gookjinAsDoubleJunk: game.computerGookjinAsDoubleJunk }).total;
   const computerDifficulty = game.computerDifficulty ?? preferredDifficulty;
-  const opponentName = opponentNameForGame(game.gameUuid);
   const pointValue = normalizeMatgoPointValue(game.pointValue);
   const balanceEmpty = (moneyTransfer?.humanAfter ?? profile.virtualBalance) <= 0;
   const pendingStopSettlement = game.phase === 'awaiting-go-stop' && game.pendingDecision
@@ -882,7 +874,7 @@ export default function GamePage() {
             choice={floorCardChoice}
             disabled={busy && floorCardChoice?.source !== 'draw'}
             onSelect={selectFloorCard}
-            onCancel={() => setFloorCardChoice(null)}
+            onCancel={() => { playCancelSound(); setFloorCardChoice(null); }}
           /></div>
         </section>
         {aiThinking && game.phase === 'playing' && <AiThinkingIndicator plan={aiThinking} placement="board" />}
@@ -893,7 +885,7 @@ export default function GamePage() {
           cardIds={game.humanCaptured}
           owner="human"
           gookjinAsDoubleJunk={game.humanGookjinAsDoubleJunk}
-          onToggleGookjin={() => setGookjinChoiceOpen(true)}
+          onToggleGookjin={() => { playDecisionSound(); setGookjinChoiceOpen(true); }}
         />
         {bombChoice && <BombDecisionPanel
           month={bombChoice.month}
@@ -983,7 +975,7 @@ export default function GamePage() {
       <p>한 장을 뒤집으면 선공과 후공이 정해집니다.</p>
       <div className="dealer-selection-layout">
         <div className="dealer-point-value"><PointValueSelector value={pointValue} disabled={busy} onChange={value => void selectPointValue(value)} /></div>
-        <StartingPlayerChoice seed={game.randomSeed} disabled={busy} onSelect={player => void selectStartingPlayer(player)} onExit={() => navigate('/matgo')} />
+        <StartingPlayerChoice seed={game.randomSeed} disabled={busy} onSelect={player => void selectStartingPlayer(player)} onReveal={player => playDealerResultSound(player === 'computer' ? opponentVoiceActor : 'player')} onExit={() => navigate('/matgo')} />
         <div className="dealer-difficulty"><DifficultySelector value={computerDifficulty} onChange={difficulty => void selectDifficulty(difficulty)} /></div>
       </div>
     </section></div> : !started && <div className="start-overlay"><div><span className="start-logo">가족화투</span><>

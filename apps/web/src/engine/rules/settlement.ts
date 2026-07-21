@@ -9,7 +9,7 @@ export interface SettlementOptions {
   winnerMissionMultiplier?: number;
   roundMultiplier?: number;
   loserGoCount?: number;
-  loserScoreAtLastGo?: number;
+  loserCapturedCount?: number;
   settings?: GameRuleSettings;
   suppressMultipliers?: boolean;
   forcedBaseScore?: number;
@@ -31,13 +31,14 @@ export function calculateSettlement(options: SettlementOptions): RoundSettlement
   const shakeMultiplier = options.suppressMultipliers ? 1 : 2 ** Math.max(0, options.winnerShakeCount ?? 0);
   const missionMultiplier = options.suppressMultipliers ? 1 : Math.max(1, options.winnerMissionMultiplier ?? 1);
   const roundMultiplier = Math.max(1, options.roundMultiplier ?? 1);
+  const paymentExempt = options.loserCapturedCount === 0;
   const bakCodes: BakCode[] = [];
 
   if (!options.suppressMultipliers) {
-    if (options.winnerScore.junkCount >= settings.junkStart && options.loserScore.junkCount <= 7) bakCodes.push('pi-bak');
+    if (options.winnerScore.junkCount >= settings.junkStart && options.loserScore.junkCount >= 1 && options.loserScore.junkCount <= 7) bakCodes.push('pi-bak');
     if (options.winnerScore.brightCount === 5 || (options.winnerScore.brightCount >= 3 && options.loserScore.brightCount === 0)) bakCodes.push('gwang-bak');
-    if (options.loserScore.animalCount === 0) bakCodes.push('meong-bak');
-    if ((options.loserGoCount ?? 0) > 0 && options.loserScore.total <= (options.loserScoreAtLastGo ?? -1)) bakCodes.push('go-bak');
+    if (options.winnerScore.animalCount >= 7) bakCodes.push('meong-bak');
+    if ((options.loserGoCount ?? 0) > 0) bakCodes.push('go-bak');
   }
 
   const baks = bakCodes.map(code => ({ code, label: BAK_LABELS[code], multiplier: settings.bakMultiplier }));
@@ -60,7 +61,9 @@ export function calculateSettlement(options: SettlementOptions): RoundSettlement
     scoreLines: options.winnerScore.lines,
     baseScore, goBonus, goMultiplier, shakeMultiplier, missionMultiplier, roundMultiplier, baks, bakMultiplier, finalScore,
     pointValue: settings.pointValue,
-    displayAmount: finalScore * settings.pointValue,
+    displayAmount: paymentExempt ? 0 : finalScore * settings.pointValue,
+    paymentExempt,
+    paymentExemptReason: paymentExempt ? '패자가 획득한 패가 없어 게임머니를 지급하지 않습니다.' : undefined,
     isRealCurrency: false,
     isExchangeable: false,
     steps

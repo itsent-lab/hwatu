@@ -143,7 +143,7 @@ function evaluateBomb(state: GameState, player: PlayerId, month: number): MoveEv
   return {
     move: { kind: 'bomb', month }, immediateValue, opponentRisk, combinationValue,
     total: immediateValue + combinationValue * 1.15 - opponentRisk * 1.25 + tempoValue,
-    reason: `${option.kind === 'two-card-bomb' ? '두장폭탄' : '폭탄'}으로 ${capturedIds.length}장 확보`
+    reason: `${option.kind === 'two-card-bomb' ? '두장폭탄' : option.kind === 'four-card-bomb' ? '4장 흔들기·폭탄' : '폭탄'}으로 ${capturedIds.length}장 확보`
   };
 }
 

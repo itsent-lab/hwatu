@@ -25,15 +25,23 @@ public sealed class HwatuCookieEvents(UserRepository users) : CookieAuthenticati
     }
 
     public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        return Task.CompletedTask;
-    }
+        => WriteAuthErrorAsync(
+            context.Response,
+            StatusCodes.Status401Unauthorized,
+            "AUTH_REQUIRED",
+            "로그인이 필요합니다.");
 
     public override Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
+        => WriteAuthErrorAsync(
+            context.Response,
+            StatusCodes.Status403Forbidden,
+            "ACCESS_DENIED",
+            "이 요청을 처리할 권한이 없습니다.");
+
+    private static Task WriteAuthErrorAsync(HttpResponse response, int statusCode, string code, string message)
     {
-        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
+        response.StatusCode = statusCode;
+        return response.WriteAsJsonAsync(new { ok = false, error = new { code, message } });
     }
 
     private static async Task RejectAsync(CookieValidatePrincipalContext context)

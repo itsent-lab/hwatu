@@ -2,9 +2,13 @@ namespace Hwatu.Server.Models;
 
 public sealed record GostopSettlementRequest(
     string GameUuid,
-    string Winner,
+    string? Winner,
     int FinalScore,
-    int PointValue);
+    int PointValue,
+    string? RoundResult = null,
+    int HumanPoints = 0,
+    int ComputerAPoints = 0,
+    int ComputerBPoints = 0);
 
 public sealed record GostopSettlementResult(
     long VirtualBalance,

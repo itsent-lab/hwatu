@@ -1,19 +1,19 @@
 {
-  "name": "family-hwatu",
+  "name": "hwatu",
   "private": true,
   "author": "NSJ <itsent@itsent.co.kr>",
   "workspaces": [
     "apps/web"
   ],
   "scripts": {
-    "assets:hwatu": "npm run assets:hwatu --workspace @family-hwatu/web",
-    "build": "npm run build --workspace @family-hwatu/web",
+    "assets:hwatu": "npm run assets:hwatu --workspace @hwatu/web",
+    "build": "npm run build --workspace @hwatu/web",
     "check:public": "node scripts/check-public-release.mjs && npm run typecheck && npm test && npm run build && dotnet build services/api/Hwatu.Server.csproj",
-    "dev": "npm run dev --workspace @family-hwatu/web",
-    "dev:web": "npm run dev --workspace @family-hwatu/web",
+    "dev": "npm run dev --workspace @hwatu/web",
+    "dev:web": "npm run dev --workspace @hwatu/web",
     "dev:server": "dotnet run --project services/api/Hwatu.Server.csproj",
-    "simulate:ai": "npm run simulate:ai --workspace @family-hwatu/web",
-    "test": "npm run test --workspace @family-hwatu/web",
-    "typecheck": "npm run typecheck --workspace @family-hwatu/web"
+    "simulate:ai": "npm run simulate:ai --workspace @hwatu/web",
+    "test": "npm run test --workspace @hwatu/web",
+    "typecheck": "npm run typecheck --workspace @hwatu/web"
   }
 }

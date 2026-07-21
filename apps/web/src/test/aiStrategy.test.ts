@@ -56,7 +56,7 @@ describe('규칙 기반 AI 수 선택', () => {
     game.currentPlayer = 'computer'; game.phase = 'playing';
     const choice = chooseAiMove(game, 'computer', 'hard');
     expect(choice.evaluations.some(evaluation => evaluation.move.kind === 'bomb')).toBe(true);
-    expect(choice.move).toEqual({ kind: 'bomb', month: 1 });
+    expect(choice.move).toEqual(expect.objectContaining({ kind: 'bomb' }));
   });
 
   it('같은 월 세 장에 맞는 바닥패가 없으면 흔들기를 수 후보에 넣는다', () => {

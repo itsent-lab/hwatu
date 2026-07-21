@@ -111,14 +111,16 @@ app.UseAuthorization();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+app.MapClientEndpoints();
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapGameEndpoints();
 app.MapGostopGameEndpoints();
 app.MapFallbackToFile("index.html");
 
-await using (var scope = app.Services.CreateAsyncScope())
+if (builder.Configuration.GetValue("Database:InitializeOnStartup", true))
 {
+    await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().InitializeAsync();
 }
 

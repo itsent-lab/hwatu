@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDeck, createMatgoDeck, dealGostop, dealMatgo, shuffleDeck } from '../engine/deck';
+import { createDeck, createGostopDeck, createMatgoDeck, dealGostop, dealMatgo, shuffleDeck } from '../engine/deck';
 
 describe('화투 덱', () => {
   it('48장 모두가 한 번씩 존재한다', () => {
@@ -46,14 +46,14 @@ describe('화투 덱', () => {
   });
 
   it('3인 고스톱은 보너스패를 포함해 7·7·7·6장으로 나눈다', () => {
-    const deal = dealGostop(shuffleDeck(createMatgoDeck(), 23).cards);
+    const deal = dealGostop(shuffleDeck(createGostopDeck(), 23).cards);
     expect([deal.humanHand.length, deal.computerAHand.length, deal.computerBHand.length, deal.floorCards.length]).toEqual([7, 7, 7, 6]);
-    expect(deal.drawPile.length + deal.initialBonusCards.length).toBe(23);
+    expect(deal.drawPile.length + deal.initialBonusCards.length).toBe(24);
     expect(deal.floorCards.some(cardId => cardId.startsWith('bonus-'))).toBe(false);
   });
 
   it('고스톱의 첫 바닥 보너스패는 선이 가져갈 수 있도록 따로 보존한다', () => {
-    const deck = createMatgoDeck();
+    const deck = createGostopDeck();
     const bonus = deck.find(cardId => cardId.startsWith('bonus-'))!;
     const arranged = deck.filter(cardId => cardId !== bonus);
     arranged.splice(21, 0, bonus);

@@ -65,7 +65,9 @@
 .gostop-floor-card-group { display: grid; grid-template-columns: repeat(3, clamp(56px, 6.3vw, 82px)); gap: clamp(12px, 2vw, 26px); }
 .gostop-floor-card-group.left { justify-content: end; }
 .gostop-floor-card-group.right { justify-content: start; }
-.gostop-draw-pile { position: relative; display: grid; place-items: center; width: clamp(58px, 6.5vw, 86px); aspect-ratio: 38 / 53; border: 4px solid #f2dc9f; border-radius: 7px; background: repeating-linear-gradient(45deg, #d91924 0 7px, #9f0b14 7px 14px); box-shadow: 5px 5px 0 #890c13, 9px 9px 0 #65080d, 0 12px 18px rgba(0,0,0,.3); color: #ffe165; font-family: Georgia, serif; font-size: 2rem; }
+.gostop-draw-pile { position: relative; display: grid; place-items: center; width: clamp(58px, 6.5vw, 86px); aspect-ratio: 38 / 53; padding: 0; border: 4px solid #f2dc9f; border-radius: 7px; background: repeating-linear-gradient(45deg, #d91924 0 7px, #9f0b14 7px 14px); box-shadow: 5px 5px 0 #890c13, 9px 9px 0 #65080d, 0 12px 18px rgba(0,0,0,.3); color: #ffe165; font-family: Georgia, serif; font-size: 2rem; }
+.gostop-draw-pile:not(:disabled) { cursor: pointer; outline: 4px solid #ffe967; animation: play-hint-bounce .78s ease-in-out infinite; }
+.gostop-draw-pile:disabled { opacity: 1; }
 .gostop-draw-pile b { position: absolute; right: -15px; bottom: -12px; display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid white; border-radius: 50%; background: #304e46; color: #ffea70; font-family: sans-serif; font-size: .75rem; }
 .gostop-room-status { position: absolute; z-index: 3; top: clamp(88px, 12%, 105px); left: 50%; width: min(620px, 90%); padding: 7px 17px; border: 2px solid rgba(239,224,139,.68); border-radius: 18px; background: rgba(24,70,50,.86); text-align: center; transform: translateX(-50%); }
 .gostop-room-status strong, .gostop-room-status span { display: block; }

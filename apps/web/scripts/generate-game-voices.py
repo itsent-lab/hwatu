@@ -1,5 +1,6 @@
 import hashlib
 import json
+from argparse import ArgumentParser
 from datetime import date
 from importlib.metadata import version
 from pathlib import Path
@@ -50,6 +51,68 @@ VOICE_CLIPS: dict[str, tuple[str, str, float]] = {
     "lose": ("M1", "내가 이겼지!", 1.08),
     "nagari": ("M1", "나가리! 다시 붙어!", 1.08),
     "start": ("F2", "시작! 한 판 붙어 보자!", 1.1),
+    "player-chongtong": ("F2", "총통! 네 장 완성!", 1.1),
+    "opponent-chongtong": ("M1", "총통! 네 장 다 모았다!", 1.1),
+    "dealer-human": ("F2", "좋았어! 내가 선이다!", 1.1),
+    "dealer-opponent": ("M1", "이번엔 내가 선이다!", 1.1),
+    "gookjin-double": ("F2", "국진은 쌍피로 간다!", 1.1),
+    "gookjin-animal": ("F2", "국진은 열끗으로 간다!", 1.1),
+    "undo": ("F2", "무르기! 다시 보자!", 1.08),
+    "gostop-computer-a-capture": ("F1", "앗, 이건 제가 먹을게요!", 1.18),
+    "gostop-computer-a-bonus-two": ("F1", "쌍피예요! 완전 좋아!", 1.18),
+    "gostop-computer-a-bonus-three": ("F1", "쓰리피예요! 대박이다!", 1.18),
+    "gostop-computer-a-ppeok": ("F1", "앗, 뻑이에요!", 1.16),
+    "gostop-computer-a-sweep": ("F1", "싹쓸이! 제가 다 가져갈게요!", 1.18),
+    "gostop-computer-a-ppeok-capture": ("F1", "싼 패! 잘 먹을게요!", 1.18),
+    "gostop-computer-a-self-ppeok": ("F1", "자뻑! 오늘 운 좋은데요?", 1.18),
+    "gostop-computer-a-score": ("F1", "점수 났어요! 신난다!", 1.18),
+    "gostop-computer-a-go": ("F1", "고! 한 번 더 가볼게요!", 1.16),
+    "gostop-computer-a-stop": ("F1", "스톱! 여기까지 할게요!", 1.16),
+    "gostop-computer-a-win": ("F1", "제가 이겼어요! 재밌었다!", 1.16),
+    "matgo-female-capture": ("F4", "딱! 제가 잡았어요!", 1.14),
+    "matgo-female-bonus-two": ("F4", "쌍피예요! 신난다!", 1.14),
+    "matgo-female-bonus-three": ("F4", "쓰리피예요! 대박!", 1.14),
+    "matgo-female-ppeok": ("F4", "어머, 뻑이에요!", 1.12),
+    "matgo-female-sweep": ("F4", "싹쓸이! 다 가져갈게요!", 1.14),
+    "matgo-female-ppeok-capture": ("F4", "싼 패! 잘 먹을게요!", 1.14),
+    "matgo-female-self-ppeok": ("F4", "자뻑! 운이 좋네요!", 1.14),
+    "matgo-female-score": ("F4", "점수 났어요! 좋아요!", 1.14),
+    "matgo-female-go": ("F4", "고! 더 가볼게요!", 1.12),
+    "matgo-female-stop": ("F4", "스톱! 여기까지예요!", 1.12),
+    "matgo-female-win": ("F4", "제가 이겼어요! 신난다!", 1.12),
+    "gostop-computer-b-capture": ("M4", "딱! 이건 내가 먹지!", 1.16),
+    "gostop-computer-b-bonus-two": ("M4", "쌍피네! 약 오르지?", 1.16),
+    "gostop-computer-b-bonus-three": ("M4", "쓰리피다! 어때?", 1.16),
+    "gostop-computer-b-ppeok": ("M4", "뻑이네! 이것도 재미지!", 1.14),
+    "gostop-computer-b-sweep": ("M4", "싹쓸이! 구경 잘했지?", 1.16),
+    "gostop-computer-b-ppeok-capture": ("M4", "싼 패! 내가 챙긴다!", 1.16),
+    "gostop-computer-b-self-ppeok": ("M4", "자뻑! 운까지 내 편이네!", 1.16),
+    "gostop-computer-b-score": ("M4", "점수 났네! 따라와 봐!", 1.16),
+    "gostop-computer-b-go": ("M4", "고! 겁나면 빠져!", 1.14),
+    "gostop-computer-b-stop": ("M4", "스톱! 딱 여기까지!", 1.14),
+    "gostop-computer-b-win": ("M4", "내가 이겼네! 다음 판도 콜?", 1.14),
+    "gostop-computer-c-capture": ("M5", "좋군. 이 패는 내가 가져가겠네.", 0.98),
+    "gostop-computer-c-bonus-two": ("M5", "쌍피로군. 운이 따르는군.", 0.98),
+    "gostop-computer-c-bonus-three": ("M5", "쓰리피라, 제법이군.", 0.98),
+    "gostop-computer-c-ppeok": ("M5", "허허, 뻑이로군.", 0.96),
+    "gostop-computer-c-sweep": ("M5", "싹쓸이군. 패가 잘 붙는군.", 0.98),
+    "gostop-computer-c-ppeok-capture": ("M5", "싼 패로군. 잘 가져가겠네.", 0.98),
+    "gostop-computer-c-self-ppeok": ("M5", "자뻑이라. 오늘 운이 좋군.", 0.98),
+    "gostop-computer-c-score": ("M5", "점수가 났군. 흐름이 좋네.", 0.98),
+    "gostop-computer-c-go": ("M5", "고. 조금 더 가보겠네.", 0.96),
+    "gostop-computer-c-stop": ("M5", "스톱. 여기서 마무리하지.", 0.96),
+    "gostop-computer-c-win": ("M5", "내가 이겼군. 좋은 승부였네.", 0.96),
+    "gostop-computer-d-capture": ("F3", "어머, 그 패는 제가 가져갈게요.", 0.98),
+    "gostop-computer-d-bonus-two": ("F3", "쌍피네요. 운도 제 편인가 봐요.", 0.98),
+    "gostop-computer-d-bonus-three": ("F3", "쓰리피라니, 꽤 마음에 드네요.", 0.98),
+    "gostop-computer-d-ppeok": ("F3", "어머, 뻑이네요.", 0.96),
+    "gostop-computer-d-sweep": ("F3", "싹쓸이네요. 전부 제 거예요.", 0.98),
+    "gostop-computer-d-ppeok-capture": ("F3", "싼 패네요. 제가 챙길게요.", 0.98),
+    "gostop-computer-d-self-ppeok": ("F3", "자뻑이라니, 운이 따라주네요.", 0.98),
+    "gostop-computer-d-score": ("F3", "점수가 났네요. 흐름이 좋은데요?", 0.98),
+    "gostop-computer-d-go": ("F3", "고. 조금 더 즐겨볼까요?", 0.96),
+    "gostop-computer-d-stop": ("F3", "스톱. 여기서 끝낼게요.", 0.96),
+    "gostop-computer-d-win": ("F3", "제가 이겼네요. 즐거운 승부였어요.", 0.96),
 }
 
 
@@ -68,20 +131,32 @@ def trim_and_normalize(samples: np.ndarray) -> np.ndarray:
 
 
 def main() -> None:
+    parser = ArgumentParser(description="Generate or verify the prerecorded game voice assets.")
+    parser.add_argument(
+        "--manifest-only",
+        action="store_true",
+        help="Keep existing WAV files and rebuild only their verification manifests.",
+    )
+    args = parser.parse_args()
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    np.random.seed(20_260_721)
-    tts = TTS(auto_download=True)
+    tts = None
+    if not args.manifest_only:
+        np.random.seed(20_260_721)
+        tts = TTS(auto_download=True)
     assets = []
     for filename, (voice_name, text, speed) in VOICE_CLIPS.items():
-        samples, _ = tts.synthesize(
-            text=text,
-            lang="ko",
-            voice_style=tts.get_voice_style(voice_name=voice_name),
-            total_steps=12,
-            speed=speed,
-        )
         output_path = OUTPUT_DIRECTORY / f"{filename}.wav"
-        sf.write(output_path, trim_and_normalize(samples), SAMPLE_RATE, subtype="PCM_16")
+        if tts is not None:
+            samples, _ = tts.synthesize(
+                text=text,
+                lang="ko",
+                voice_style=tts.get_voice_style(voice_name=voice_name),
+                total_steps=12,
+                speed=speed,
+            )
+            sf.write(output_path, trim_and_normalize(samples), SAMPLE_RATE, subtype="PCM_16")
+        elif not output_path.is_file():
+            raise FileNotFoundError(f"Voice asset is missing: {output_path}")
         data = output_path.read_bytes()
         assets.append({
             "file": output_path.name,
@@ -91,7 +166,8 @@ def main() -> None:
             "bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest(),
         })
-        print(f"{output_path.name}: {voice_name} / {text}")
+        action = "verified" if args.manifest_only else "generated"
+        print(f"{action} {output_path.name}: {voice_name} / {text}")
 
     manifest = {
         "version": 1,

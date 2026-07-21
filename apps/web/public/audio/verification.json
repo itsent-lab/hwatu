@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "acquiredAt": "2026-07-21",
   "assets": [
     {
@@ -38,9 +38,16 @@
       "license": "CC0 1.0"
     },
     {
+      "file": "effects/verification.json",
+      "bytes": 7341,
+      "sha256": "04f4530f5d0a4055c515a79d81bf9190b1d5bbeea61bd289cc19245145198ab4",
+      "source": "https://kenney.nl/assets/casino-audio; https://kenney.nl/assets/impact-sounds; https://kenney.nl/assets/interface-sounds",
+      "license": "CC0 1.0"
+    },
+    {
       "file": "voices/verification.json",
-      "bytes": 9306,
-      "sha256": "e975ed45d7f4d2d9060840918fac662b158131af3a731e959d1feb27fcc6baf6",
+      "bytes": 25025,
+      "sha256": "493c9bac4e0477d9b6217dcc479fc9522620d6235e5ecfeabc64e90f11bf3457",
       "source": "https://huggingface.co/Supertone/supertonic-3",
       "license": "Generated output; Supertonic 3 model under BigScience OpenRAIL-M"
     }

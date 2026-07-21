@@ -8,9 +8,19 @@ const storageKey = (userId: number) => `${STORAGE_PREFIX}:${userId}`;
 function isSettlement(value: unknown): value is GostopSettlementRequest {
   if (!value || typeof value !== 'object') return false;
   const request = value as Partial<GostopSettlementRequest>;
+  const validWinner = request.winner === null || ['human', 'computerA', 'computerB'].includes(request.winner ?? '');
+  const validPoints = [request.humanPoints, request.computerAPoints, request.computerBPoints]
+    .every(points => points === undefined || Number.isInteger(points));
+  const validResult = request.roundResult === undefined
+    ? request.winner !== null && (request.finalScore ?? 0) > 0
+    : request.roundResult === 'win'
+    ? request.winner !== null && (request.finalScore ?? 0) > 0
+    : request.roundResult === 'nagari' && request.winner === null && request.finalScore === 0;
   return typeof request.gameUuid === 'string'
-    && ['human', 'computerA', 'computerB'].includes(request.winner ?? '')
-    && Number.isInteger(request.finalScore) && (request.finalScore ?? 0) > 0
+    && validWinner
+    && validResult
+    && Number.isInteger(request.finalScore) && (request.finalScore ?? 0) >= 0
+    && validPoints
     && [100, 1_000, 2_000, 5_000, 10_000].includes(request.pointValue ?? 0);
 }
 

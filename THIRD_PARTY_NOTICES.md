@@ -1,6 +1,6 @@
 # 저작권 및 제3자 라이선스 고지
 
-이 문서는 FamilyHwatu 저장소에서 루트 `LICENSE`의 MIT License가 적용되는 범위와 제3자 자료에 적용되는 별도 조건을 구분합니다.
+이 문서는 화투 저장소에서 루트 `LICENSE`의 MIT License가 적용되는 범위와 제3자 자료에 적용되는 별도 조건을 구분합니다.
 
 ## 자체 제작 코드와 권리자
 
@@ -16,9 +16,9 @@
 
 ## GitHub 공개와 서비스 운영의 구분
 
-가족용·비상업·비공개로 운영한다는 사실은 제3자의 프로그램 내용이나 창작물을 허가 없이 사용할 수 있다는 의미가 아닙니다. FamilyHwatu는 공개 게임 플레이 영상에서 일반적인 화투 룰, 진행 흐름과 연출 기법을 참고하지만, 위에 설명한 것처럼 구체적인 프로그램 내용·파일·데이터나 고유한 표현을 추출·복제하지 않습니다.
+가족용·비상업·비공개로 운영한다는 사실은 제3자의 프로그램 내용이나 창작물을 허가 없이 사용할 수 있다는 의미가 아닙니다. 화투는 공개 게임 플레이 영상에서 일반적인 화투 룰, 진행 흐름과 연출 기법을 참고하지만, 위에 설명한 것처럼 구체적인 프로그램 내용·파일·데이터나 고유한 표현을 추출·복제하지 않습니다.
 
-이 GitHub 저장소는 FamilyHwatu 서비스를 일반 사용자에게 배포·제공하는 채널이 아니라 개발 소스 코드, 테스트, 문서와 재배포 가능한 자산을 공개하는 저장소입니다. 실행 중인 가족용 서버, 운영 계정·데이터, 실제 운영 설정, 서비스 이용 권한, 호스팅과 기술 지원은 공개 범위에 포함되지 않습니다. 제3자가 라이선스에 따라 코드를 직접 빌드·운영하는 것은 가능하지만, 그 행위는 NSJ가 운영하는 서비스에 대한 권리나 지원 관계를 만들지 않습니다.
+이 GitHub 저장소는 화투 서비스를 일반 사용자에게 배포·제공하는 채널이 아니라 개발 소스 코드, 테스트, 문서와 재배포 가능한 자산을 공개하는 저장소입니다. 실행 중인 가족용 서버, 운영 계정·데이터, 실제 운영 설정, 서비스 이용 권한, 호스팅과 기술 지원은 공개 범위에 포함되지 않습니다. 제3자가 라이선스에 따라 코드를 직접 빌드·운영하는 것은 가능하지만, 그 행위는 NSJ가 운영하는 서비스에 대한 권리나 지원 관계를 만들지 않습니다.
 
 ## 유지보수와 지원
 
@@ -54,17 +54,18 @@
 | `card-slide.mp3` | Playing Card Slide Right · el_boss | <https://freesound.org/people/el_boss/sounds/571581/> | CC0 1.0 |
 | `card-contact.mp3` | Contact1.wav · BMacZero | <https://freesound.org/people/BMacZero/sounds/96127/> | CC0 1.0 |
 | `wood-block.mp3` | Wood block hit · thomasjaunism | <https://freesound.org/people/thomasjaunism/sounds/218460/> | CC0 1.0 |
-| `voices/*.wav` | FamilyHwatu 한국어 선언 AI 음성 · Supertonic 3 F2/M1로 생성 | <https://huggingface.co/Supertone/supertonic-3> | 생성 모델: BigScience OpenRAIL-M |
+| `effects/*.wav` | Casino Audio 1.1, Impact Sounds 1.0, Interface Sounds 1.0 · Kenney | <https://kenney.nl/assets/casino-audio>, <https://kenney.nl/assets/impact-sounds>, <https://kenney.nl/assets/interface-sounds> | CC0 1.0 |
+| `voices/*.wav` | 화투 한국어 선언 AI 음성 · Supertonic 3 F1/F2/F3/F4/M1/M4/M5로 생성 | <https://huggingface.co/Supertone/supertonic-3> | 생성 모델: BigScience OpenRAIL-M |
 
-CC BY 4.0 음원은 제목, 권리자, 출처, 라이선스와 변경 여부를 표시합니다. CC0 효과음도 추적 가능하도록 제작자와 원본 페이지를 기록합니다. 파일별 상세 고지는 [`apps/web/public/audio/ATTRIBUTION.txt`](apps/web/public/audio/ATTRIBUTION.txt)를 확인하세요. 나머지 게임 효과음은 Web Audio API로 합성합니다.
+CC BY 4.0 음원은 제목, 권리자, 출처, 라이선스와 변경 여부를 표시합니다. CC0 효과음도 추적 가능하도록 제작자, 원본 묶음과 원본 파일명을 기록합니다. 파일별 상세 고지는 [`apps/web/public/audio/ATTRIBUTION.txt`](apps/web/public/audio/ATTRIBUTION.txt)를 확인하세요. 모든 게임 효과음과 배경음은 오디오 파일로 재생하며, Web Audio API는 파일 디코딩·재생·음량·압축과 게임 상황에 따른 배경음 재생 속도 조절에만 사용하고 런타임 합성음을 만들지 않습니다.
 
-`voices/*.wav`는 `supertonic 1.3.1`과 Supertonic 3 모델로 생성하고 무음 구간 정리와 최대 음량 정규화만 수행한 한국어 AI 음성입니다. 모델의 OpenRAIL-M 제6조에 따라 모델 제공자는 생성 결과에 권리를 주장하지 않지만, 결과 사용은 같은 라이선스의 사용 제한을 위반할 수 없으며 AI 생성 콘텐츠임을 명확하게 알려야 합니다. 프로젝트는 이 문서와 앱 크레딧에서 생성 음성임을 표시합니다. 모델 가중치는 배포하지 않으며 대사·음색·파일 해시는 [`apps/web/public/audio/voices/verification.json`](apps/web/public/audio/voices/verification.json)에 기록합니다. OpenRAIL-M 전문은 [`licenses/BigScience-OpenRAIL-M.txt`](licenses/BigScience-OpenRAIL-M.txt)에 포함합니다. 파일 로드에 실패한 경우에만 운영체제나 브라우저의 한국어 TTS를 사용합니다.
+`voices/*.wav`는 `supertonic 1.3.1`과 Supertonic 3 모델로 생성하고 무음 구간 정리와 최대 음량 정규화만 수행한 한국어 AI 음성입니다. 모델의 OpenRAIL-M 제6조에 따라 모델 제공자는 생성 결과에 권리를 주장하지 않지만, 결과 사용은 같은 라이선스의 사용 제한을 위반할 수 없으며 AI 생성 콘텐츠임을 명확하게 알려야 합니다. 프로젝트는 이 문서와 앱 크레딧에서 생성 음성임을 표시합니다. 모델 가중치는 배포하지 않으며 대사·음색·파일 해시는 [`apps/web/public/audio/voices/verification.json`](apps/web/public/audio/voices/verification.json)에 기록합니다. OpenRAIL-M 전문은 [`licenses/BigScience-OpenRAIL-M.txt`](licenses/BigScience-OpenRAIL-M.txt)에 포함합니다. 운영체제나 브라우저의 한국어 TTS는 사용하지 않으며, 음성 파일을 불러오지 못하면 해당 선언 음성을 건너뜁니다.
 
 공개 재배포가 허용되지 않는 정식 구입·허가 자산은 공개 저장소에 포함하지 않습니다. `apps/web/public/audio/private/`와 `VITE_GAME_BGM_URL`을 사용해 로컬·운영 빌드에만 주입하고, 권리 증빙은 저장소 밖에 보관합니다.
 
 ## 프로젝트 아이콘
 
-`apps/web/public/icons/`의 SVG 및 그 SVG에서 만든 PNG 아이콘은 FamilyHwatu를 위해 새로 디자인한 프로젝트 고유 자산입니다. 화투패 원본 SVG를 복사하거나 특정 상용 게임의 아이콘을 추출해 만든 자산이 아니며, NSJ가 권리를 보유한 범위에서 루트 MIT License를 적용합니다.
+`apps/web/public/icons/`의 SVG 및 그 SVG에서 만든 PNG 아이콘은 화투를 위해 새로 디자인한 프로젝트 고유 자산입니다. 화투패 원본 SVG를 복사하거나 특정 상용 게임의 아이콘을 추출해 만든 자산이 아니며, NSJ가 권리를 보유한 범위에서 루트 MIT License를 적용합니다.
 
 ## 직접 사용하는 오픈소스 의존성
 
@@ -97,7 +98,7 @@ CC BY 4.0 음원은 제목, 권리자, 출처, 라이선스와 변경 여부를 
 | Vite | 7.3.6 | MIT |
 | Vitest | 3.2.7 | MIT |
 
-개발·검증 도구의 라이선스는 해당 도구 자체에 적용되며, 그 도구로 작성하거나 빌드한 FamilyHwatu 자체 코드의 MIT License를 변경하지 않습니다. 설치되는 전이 의존성에는 각 패키지 배포본에 포함된 별도 라이선스가 적용됩니다.
+개발·검증 도구의 라이선스는 해당 도구 자체에 적용되며, 그 도구로 작성하거나 빌드한 화투 자체 코드의 MIT License를 변경하지 않습니다. 설치되는 전이 의존성에는 각 패키지 배포본에 포함된 별도 라이선스가 적용됩니다.
 
 Apache-2.0 전문은 [`licenses/Apache-2.0.txt`](licenses/Apache-2.0.txt)에, Supertonic 모델의 OpenRAIL-M 전문은 [`licenses/BigScience-OpenRAIL-M.txt`](licenses/BigScience-OpenRAIL-M.txt)에 포함합니다. 바이너리 배포물을 만들 때는 실제 포함된 패키지의 LICENSE와 NOTICE 파일을 다시 수집하고 이 고지와 함께 배포해야 합니다.
 

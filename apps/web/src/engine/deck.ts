@@ -3,7 +3,8 @@ import { normalizeSeed, randomInteger } from './random';
 import type { PlayerId } from './types';
 
 export const createDeck = (): string[] => HWATU_CARDS.map(card => card.id);
-export const createMatgoDeck = (): string[] => [...createDeck(), ...BONUS_PEE_CARDS.map(card => card.id)];
+export const createMatgoDeck = (): string[] => [...createDeck(), BONUS_PEE_CARDS[0].id, BONUS_PEE_CARDS[2].id];
+export const createGostopDeck = (): string[] => [...createDeck(), ...BONUS_PEE_CARDS.map(card => card.id)];
 
 export function shuffleDeck(cardIds: string[] = createDeck(), initialSeed = Date.now()): { cards: string[]; seed: number } {
   const cards = [...cardIds];
@@ -37,7 +38,7 @@ export function dealMatgo(shuffledCards: string[], startingPlayer: PlayerId = 'h
 }
 
 export function dealGostop(shuffledCards: string[]) {
-  if (shuffledCards.length !== 50) throw new RangeError('Gostop requires 48 cards and 2 bonus cards');
+  if (shuffledCards.length !== 51) throw new RangeError('Gostop requires 48 cards and 3 bonus cards');
   const cards = [...shuffledCards];
   const humanHand = cards.splice(0, 7);
   const computerAHand = cards.splice(0, 7);

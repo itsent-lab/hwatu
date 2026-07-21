@@ -6,6 +6,16 @@ export interface PeeTransferSummary {
   strongestBurst: 2 | 3 | null;
 }
 
+export function bonusPeeBurst(cardIds: string[]) {
+  const values = cardIds.map(cardId => getCard(cardId)?.tags.includes('triple-junk') ? 3 : 2);
+  const strongest = values.includes(3) ? 3 : 2;
+  return {
+    kind: strongest === 3 ? 'triple-pee' as const : 'double-pee' as const,
+    strongest: strongest as 2 | 3,
+    totalValue: values.reduce((total, value) => total + value, 0)
+  };
+}
+
 export function peeCardValue(cardId: string): number {
   const card = getCard(cardId);
   if (card?.tags.includes('triple-junk')) return 3;

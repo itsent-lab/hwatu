@@ -38,6 +38,8 @@ export interface RoundSettlement {
   finalScore: number;
   pointValue: number;
   displayAmount: number;
+  paymentExempt?: boolean;
+  paymentExemptReason?: string;
   isRealCurrency: false;
   isExchangeable: false;
   steps: SettlementStep[];

@@ -132,6 +132,25 @@ describe('게임 종료 선택창', () => {
     expect(html).not.toContain('가상 게임머니');
   });
 
+  it('패자가 획득한 패가 없으면 게임머니 지급 면제를 보여준다', () => {
+    const game = createInitialGame(20260721);
+    game.phase = 'round-ended';
+    game.roundResult = 'win';
+    game.winner = 'human';
+    game.settlement = {
+      baseScore: 7, goBonus: 0, goMultiplier: 1, shakeMultiplier: 1, missionMultiplier: 1,
+      baks: [], bakMultiplier: 1, finalScore: 7, pointValue: 100, displayAmount: 0,
+      paymentExempt: true, paymentExemptReason: '패자가 획득한 패가 없어 게임머니를 지급하지 않습니다.',
+      isRealCurrency: false, isExchangeable: false, steps: []
+    };
+    const html = renderToStaticMarkup(<RoundResultOverlay game={game} moneyTransfer={{
+      humanBefore: 100000, humanAfter: 100000, computerBefore: 50000, computerAfter: 50000,
+      amount: 0, appliedNow: true
+    }} onContinue={vi.fn()} onExit={vi.fn()} />);
+    expect(html).toContain('게임머니 지급 면제');
+    expect(html).toContain('패자가 획득한 패가 없어');
+  });
+
   it('컴퓨터 상대 잔액이 0냥이면 500,000냥 자동 리필을 정산 결과에 보여준다', () => {
     const game = createInitialGame(20260720);
     game.phase = 'round-ended';

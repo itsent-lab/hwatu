@@ -4,7 +4,7 @@ export interface BombOption {
   month: number;
   handCardIds: string[];
   floorCardIds: string[];
-  kind: 'two-card-bomb' | 'three-card-bomb';
+  kind: 'two-card-bomb' | 'three-card-bomb' | 'four-card-bomb';
 }
 
 export interface ShakeOption {
@@ -39,6 +39,7 @@ export function findBombOptions(handCardIds: string[], floorCardIds: string[], a
     const floorCards = floor.get(month) ?? [];
     if (handCards.length === 3 && floorCards.length === 1) options.push({ month, handCardIds: handCards, floorCardIds: floorCards, kind: 'three-card-bomb' });
     if (allowTwoCardBomb && handCards.length === 2 && floorCards.length === 2) options.push({ month, handCardIds: handCards, floorCardIds: floorCards, kind: 'two-card-bomb' });
+    if (handCards.length === 4 && floorCards.length === 0) options.push({ month, handCardIds: handCards, floorCardIds: [], kind: 'four-card-bomb' });
   });
   return options;
 }
@@ -95,6 +96,21 @@ export function stealPeeCards(opponentCaptured: string[], count: number): { stol
     const stolen = stealPeeForBonus(remaining);
     if (!stolen.stolenCardId) break;
     stolenCardIds.push(stolen.stolenCardId);
+    remaining = stolen.remaining;
+  }
+  return { stolenCardIds, remaining };
+}
+
+export function stealPeeByValue(opponentCaptured: string[], targetValue: number): { stolenCardIds: string[]; remaining: string[] } {
+  let remaining = [...opponentCaptured];
+  const stolenCardIds: string[] = [];
+  let stolenValue = 0;
+  while (stolenValue < targetValue) {
+    const stolen = stealPeeForBonus(remaining);
+    if (!stolen.stolenCardId) break;
+    const card = getCard(stolen.stolenCardId);
+    stolenCardIds.push(stolen.stolenCardId);
+    stolenValue += card?.tags.includes('triple-junk') ? 3 : card?.type === 'doubleJunk' ? 2 : 1;
     remaining = stolen.remaining;
   }
   return { stolenCardIds, remaining };

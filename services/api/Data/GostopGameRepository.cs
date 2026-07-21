@@ -12,7 +12,10 @@ public sealed class GostopGameRepository(HwatuDb database)
     public async Task<GostopSettlementResult> SettleAsync(
         long userId,
         GostopSettlementRequest request,
-        long amountPerOpponent)
+        string roundResult,
+        long humanRequestedDelta,
+        long computerARequestedDelta,
+        long computerBRequestedDelta)
     {
         await using var connection = database.OpenConnection();
         await connection.OpenAsync();
@@ -49,30 +52,19 @@ public sealed class GostopGameRepository(HwatuDb database)
         var human = balances.VirtualBalance;
         var computerA = balances.ComputerABalance;
         var computerB = balances.ComputerBBalance;
-        switch (request.Winner)
-        {
-            case "human":
-                Transfer(ref computerA, ref human, amountPerOpponent);
-                Transfer(ref computerB, ref human, amountPerOpponent);
-                break;
-            case "computerA":
-                Transfer(ref human, ref computerA, amountPerOpponent);
-                Transfer(ref computerB, ref computerA, amountPerOpponent);
-                break;
-            case "computerB":
-                Transfer(ref human, ref computerB, amountPerOpponent);
-                Transfer(ref computerA, ref computerB, amountPerOpponent);
-                break;
-        }
+        ApplyRequestedDeltas(
+            ref human, ref computerA, ref computerB,
+            humanRequestedDelta, computerARequestedDelta, computerBRequestedDelta);
         if (computerA == 0) computerA = ComputerRefillBalance;
         if (computerB == 0) computerB = ComputerRefillBalance;
         var humanDelta = human - balances.VirtualBalance;
         var summary = JsonSerializer.Serialize(new
         {
             request.Winner,
+            RoundResult = roundResult,
             request.FinalScore,
             request.PointValue,
-            AmountPerOpponent = amountPerOpponent,
+            RequestedDeltas = new { humanRequestedDelta, computerARequestedDelta, computerBRequestedDelta },
             ComputerABalanceAfter = computerA,
             ComputerBBalanceAfter = computerB
         });
@@ -91,7 +83,7 @@ public sealed class GostopGameRepository(HwatuDb database)
             {
                 UserId = userId,
                 request.GameUuid,
-                Result = request.Winner == "human" ? "win" : "loss",
+                Result = roundResult == "nagari" ? "nagari" : request.Winner == "human" ? "win" : "loss",
                 request.FinalScore,
                 SettlementAmount = humanDelta,
                 BalanceAfter = human,
@@ -118,11 +110,34 @@ public sealed class GostopGameRepository(HwatuDb database)
         return new GostopSettlementResult(human, computerA, computerB, humanDelta, true);
     }
 
-    private static long Transfer(ref long loser, ref long winner, long requested)
+    private static void ApplyRequestedDeltas(
+        ref long human,
+        ref long computerA,
+        ref long computerB,
+        long humanRequested,
+        long computerARequested,
+        long computerBRequested)
     {
-        var payment = Math.Min(requested, Math.Min(Math.Max(0, loser), Math.Max(0, MaxVirtualBalance - winner)));
-        loser -= payment;
-        winner += payment;
-        return payment;
+        var current = new[] { human, computerA, computerB };
+        var requested = new[] { humanRequested, computerARequested, computerBRequested };
+        var credits = requested.Select(value => Math.Max(0, value)).ToArray();
+        for (var debtor = 0; debtor < requested.Length; debtor++)
+        {
+            var debt = Math.Max(0, -requested[debtor]);
+            for (var creditor = 0; creditor < requested.Length && debt > 0 && current[debtor] > 0; creditor++)
+            {
+                if (credits[creditor] <= 0) continue;
+                var payment = Math.Min(debt, credits[creditor]);
+                payment = Math.Min(payment, Math.Max(0, current[debtor]));
+                payment = Math.Min(payment, Math.Max(0, MaxVirtualBalance - current[creditor]));
+                current[debtor] -= payment;
+                current[creditor] += payment;
+                debt -= payment;
+                credits[creditor] -= payment;
+            }
+        }
+        human = current[0];
+        computerA = current[1];
+        computerB = current[2];
     }
 }
