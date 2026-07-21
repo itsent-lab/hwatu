@@ -539,7 +539,7 @@ button.hwatu-card:disabled { filter: saturate(.82); }
 .difficulty-selector { margin: 20px 0 16px; padding: 0; border: 0; }
 .difficulty-selector legend { width: 100%; margin-bottom: 9px; color: #41551c; font-size: .88rem; font-weight: 900; }
 .difficulty-selector > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.difficulty-selector button { --difficulty-top: #9db487; --difficulty-bottom: #647d55; --difficulty-border: #4d673f; --difficulty-text: white; --difficulty-shadow: #34452b; min-height: 82px; padding: 10px 8px; border: 3px solid var(--difficulty-border); border-radius: 13px; background: linear-gradient(var(--difficulty-top), var(--difficulty-bottom)); color: var(--difficulty-text); text-shadow: 0 1px var(--difficulty-shadow); cursor: pointer; }
+.difficulty-selector button { --difficulty-top: #9db487; --difficulty-bottom: #647d55; --difficulty-border: #4d673f; --difficulty-text: white; --difficulty-shadow: #34452b; position: relative; min-height: 82px; padding: 10px 8px; border: 3px solid var(--difficulty-border); border-radius: 13px; background: linear-gradient(var(--difficulty-top), var(--difficulty-bottom)); color: var(--difficulty-text); text-shadow: 0 1px var(--difficulty-shadow); cursor: pointer; }
 .difficulty-selector button.selected { border-color: #fff36a; background: linear-gradient(var(--difficulty-top), var(--difficulty-bottom)); color: var(--difficulty-text); box-shadow: inset 0 2px rgba(255,255,255,.58), 0 3px 0 var(--difficulty-border), 0 0 0 2px rgba(255,235,75,.3); filter: brightness(1.12) saturate(1.12); text-shadow: 0 1px var(--difficulty-shadow); }
 .difficulty-selector [data-difficulty="easy"], .mobile-difficulty-cycle[data-difficulty="easy"] { --difficulty-top: #83d72a; --difficulty-bottom: #469c09; --difficulty-border: #347603; --difficulty-text: white; --difficulty-shadow: #2c6800; }
 .difficulty-selector [data-difficulty="normal"], .mobile-difficulty-cycle[data-difficulty="normal"] { --difficulty-top: #49c9ef; --difficulty-bottom: #147fbe; --difficulty-border: #075e97; --difficulty-text: white; --difficulty-shadow: #07557f; }
@@ -561,7 +561,7 @@ button.hwatu-card:disabled { filter: saturate(.82); }
 .point-value-selector { margin: 0; padding: 0; border: 0; }
 .point-value-selector legend { width: 100%; margin-bottom: 7px; color: #efffd2; font-size: .84rem; font-weight: 900; }
 .point-value-selector > div { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.point-value-selector button { --stake-top: #98b278; --stake-bottom: #607c4d; --stake-border: #456137; --stake-text: white; --stake-shadow: #344b29; min-height: 58px; padding: 7px 5px; border: 2px solid var(--stake-border); border-radius: 11px; background: linear-gradient(var(--stake-top), var(--stake-bottom)); color: var(--stake-text); cursor: pointer; text-shadow: 0 1px var(--stake-shadow); }
+.point-value-selector button { --stake-top: #98b278; --stake-bottom: #607c4d; --stake-border: #456137; --stake-text: white; --stake-shadow: #344b29; position: relative; min-height: 58px; padding: 7px 5px; border: 2px solid var(--stake-border); border-radius: 11px; background: linear-gradient(var(--stake-top), var(--stake-bottom)); color: var(--stake-text); cursor: pointer; text-shadow: 0 1px var(--stake-shadow); }
 .point-value-selector button.selected { border-color: #fff475; background: linear-gradient(var(--stake-top), var(--stake-bottom)); box-shadow: inset 0 2px rgba(255,255,255,.68), 0 3px 0 var(--stake-border), 0 0 0 2px rgba(255,238,87,.3); color: var(--stake-text); filter: brightness(1.12) saturate(1.12); text-shadow: 0 1px var(--stake-shadow); }
 .point-value-selector [data-point-value="100"], .stake-quick-selector [data-point-value="100"], .game-stake[data-point-value="100"] { --stake-top: #ffd34b; --stake-bottom: #e99a0c; --stake-border: #a96600; --stake-text: #503100; --stake-shadow: rgba(255,244,168,.72); }
 .point-value-selector [data-point-value="1000"], .stake-quick-selector [data-point-value="1000"], .game-stake[data-point-value="1000"] { --stake-top: #59d7d0; --stake-bottom: #168b9b; --stake-border: #086170; --stake-text: white; --stake-shadow: #075867; }
@@ -582,6 +582,10 @@ button.hwatu-card:disabled { filter: saturate(.82); }
 .dealer-point-value .point-value-selector legend { margin-bottom: 11px; color: #ffe6ff; font-size: clamp(1.05rem, 1.4vw, 1.2rem); }
 .dealer-point-value .point-value-selector > div { grid-template-columns: 1fr; gap: 10px; }
 .dealer-point-value .point-value-selector button { min-height: clamp(72px, 10.2vh, 92px); padding: 10px 7px; border-width: 3px; }
+.dealer-point-value .point-value-selector button:not(.selected), .dealer-difficulty .difficulty-selector button:not(.selected) { opacity: .72; filter: brightness(.78) saturate(.72); }
+.dealer-point-value .point-value-selector button:not(.selected):hover, .dealer-point-value .point-value-selector button:not(.selected):focus-visible, .dealer-difficulty .difficulty-selector button:not(.selected):hover, .dealer-difficulty .difficulty-selector button:not(.selected):focus-visible { opacity: .9; filter: brightness(.92) saturate(.9); }
+.dealer-point-value .point-value-selector button.selected, .dealer-difficulty .difficulty-selector button.selected { z-index: 1; border-color: #fff; outline: 4px solid #ffe33e; outline-offset: 1px; box-shadow: inset 0 2px rgba(255,255,255,.72), 0 4px 0 var(--stake-border, var(--difficulty-border)), 0 0 0 7px rgba(15,28,45,.72), 0 0 22px 10px rgba(255,226,45,.58); filter: brightness(1.1) saturate(1.14); transform: translateY(-2px); }
+.dealer-point-value .point-value-selector button.selected::after, .dealer-difficulty .difficulty-selector button.selected::after { content: "✓ 선택됨"; position: absolute; top: 5px; right: 6px; padding: 2px 6px; border: 2px solid #17324a; border-radius: 999px; background: #fff; box-shadow: 0 2px 5px rgba(5,18,31,.45); color: #17324a; font-size: clamp(.56rem, .75vw, .66rem); font-weight: 1000; line-height: 1.1; text-shadow: none; }
 .dealer-point-value .point-value-selector b { font-size: clamp(1rem, 1.35vw, 1.18rem); }
 .dealer-point-value .point-value-selector span { font-size: clamp(.74rem, .95vw, .86rem); }
 .starting-player-choice { margin: 0; padding: 14px 12px; border: 3px solid rgba(121,211,234,.76); border-radius: 17px; background: rgba(15,70,91,.9); box-shadow: inset 0 2px rgba(202,246,255,.18), 0 7px 18px rgba(7,19,36,.28); }
@@ -866,6 +870,7 @@ button.hwatu-card:disabled { filter: saturate(.82); }
   .dealer-point-value, .dealer-difficulty { width: 100%; padding: 8px; }
   .dealer-point-value .point-value-selector > div { grid-template-columns: repeat(3, 1fr); gap: 5px; }
   .dealer-point-value .point-value-selector button { min-height: 54px; }
+  .dealer-point-value .point-value-selector button.selected::after, .dealer-difficulty .difficulty-selector button.selected::after { content: "✓"; padding: 2px 5px; }
   .dealer-difficulty .difficulty-selector > div { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .dealer-difficulty .difficulty-selector button { min-height: 64px; }
   .starting-player-choice { padding: 8px 6px; }

@@ -1,4 +1,5 @@
 using Dapper;
+using Hwatu.Server.Migrations;
 
 namespace Hwatu.Server.Data;
 
@@ -14,6 +15,7 @@ public sealed class DatabaseInitializer(HwatuDb database, IWebHostEnvironment en
 
         await using var connection = database.OpenConnection();
         await connection.OpenAsync(cancellationToken);
+        var isNewDatabase = !await HasTableAsync(connection, "users", cancellationToken);
         foreach (var statement in statements)
         {
             await connection.ExecuteAsync(new CommandDefinition(statement, cancellationToken: cancellationToken));
@@ -80,6 +82,27 @@ public sealed class DatabaseInitializer(HwatuDb database, IWebHostEnvironment en
                 cancellationToken: cancellationToken));
         }
 
+        if (isNewDatabase)
+        {
+            await MigrationRunner.BaselineNewDatabaseAsync(
+                connection, environment.ContentRootPath, cancellationToken);
+        }
+
+    }
+
+    private static async Task<bool> HasTableAsync(
+        MySqlConnector.MySqlConnection connection,
+        string tableName,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+              AND table_name = @TableName
+            """;
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            sql, new { TableName = tableName }, cancellationToken: cancellationToken)) > 0;
     }
 
     private static async Task<bool> HasColumnAsync(

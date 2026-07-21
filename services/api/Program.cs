@@ -3,10 +3,18 @@ using Hwatu.Server.Auth;
 using Hwatu.Server.Data;
 using Hwatu.Server.Endpoints;
 using Hwatu.Server.Models;
+using Hwatu.Server.Migrations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
+
+var migrationExitCode = await MigrationCommand.TryRunAsync(args);
+if (migrationExitCode.HasValue)
+{
+    Environment.ExitCode = migrationExitCode.Value;
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
