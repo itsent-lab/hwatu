@@ -65,6 +65,13 @@ const privateOperationalFiles = ignoredFiles.filter(path =>
   /(^|\/)\.env(?:\.|$)/i.test(path) && !isAllowedExample(path) ||
   /\.(?:pem|key|p12|pfx|jks|keystore)$/i.test(path)
 );
+const privateValueSources = privateOperationalFiles.filter(path =>
+  /appsettings\.(?:local|production)\.json$/i.test(path) ||
+  /(^|\/)\.env(?:\.|$)/i.test(path) ||
+  path === 'deploy/production.env' ||
+  path.startsWith('deploy/nginx/') ||
+  path.startsWith('deploy/systemd/')
+);
 
 const genericPrivateValues = new Set([
   'localhost',
@@ -112,6 +119,14 @@ function collectPrivateValues(path) {
     }
   }
 
+  if (path.endsWith('.env')) {
+    const sensitiveKey = /connection|string|password|token|secret|server|host|user|database|domain|path|certificate|service|url/i;
+    for (const line of text.split('\n')) {
+      const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.+)$/);
+      if (match && sensitiveKey.test(match[1])) add(match[2]);
+    }
+  }
+
   const patterns = [
     /server_name\s+([^;\s]+)/g,
     /ssl_certificate(?:_key)?\s+([^;\s]+)/g,
@@ -126,11 +141,20 @@ function collectPrivateValues(path) {
   return values;
 }
 
-const privateValues = new Set(privateOperationalFiles.flatMap(path => [...collectPrivateValues(path)]));
+function containsPrivateValue(body, value) {
+  const text = body.toString('utf8');
+  if (/^[A-Za-z0-9._-]+$/.test(value)) {
+    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`(^|[^A-Za-z0-9._-])${escaped}([^A-Za-z0-9._-]|$)`).test(text);
+  }
+  return body.includes(Buffer.from(value));
+}
+
+const privateValues = new Set(privateValueSources.flatMap(path => [...collectPrivateValues(path)]));
 let privateValueLeakCount = 0;
 for (const value of privateValues) {
   for (const [, body] of publicBodies) {
-    if (body.includes(Buffer.from(value))) privateValueLeakCount += 1;
+    if (containsPrivateValue(body, value)) privateValueLeakCount += 1;
   }
 }
 if (privateValueLeakCount) {
