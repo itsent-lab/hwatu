@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import GostopPointRooms from '../components/GostopPointRooms';
+import GameStatisticsPanel from '../components/GameStatisticsPanel';
 import Loading from '../components/Loading';
 import PageLayout from '../components/PageLayout';
+import PointEntryButtons from '../components/PointEntryButtons';
 import { loadGostopBalanceSnapshot, saveGostopBalanceSnapshot } from '../games/gostop/balanceSnapshot';
 import { DEFAULT_GOSTOP_COMPUTER_BALANCE } from '../games/gostop/money';
 import { loadPendingGostopSettlements, removePendingGostopSettlement } from '../games/gostop/pendingSettlement';
@@ -11,11 +12,12 @@ import { dashboard, refillBalance, settleGostopRound } from '../lib/api';
 import { resetGostopOpponentSession } from '../lib/computerPlayers';
 import { saveGostopPointValue } from '../lib/gamePreferences';
 import { saveProfile } from '../lib/localStore';
-import type { UserProfile } from '../lib/types';
+import type { GameModeStatistics, UserProfile } from '../lib/types';
 
 export default function GostopLobbyPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [gameStats, setGameStats] = useState<GameModeStatistics | null>(null);
   const [refilling, setRefilling] = useState(false);
   const [refillError, setRefillError] = useState('');
 
@@ -59,6 +61,7 @@ export default function GostopLobbyPage() {
       }
       await saveProfile(result.user);
       setUser(result.user);
+      setGameStats(result.gameStats.gostop);
     }).catch(() => navigate('/login', { replace: true }));
   }, [navigate]);
 
@@ -90,22 +93,20 @@ export default function GostopLobbyPage() {
     finally { setRefilling(false); }
   };
 
-  return <PageLayout user={user} pageClassName="dashboard-site-page gostop-lobby-page">
-    <section className="gostop-lobby-panel">
-      <header className="gostop-lobby-heading">
-        <span>3인 고스톱</span>
-        <h1>{user.displayName} 님, 점당 금액을 골라 주세요</h1>
-        {balanceEmpty && <p className="gostop-refill-guide">게임머니를 모두 사용했습니다. 여기에서 리필한 뒤 새 판을 시작하세요.</p>}
-        <div className="gostop-balance"><span>내 게임머니</span><strong>{money}</strong><small>냥</small></div>
-      </header>
-      {balanceEmpty
-        ? <div className="gostop-refill-actions">
-            <button className="primary-button gostop-refill-button" type="button" disabled={refilling} onClick={() => void refill()}>{refilling ? '리필 중…' : '게임머니 500,000냥 리필 받기'}</button>
-            {refillError && <p className="form-error refill-error" role="alert">{refillError}</p>}
-          </div>
-        : <GostopPointRooms onEnter={enterRoom} />}
-      <div className="game-mode-back-row">
-        <Link className="secondary-button game-mode-back-button" to="/home">게임 모드 선택으로 돌아가기</Link>
+  return <PageLayout user={user} pageClassName="dashboard-site-page">
+    <section className="welcome-panel dashboard-welcome">
+      <GameStatisticsPanel stats={gameStats} modeLabel="고스톱" hero showZeroStats />
+      <div className={`balance-card dashboard-player-card${balanceEmpty ? ' balance-empty' : ''}`} aria-label={`${user.displayName}님의 게임머니 ${money}냥`}>
+        <div className="dashboard-player-money"><span>내 게임머니</span><strong>{money}</strong><small>냥</small></div>
+      </div>
+      <div className="button-row dashboard-actions">
+        {balanceEmpty
+          ? <button className="primary-button refill-button" type="button" disabled={refilling} onClick={() => void refill()}>{refilling ? '리필 중…' : '게임머니 500,000냥 리필 받기'}</button>
+          : <PointEntryButtons ariaLabel="고스톱 점당 금액을 고르고 입장하세요" onEnter={enterRoom} />}
+        <div className="game-mode-back-row">
+          <Link className="secondary-button game-mode-back-button" to="/home">게임 모드 선택으로 돌아가기</Link>
+        </div>
+        {refillError && <p className="form-error refill-error" role="alert">{refillError}</p>}
       </div>
     </section>
   </PageLayout>;

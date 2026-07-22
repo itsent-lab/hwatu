@@ -6,6 +6,7 @@ namespace Hwatu.Server.Data;
 
 public sealed class GostopGameRepository(HwatuDb database)
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const long MaxVirtualBalance = 999_999_999_999;
     private const long ComputerRefillBalance = 500_000;
 
@@ -66,8 +67,9 @@ public sealed class GostopGameRepository(HwatuDb database)
             request.PointValue,
             RequestedDeltas = new { humanRequestedDelta, computerARequestedDelta, computerBRequestedDelta },
             ComputerABalanceAfter = computerA,
-            ComputerBBalanceAfter = computerB
-        });
+            ComputerBBalanceAfter = computerB,
+            statistics = request.Statistics ?? new MatchStatistics()
+        }, JsonOptions);
         await connection.ExecuteAsync(
             """
             INSERT INTO match_history

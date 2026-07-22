@@ -34,7 +34,8 @@ public static class GostopGameEndpoints
         if (roundResult is not ("win" or "nagari")
             || (roundResult == "win" && (request.Winner is not ("human" or "computerA" or "computerB") || request.FinalScore <= 0))
             || (roundResult == "nagari" && (request.Winner is not null || request.FinalScore != 0))
-            || !PointValues.Contains(request.PointValue))
+            || !PointValues.Contains(request.PointValue)
+            || !ValidStatistics(request.Statistics))
             return ApiResults.Error("INVALID_SETTLEMENT", "고스톱 정산 정보가 올바르지 않습니다.", 422);
         long humanPoints = request.HumanPoints;
         long computerAPoints = request.ComputerAPoints;
@@ -64,5 +65,16 @@ public static class GostopGameEndpoints
             settlementAmount = result.SettlementAmount,
             settlementApplied = result.SettlementApplied
         });
+    }
+
+    private static bool ValidStatistics(MatchStatistics? statistics)
+    {
+        if (statistics is null) return true;
+        var counts = new[]
+        {
+            statistics.GoCount, statistics.SweepCount, statistics.BombCount,
+            statistics.ShakeCount, statistics.PpeokCount, statistics.OpeningPpeokCount
+        };
+        return statistics.Version == 1 && counts.All(count => count is >= 0 and <= 100);
     }
 }

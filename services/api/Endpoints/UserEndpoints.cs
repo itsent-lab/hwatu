@@ -60,17 +60,24 @@ public static class UserEndpoints
         });
     }
 
-    private static async Task<IResult> DashboardAsync(HttpContext context, SessionService sessions, UserRepository users, GameRepository games)
+    private static async Task<IResult> DashboardAsync(
+        HttpContext context,
+        SessionService sessions,
+        UserRepository users,
+        GameRepository games,
+        StatisticsRepository statistics)
     {
         var user = await sessions.CurrentUserAsync(context.User);
         if (user is null) return ApiResults.Error("AUTH_REQUIRED", "로그인이 필요합니다.", 401);
         var save = await games.LoadMatgoAsync(user.Id);
         var today = await users.TodayStatsAsync(user.Id);
+        var gameStats = await statistics.GetAsync(user.Id);
         return ApiResults.Ok(new
         {
             user = AuthEndpoints.ToClient(user),
             activeSave = save is null ? null : new { save.GameUuid, save.TurnNumber, save.UpdatedAt },
-            today
+            today,
+            gameStats
         });
     }
 

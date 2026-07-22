@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dapper;
 using Hwatu.Server.Models;
 
@@ -5,6 +6,7 @@ namespace Hwatu.Server.Data;
 
 public sealed class GameRepository(HwatuDb database)
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const long MaxVirtualBalance = 999_999_999_999;
     private const long OpponentRefillBalance = 500_000;
 
@@ -149,7 +151,7 @@ public sealed class GameRepository(HwatuDb database)
                 SettlementAmount = appliedDelta,
                 BalanceAfter = balanceAfter,
                 OpponentBalanceAfter = opponentBalanceAfterSettlement,
-                settlement.SummaryJson
+                SummaryJson = BuildSummaryJson(settlement)
             }, transaction);
         await connection.ExecuteAsync(
             """
@@ -200,4 +202,14 @@ public sealed class GameRepository(HwatuDb database)
             WHERE user_id = @UserId AND slot_key = 'matgo-main' AND game_uuid = @GameUuid
             """,
             new { UserId = userId, GameUuid = gameUuid }, transaction);
+
+    private static string BuildSummaryJson(MatgoSettlement settlement)
+    {
+        using var document = JsonDocument.Parse(settlement.SummaryJson);
+        return JsonSerializer.Serialize(new
+        {
+            statistics = settlement.Statistics,
+            settlement = document.RootElement.Clone()
+        }, JsonOptions);
+    }
 }

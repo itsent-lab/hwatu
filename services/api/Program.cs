@@ -24,6 +24,7 @@ builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<GameRepository>();
 builder.Services.AddScoped<GostopGameRepository>();
+builder.Services.AddScoped<StatisticsRepository>();
 builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<HwatuCookieEvents>();
 builder.Services.AddScoped<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();

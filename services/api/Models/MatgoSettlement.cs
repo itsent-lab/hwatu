@@ -4,7 +4,8 @@ public sealed record MatgoSettlement(
     string Result,
     int FinalScore,
     long RequestedAmount,
-    string SummaryJson);
+    string SummaryJson,
+    MatchStatistics Statistics);
 
 public sealed record GameSaveResult(
     long VirtualBalance,

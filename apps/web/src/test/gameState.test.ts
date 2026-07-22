@@ -174,6 +174,7 @@ describe('기본 맞고 진행 상태', () => {
     expect(result.ppeok).toBe(true);
     expect(result.state.floorCards.filter(id => id.startsWith('m01-'))).toHaveLength(3);
     expect(result.state.humanPpeokCount).toBe(1);
+    expect(result.state.humanOpeningPpeokCount).toBe(1);
     expect(result.state.ppeokPiles).toEqual([expect.objectContaining({ month: 1, owner: 'human' })]);
   });
 
@@ -234,6 +235,7 @@ describe('기본 맞고 진행 상태', () => {
     expect(result.specialEvents?.map(event => event.kind)).toEqual(['ttadak', 'sweep']);
     expect(result.stolenPee).toEqual(['m02-03', 'm03-03']);
     expect(result.state.floorCards).toHaveLength(0);
+    expect(result.state.humanSweepCount).toBe(1);
   });
 
   it('마지막 손패에서는 쪽·따닥·싹쓸이 피 뺏기 보너스를 적용하지 않는다', () => {

@@ -85,7 +85,7 @@ public static class GameEndpoints
         if (!state.TryGetProperty("roundResult", out var roundResult)) return false;
         if (roundResult.GetString() == "nagari")
         {
-            settlement = new MatgoSettlement("nagari", 0, 0, "{}");
+            settlement = new MatgoSettlement("nagari", 0, 0, "{}", ReadMatgoStatistics(state, null, false));
             return true;
         }
         if (roundResult.GetString() != "win" ||
@@ -117,7 +117,42 @@ public static class GameEndpoints
             winnerName == "human" ? "win" : "loss",
             finalScore,
             amount,
-            result.GetRawText());
+            result.GetRawText(),
+            ReadMatgoStatistics(state, result, winnerName == "human"));
         return true;
+    }
+
+    private static MatchStatistics ReadMatgoStatistics(JsonElement state, JsonElement? result, bool humanWon)
+    {
+        var ppeokCount = ReadCount(state, "humanPpeokCount");
+        return new MatchStatistics
+        {
+            GoCount = ReadCount(state, "humanGoCount"),
+            SweepCount = ReadCount(state, "humanSweepCount"),
+            BombCount = ReadCount(state, "humanBombCount"),
+            ShakeCount = ReadCount(state, "humanShakeCount"),
+            PpeokCount = ppeokCount,
+            OpeningPpeokCount = ReadCount(state, "humanOpeningPpeokCount"),
+            ThreePpeokWin = humanWon && ppeokCount >= 3,
+            PiBakWin = humanWon && HasBak(result, "pi-bak"),
+            GwangBakWin = humanWon && HasBak(result, "gwang-bak")
+        };
+    }
+
+    private static int ReadCount(JsonElement source, string propertyName)
+    {
+        if (!source.TryGetProperty(propertyName, out var value) || !value.TryGetInt32(out var count)) return 0;
+        return Math.Clamp(count, 0, 100);
+    }
+
+    private static bool HasBak(JsonElement? result, string code)
+    {
+        if (result is not { ValueKind: JsonValueKind.Object } settlement
+            || !settlement.TryGetProperty("baks", out var baks)
+            || baks.ValueKind != JsonValueKind.Array) return false;
+        return baks.EnumerateArray().Any(bak =>
+            bak.ValueKind == JsonValueKind.Object
+            && bak.TryGetProperty("code", out var bakCode)
+            && bakCode.GetString() == code);
     }
 }

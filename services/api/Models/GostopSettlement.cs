@@ -8,7 +8,8 @@ public sealed record GostopSettlementRequest(
     string? RoundResult = null,
     int HumanPoints = 0,
     int ComputerAPoints = 0,
-    int ComputerBPoints = 0);
+    int ComputerBPoints = 0,
+    MatchStatistics? Statistics = null);
 
 public sealed record GostopSettlementResult(
     long VirtualBalance,

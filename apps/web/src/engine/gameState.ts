@@ -18,8 +18,8 @@ export const GAME_STATE_VERSION = 3;
 
 const otherPlayer = (player: PlayerId): PlayerId => player === 'human' ? 'computer' : 'human';
 const keysFor = (player: PlayerId) => player === 'human'
-  ? { hand: 'humanHand', captured: 'humanCaptured', go: 'humanGoCount', lastGo: 'humanScoreAtLastGo', ppeok: 'humanPpeokCount', gookjin: 'humanGookjinAsDoubleJunk', bombSkips: 'humanBombSkips', bombCount: 'humanBombCount', shake: 'humanShakeCount', shakenMonths: 'humanShakenMonths', pendingShake: 'humanPendingShakeMonth' } as const
-  : { hand: 'computerHand', captured: 'computerCaptured', go: 'computerGoCount', lastGo: 'computerScoreAtLastGo', ppeok: 'computerPpeokCount', gookjin: 'computerGookjinAsDoubleJunk', bombSkips: 'computerBombSkips', bombCount: 'computerBombCount', shake: 'computerShakeCount', shakenMonths: 'computerShakenMonths', pendingShake: 'computerPendingShakeMonth' } as const;
+  ? { hand: 'humanHand', captured: 'humanCaptured', go: 'humanGoCount', lastGo: 'humanScoreAtLastGo', ppeok: 'humanPpeokCount', openingPpeok: 'humanOpeningPpeokCount', sweep: 'humanSweepCount', gookjin: 'humanGookjinAsDoubleJunk', bombSkips: 'humanBombSkips', bombCount: 'humanBombCount', shake: 'humanShakeCount', shakenMonths: 'humanShakenMonths', pendingShake: 'humanPendingShakeMonth' } as const
+  : { hand: 'computerHand', captured: 'computerCaptured', go: 'computerGoCount', lastGo: 'computerScoreAtLastGo', ppeok: 'computerPpeokCount', openingPpeok: 'computerOpeningPpeokCount', sweep: 'computerSweepCount', gookjin: 'computerGookjinAsDoubleJunk', bombSkips: 'computerBombSkips', bombCount: 'computerBombCount', shake: 'computerShakeCount', shakenMonths: 'computerShakenMonths', pendingShake: 'computerPendingShakeMonth' } as const;
 
 export function createInitialGame(
   seed = Date.now(),
@@ -52,6 +52,8 @@ export function createInitialGame(
     humanGoCount: 0, computerGoCount: 0,
     humanScoreAtLastGo: 0, computerScoreAtLastGo: 0,
     humanPpeokCount: 0, computerPpeokCount: 0,
+    humanOpeningPpeokCount: 0, computerOpeningPpeokCount: 0,
+    humanSweepCount: 0, computerSweepCount: 0,
     ppeokPiles: [],
     mission: createCardMission(shuffled.seed),
     humanBombSkips: 0, computerBombSkips: 0,
@@ -189,6 +191,10 @@ function stealPeeValue(state: GameState, player: PlayerId, targetValue: number):
 }
 
 function makeSpecialEvent(state: GameState, player: PlayerId, kind: TurnSpecialKind, label: string, stealCount: number): TurnSpecialEvent {
+  if (kind === 'sweep') {
+    const sweepKey = keysFor(player).sweep;
+    state[sweepKey] = (state[sweepKey] ?? 0) + 1;
+  }
   return { kind, label, stolenPee: stealPee(state, player, stealCount) };
 }
 
@@ -361,6 +367,7 @@ export function playTurn(state: GameState, player: PlayerId, cardId: string, opt
   if (isPpeok && drawnCardId) {
     next.floorCards.push(cardId, drawnCardId);
     next[keys.ppeok] += 1;
+    if (next.turnNumber < 2) next[keys.openingPpeok] = (next[keys.openingPpeok] ?? 0) + 1;
     next.ppeokPiles = [...(next.ppeokPiles ?? []), {
       month: getCard(cardId)?.month ?? 0,
       owner: player,

@@ -2,6 +2,7 @@ import { MATGO_POINT_VALUES, type MatgoPointValue } from '../engine/rules/settin
 
 interface PointEntryButtonsProps {
   disabled?: boolean;
+  ariaLabel?: string;
   onEnter: (pointValue: MatgoPointValue) => void;
 }
 
@@ -13,8 +14,12 @@ const ROOM_LABELS: Record<MatgoPointValue, string> = {
   10_000: '큰 승부'
 };
 
-export default function PointEntryButtons({ disabled = false, onEnter }: PointEntryButtonsProps) {
-  return <fieldset className="dashboard-point-entry" aria-label="점당 금액을 고르고 입장하세요">
+export default function PointEntryButtons({
+  disabled = false,
+  ariaLabel = '점당 금액을 고르고 입장하세요',
+  onEnter
+}: PointEntryButtonsProps) {
+  return <fieldset className="dashboard-point-entry" aria-label={ariaLabel}>
     <div>{MATGO_POINT_VALUES.map(pointValue => <button
       type="button"
       disabled={disabled}

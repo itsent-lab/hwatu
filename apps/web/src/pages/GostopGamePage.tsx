@@ -45,11 +45,31 @@ import { animateCardFlight } from '../lib/effects';
 import { loadGostopAiDifficulty, loadGostopPointValue, saveGostopAiDifficulty } from '../lib/gamePreferences';
 import { useGameViewportFit } from '../lib/gameViewport';
 import { saveProfile } from '../lib/localStore';
-import type { GostopSettlementRequest, UserProfile } from '../lib/types';
+import type { GostopSettlementRequest, MatchStatistics, UserProfile } from '../lib/types';
 
 const COMPUTER_TURN_DELAY_MS = 1_700;
 const AUTO_HUMAN_TURN_DELAY_MS = 1_300;
 const formatMoney = (value: number) => new Intl.NumberFormat('ko-KR').format(value);
+
+function humanMatchStatistics(room: GostopRoomState): MatchStatistics {
+  const human = room.players.human;
+  const humanWon = room.winner === 'human';
+  const baks = humanWon
+    ? room.settlement?.loserPayments.flatMap(payment => payment.baks) ?? []
+    : [];
+  return {
+    version: 1,
+    goCount: human.goCount,
+    sweepCount: human.sweepCount ?? 0,
+    bombCount: human.bombCount,
+    shakeCount: human.shakeCount,
+    ppeokCount: human.ppeokCount,
+    openingPpeokCount: human.openingPpeokTotal ?? 0,
+    threePpeokWin: humanWon && human.ppeokCount >= 3,
+    piBakWin: baks.includes('pi-bak'),
+    gwangBakWin: baks.includes('gwang-bak')
+  };
+}
 
 interface FloorChoice {
   stage: 'played' | 'drawn' | 'flip-only';
@@ -260,7 +280,7 @@ export default function GostopGamePage() {
   useEffect(() => {
     if (!user || !room || room.phase !== 'round-ended') return;
     const pointDeltas = room.settlement?.pointDeltas ?? room.interimPointDeltas;
-    if (Object.values(pointDeltas).every(points => points === 0)) return;
+    if (Object.values(pointDeltas).every(points => points === 0) && room.roundResult !== 'nagari') return;
     const gameUuid = roundGameUuidRef.current;
     if (settledRoundRef.current === gameUuid) return;
     settledRoundRef.current = gameUuid;
@@ -282,7 +302,8 @@ export default function GostopGamePage() {
       pointValue: room.pointValue,
       humanPoints: pointDeltas.human,
       computerAPoints: pointDeltas.computerA,
-      computerBPoints: pointDeltas.computerB
+      computerBPoints: pointDeltas.computerB,
+      statistics: humanMatchStatistics(room)
     };
     enqueuePendingGostopSettlement(user.id, settlementRequest);
     void settleGostopRound(settlementRequest).then(result => {

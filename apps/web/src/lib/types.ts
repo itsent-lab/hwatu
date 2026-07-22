@@ -21,6 +21,54 @@ export interface GostopSettlementResult {
   settlementApplied: boolean;
 }
 
+export interface MatchStatistics {
+  version: 1;
+  goCount: number;
+  sweepCount: number;
+  bombCount: number;
+  shakeCount: number;
+  ppeokCount: number;
+  openingPpeokCount: number;
+  threePpeokWin: boolean;
+  piBakWin: boolean;
+  gwangBakWin: boolean;
+}
+
+export interface GameModeStatistics {
+  gameMode: 'matgo' | 'gostop';
+  totalGames: number;
+  wins: number;
+  losses: number;
+  nagari: number;
+  winRate: number;
+  highestScore: number;
+  longestWinStreak: number;
+  currentWinStreak: number;
+  totalSettlement: number;
+  biggestWinAmount: number;
+  recentResults: Array<'win' | 'loss' | 'draw' | 'nagari'>;
+  specialStatsTrackedGames: number;
+  totalGoCount: number;
+  highestWinningGoCount: number;
+  totalSweepCount: number;
+  maxSweepCount: number;
+  totalBombCount: number;
+  maxBombCount: number;
+  totalShakeCount: number;
+  maxShakeCount: number;
+  totalPpeokCount: number;
+  maxPpeokCount: number;
+  openingPpeokCount: number;
+  threePpeokWins: number;
+  piBakWins: number;
+  gwangBakWins: number;
+}
+
+export interface PlayerGameStatistics {
+  matgo: GameModeStatistics;
+  gostop: GameModeStatistics;
+}
+
 export interface GostopSettlementRequest {
   gameUuid: string;
   roundResult?: 'win' | 'nagari';
@@ -30,6 +78,7 @@ export interface GostopSettlementRequest {
   humanPoints?: number;
   computerAPoints?: number;
   computerBPoints?: number;
+  statistics?: MatchStatistics;
 }
 
 export interface SessionData {

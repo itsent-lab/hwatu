@@ -55,7 +55,7 @@
 | `POST /api/auth/login` | CSRF | `username`, `password`, `remember`; 사용자 반환 |
 | `POST /api/auth/logout` | 세션+CSRF | 세션 종료 |
 | `GET /api/session` | 세션 | 사용자, 새 CSRF 토큰, 기기 ID |
-| `GET /api/dashboard` | 세션 | 사용자, 맞고 저장 메타, 오늘 통계 |
+| `GET /api/dashboard` | 세션 | 사용자, 맞고 저장 메타, 오늘 통계, 모드별 누적 `gameStats` |
 | `POST /api/balance/refill` | 세션+CSRF | 0냥일 때 500,000냥 리필 |
 | `GET /api/profile/image/{userId}/{version}` | 세션 | 개인 JPEG; 성공 응답은 JSON이 아닌 이미지 |
 | `PUT /api/profile/image` | 세션+CSRF | `image` 폼 필드 JPEG 업로드 |
@@ -65,9 +65,11 @@
 | `PUT /api/users/{id}/password` | 관리자+CSRF | `password` 변경 |
 | `GET /api/games/matgo` | 세션 | 저장된 맞고 전체 상태 또는 `data: null` |
 | `PUT /api/games/matgo` | 세션+CSRF | UUID, 버전, 턴, 기기 ID, 전체 상태 저장·정산 |
-| `POST /api/games/gostop/settle` | 세션+CSRF | UUID, 승자·결과, 점수와 3인 증감 정산 |
+| `POST /api/games/gostop/settle` | 세션+CSRF | UUID, 승자·결과, 점수, 3인 증감과 선택적 통계 버전 1 정산 |
 
 사용자 객체의 공통 필드는 `id`, `username`, `displayName`, `role`, `virtualBalance`, `opponentBalance`, `gostopComputerABalance`, `gostopComputerBBalance`, `profileImageUrl`입니다. 앱은 모르는 추가 필드를 무시합니다.
+
+`GET /api/dashboard`의 `gameStats`는 `matgo`와 `gostop`을 구분해 전체 판, 승·패·나가리, 나가리를 제외한 승률, 최고 점수, 현재·최다 연승, 누적 정산, 최고 한 판 수익과 최근 5판을 제공합니다. `specialStatsTrackedGames`와 고·싹쓸이·폭탄·흔들기·뻑·박 필드는 `match_history.summary_json`에 통계 버전 1이 저장된 완료 판만 집계합니다. 구버전 기록에 통계 요약이 없어도 기본 전적과 정산 집계에는 포함되며 오류로 처리하지 않습니다.
 
 ## 6. 검증 한계
 

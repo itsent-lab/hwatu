@@ -63,6 +63,10 @@ export interface GameState {
   computerScoreAtLastGo: number;
   humanPpeokCount: number;
   computerPpeokCount: number;
+  humanOpeningPpeokCount?: number;
+  computerOpeningPpeokCount?: number;
+  humanSweepCount?: number;
+  computerSweepCount?: number;
   ppeokPiles?: PpeokPile[];
   mission?: CardMission;
   humanBombSkips: number;

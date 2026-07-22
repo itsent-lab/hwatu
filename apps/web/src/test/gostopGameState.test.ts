@@ -120,6 +120,7 @@ describe('3인 고스톱 기본 진행', () => {
     expect(result.state.players.computerA.captured).not.toContain('m03-03');
     expect(result.state.players.computerB.captured).not.toContain('m04-03');
     expect(result.state.lastAction).toContain('싹쓸이');
+    expect(result.state.players.human.sweepCount).toBe(1);
   });
 
   it('컴퓨터가 싹쓸이하면 나와 다른 컴퓨터에게서 피 한 장씩 가져온다', () => {
@@ -148,6 +149,7 @@ describe('3인 고스톱 기본 진행', () => {
     const ppeok = playGostopTurn(room, 'human', 'm01-01');
     expect(ppeok.specialEvents).toEqual([expect.objectContaining({ kind: 'ppeok' })]);
     expect(ppeok.state.ppeokPiles).toEqual([expect.objectContaining({ month: 1, owner: 'human' })]);
+    expect(ppeok.state.players.human.openingPpeokTotal).toBe(1);
 
     const captureRoom = structuredClone(ppeok.state);
     captureRoom.currentPlayer = 'computerA';

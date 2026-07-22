@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/app.css';
 import './styles/gameHub.css';
-import './styles/gostopLobby.css';
+import './styles/gameStatistics.css';
 import './styles/gostopRoom.css';
 import './styles/game.css';
 import './styles/fiveGoCelebration.css';

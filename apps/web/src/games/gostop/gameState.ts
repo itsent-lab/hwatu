@@ -26,6 +26,8 @@ export interface GostopPlayerState {
   turnCount: number;
   ppeokCount: number;
   openingPpeokCount: number;
+  openingPpeokTotal: number;
+  sweepCount: number;
   emptyCaptureStreak: number;
   shakeCount: number;
   bombCount: number;
@@ -127,7 +129,7 @@ function hasChongtong(cardIds: string[]) {
 function emptyPlayer(hand: string[]): GostopPlayerState {
   return {
     hand: sortHand(hand), captured: [], goCount: 0, scoreAtLastGo: 0, gookjinAsDoubleJunk: false,
-    turnCount: 0, ppeokCount: 0, openingPpeokCount: 0, emptyCaptureStreak: 0,
+    turnCount: 0, ppeokCount: 0, openingPpeokCount: 0, openingPpeokTotal: 0, sweepCount: 0, emptyCaptureStreak: 0,
     shakeCount: 0, bombCount: 0, flipOnlyTurns: 0, shakenMonths: [], pendingShakeMonth: null
   };
 }
@@ -306,6 +308,7 @@ function stealPeeFromOpponents(state: GostopRoomState, player: GostopPlayerId, c
 }
 
 function makeSpecialEvent(state: GostopRoomState, player: GostopPlayerId, kind: TurnSpecialKind, label: string): TurnSpecialEvent {
+  if (kind === 'sweep') state.players[player].sweepCount = (state.players[player].sweepCount ?? 0) + 1;
   return { kind, label, stolenPee: stealPeeFromOpponents(state, player, 1) };
 }
 
@@ -407,6 +410,7 @@ function updatePlayerTurnTracking(state: GostopRoomState, player: GostopPlayerId
     playerState.ppeokCount += 1;
     if (playerState.openingPpeokCount === playerState.turnCount) {
       playerState.openingPpeokCount += 1;
+      playerState.openingPpeokTotal += 1;
       awardImmediatePoints(state, player, playerState.openingPpeokCount * 3);
     }
   } else if (playerState.openingPpeokCount === playerState.turnCount) {

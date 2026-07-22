@@ -3,15 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import Loading from '../components/Loading';
 import PageLayout from '../components/PageLayout';
 import PointEntryButtons from '../components/PointEntryButtons';
+import GameStatisticsPanel from '../components/GameStatisticsPanel';
 import { dashboard, refillBalance } from '../lib/api';
 import { savePointValue } from '../lib/gamePreferences';
 import { saveProfile } from '../lib/localStore';
 import { resetMatgoOpponentSession } from '../lib/opponentNames';
-import type { UserProfile } from '../lib/types';
+import type { PlayerGameStatistics, UserProfile } from '../lib/types';
 
 interface DashboardData {
   user: UserProfile;
   activeSave: { gameUuid: string; turnNumber: number; updatedAt: string } | null;
+  gameStats?: PlayerGameStatistics;
 }
 
 export default function DashboardPage() {
@@ -59,10 +61,7 @@ export default function DashboardPage() {
   };
   return <PageLayout user={data.user} pageClassName="dashboard-site-page">
     <section className="welcome-panel dashboard-welcome">
-      <div className="welcome-copy">
-        <h1>{data.user.displayName} 님, 한 판 즐겨볼까요?</h1>
-        {balanceEmpty && <p>게임머니를 모두 사용했습니다. 여기에서 리필한 뒤 새 판을 시작하세요.</p>}
-      </div>
+      <GameStatisticsPanel stats={data.gameStats?.matgo} modeLabel="맞고" hero showZeroStats />
       <div className={`balance-card dashboard-player-card${balanceEmpty ? ' balance-empty' : ''}`} aria-label={`${data.user.displayName}님의 게임머니 ${money}냥`}>
         <div className="dashboard-player-money"><span>내 게임머니</span><strong>{money}</strong><small>냥</small></div>
       </div>

@@ -124,6 +124,7 @@ export const dashboard = () => request<{
   user: UserProfile;
   activeSave: { gameUuid: string; turnNumber: number; updatedAt: string } | null;
   today: { games: number; wins: number; settlement: number };
+  gameStats: import('./types').PlayerGameStatistics;
 }>('/api/dashboard');
 export const refillBalance = () => write<{ balance: number }>('/api/balance/refill', 'POST');
 
