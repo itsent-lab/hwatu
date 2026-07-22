@@ -67,10 +67,17 @@ final class NativeLayoutRenderTests: XCTestCase {
         appState.dashboard = DashboardData(
             user: user,
             activeSave: .init(gameUuid: "preview", turnNumber: 12, updatedAt: "2026-07-21T00:00:00Z"),
-            today: .init(games: 0, wins: 0, settlement: 0)
+            today: .init(games: 0, wins: 0, settlement: 0),
+            gameStats: PlayerGameStatistics(
+                matgo: sampleStatistics(gameMode: "matgo"),
+                gostop: sampleStatistics(gameMode: "gostop")
+            )
         )
 
         let home = RootView(launchOnAppear: false)
+            .environmentObject(appState)
+            .frame(width: 1_280, height: 720)
+        let lobby = GameLobbyView(mode: .matgo, initialData: appState.dashboard, loadDashboardOnAppear: false)
             .environmentObject(appState)
             .frame(width: 1_280, height: 720)
         let dealer = DealerSelectionView(
@@ -82,6 +89,7 @@ final class NativeLayoutRenderTests: XCTestCase {
         .frame(width: 1_280, height: 720)
 
         try assertRendered(home, named: "home")
+        try assertRendered(lobby, named: "matgo-lobby-statistics")
         try assertRendered(dealer, named: "dealer-selection")
     }
 
@@ -102,6 +110,17 @@ final class NativeLayoutRenderTests: XCTestCase {
         .frame(width: 1_280, height: 720)
 
         try assertRendered(difficultyViews, named: "difficulty-levels")
+    }
+
+    @MainActor
+    func testGameStatisticsSummaryRendersAtLobbyWidth() throws {
+        let statistics = sampleStatistics(gameMode: "matgo")
+        let view = GameStatisticsSummary(mode: .matgo, statistics: statistics)
+            .padding(20)
+            .background(HwatuTheme.paper)
+            .frame(width: 1_120, height: 190)
+
+        try assertRendered(view, named: "game-statistics-summary", width: 1_120, height: 190)
     }
 
     @MainActor
@@ -250,6 +269,18 @@ final class NativeLayoutRenderTests: XCTestCase {
             let rightIndex = Int($1.id.suffix(2)) ?? 0
             return (leftIndex, $0.month, $0.id) < (rightIndex, $1.month, $1.id)
         }
+    }
+
+    private func sampleStatistics(gameMode: String) -> GameModeStatistics {
+        GameModeStatistics(
+            gameMode: gameMode, totalGames: 42, wins: 26, losses: 13, nagari: 3, winRate: 66.7,
+            highestScore: 128, longestWinStreak: 5, currentWinStreak: 2,
+            totalSettlement: 45_600, biggestWinAmount: 12_800, recentResults: ["win", "loss", "nagari"],
+            specialStatsTrackedGames: 9, totalGoCount: 12, highestWinningGoCount: 3,
+            totalSweepCount: 4, maxSweepCount: 2, totalBombCount: 3, maxBombCount: 1,
+            totalShakeCount: 5, maxShakeCount: 2, totalPpeokCount: 6, maxPpeokCount: 2,
+            openingPpeokCount: 2, threePpeokWins: 1, piBakWins: 3, gwangBakWins: 2
+        )
     }
 
     private func capturedRackSnapshot() -> NativeGameSnapshot {

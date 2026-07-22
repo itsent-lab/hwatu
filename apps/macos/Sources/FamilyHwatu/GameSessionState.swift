@@ -38,6 +38,16 @@ extension GamePhase {
     }
 }
 
+extension GameSession {
+    var automaticPlayTaskStateKey: String {
+        [
+            String(turnNumber), phase.snapshotName, phase.snapshotPlayer?.rawValue ?? "",
+            currentPlayer.rawValue, pendingMatch?.id.uuidString ?? "", pendingChongtong?.id ?? "",
+            humanHand.map(\.id).joined(separator: ",")
+        ].joined(separator: "|")
+    }
+}
+
 struct NativeGameUndoState {
     let hands: [PlayerID: [HwatuCard]]
     let captured: [PlayerID: [HwatuCard]]
@@ -62,6 +72,8 @@ struct NativeGameUndoState {
     let emptyCaptureStreaks: [PlayerID: Int]
     let turnCounts: [PlayerID: Int]
     let openingPpeokCounts: [PlayerID: Int]
+    let openingPpeokTotals: [PlayerID: Int]
+    let sweepCounts: [PlayerID: Int]
     let interimPointDeltas: [PlayerID: Int]
     let lastGoPlayer: PlayerID?
     let gookjinChoiceMade: [PlayerID: Bool]

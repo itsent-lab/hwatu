@@ -45,9 +45,12 @@ struct DealerSelectionView: View {
                 .padding(.horizontal, compactLayout ? 8 : 22)
                 .padding(.vertical, compactLayout ? 8 : 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(LinearGradient(colors: [Color(red: 0.08, green: 0.24, blue: 0.35), Color(red: 0.03, green: 0.11, blue: 0.19)], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: compactLayout ? 14 : 25))
+                .background {
+                    RoundedRectangle(cornerRadius: compactLayout ? 14 : 25)
+                        .fill(LinearGradient(colors: [Color(red: 0.08, green: 0.24, blue: 0.35), Color(red: 0.03, green: 0.11, blue: 0.19)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .shadow(color: .black.opacity(0.58), radius: 20, y: 10)
+                }
                 .overlay(RoundedRectangle(cornerRadius: compactLayout ? 14 : 25).stroke(Color(red: 0.19, green: 0.42, blue: 0.55), lineWidth: compactLayout ? 2 : 4))
-                .shadow(color: .black.opacity(0.58), radius: 20, y: 10)
                 .padding(.horizontal, compactLayout ? 4 : 20)
                 .padding(.vertical, compactLayout ? 4 : 42)
             }
@@ -75,6 +78,7 @@ struct DealerSelectionView: View {
         VStack(spacing: 10) {
             Text("점당 게임머니").font(.headline.weight(.black)).foregroundStyle(Color(red: 1.0, green: 0.91, blue: 0.83))
             ForEach(Array(pointValues.enumerated()), id: \.offset) { index, value in
+                let selected = selectedPointValue == value
                 Button {
                     guard pickedIndex == nil else { return }
                     selectedPointValue = value
@@ -85,10 +89,21 @@ struct DealerSelectionView: View {
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity, minHeight: 76)
-                    .background(pointGradient(index), in: RoundedRectangle(cornerRadius: 9))
-                    .overlay(RoundedRectangle(cornerRadius: 9).stroke(selectedPointValue == value ? HwatuTheme.gold : Color.white.opacity(0.16), lineWidth: selectedPointValue == value ? 3 : 1))
-                    .shadow(color: .black.opacity(0.28), radius: 3, y: 3)
-                }.buttonStyle(.plain)
+                    .background {
+                        RoundedRectangle(cornerRadius: 9)
+                            .fill(pointGradient(index))
+                            .shadow(color: .black.opacity(0.28), radius: 3, y: 3)
+                    }
+                    .overlay(RoundedRectangle(cornerRadius: 9).stroke(selected ? HwatuTheme.gold : Color.white.opacity(0.16), lineWidth: selected ? 4 : 1))
+                    .overlay(alignment: .topTrailing) {
+                        if selected { selectionBadge(compact: false) }
+                    }
+                    .opacity(selected ? 1 : 0.70)
+                    .scaleEffect(selected ? 1 : 0.975)
+                }
+                .buttonStyle(.plain)
+                .disabled(pickedIndex != nil)
+                .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
         .padding(13)
@@ -102,6 +117,7 @@ struct DealerSelectionView: View {
             Text("점당 게임머니").font(.subheadline.weight(.black)).foregroundStyle(Color(red: 1.0, green: 0.91, blue: 0.83))
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 3), spacing: 5) {
                 ForEach(Array(pointValues.enumerated()), id: \.offset) { index, value in
+                    let selected = selectedPointValue == value
                     Button {
                         guard pickedIndex == nil else { return }
                         selectedPointValue = value
@@ -112,10 +128,14 @@ struct DealerSelectionView: View {
                         }
                         .foregroundStyle(.white).frame(maxWidth: .infinity, minHeight: 50)
                         .background(pointGradient(index), in: RoundedRectangle(cornerRadius: 7))
-                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(selectedPointValue == value ? .white : Color.white.opacity(0.16), lineWidth: selectedPointValue == value ? 3 : 1))
+                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(selected ? HwatuTheme.gold : Color.white.opacity(0.16), lineWidth: selected ? 3 : 1))
+                        .overlay(alignment: .topTrailing) {
+                            if selected { selectionBadge(compact: true) }
+                        }
+                        .opacity(selected ? 1 : 0.70)
                     }
                     .buttonStyle(.plain).disabled(pickedIndex != nil)
-                    .accessibilityAddTraits(selectedPointValue == value ? .isSelected : [])
+                    .accessibilityAddTraits(selected ? .isSelected : [])
                 }
             }
         }
@@ -218,6 +238,26 @@ struct DealerSelectionView: View {
             [Color(red: 0.83, green: 0.18, blue: 0.46), Color(red: 0.50, green: 0.06, blue: 0.29)]
         ]
         return LinearGradient(colors: colors[index], startPoint: .top, endPoint: .bottom)
+    }
+
+    @ViewBuilder
+    private func selectionBadge(compact: Bool) -> some View {
+        if compact {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 15, weight: .black))
+                .foregroundStyle(HwatuTheme.gold)
+                .padding(4)
+                .accessibilityHidden(true)
+        } else {
+            Label("선택됨", systemImage: "checkmark")
+                .font(.system(size: 10, weight: .black))
+                .foregroundStyle(Color(red: 0.19, green: 0.12, blue: 0.05))
+                .padding(.horizontal, 8)
+                .frame(minHeight: 22)
+                .background(HwatuTheme.gold, in: Capsule())
+                .offset(x: -7, y: 6)
+                .accessibilityHidden(true)
+        }
     }
 
 }

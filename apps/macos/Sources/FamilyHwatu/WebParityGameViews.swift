@@ -461,9 +461,12 @@ private struct ResultActionButtonStyle: ButtonStyle {
             .font(.system(size: 15, weight: .black))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity, minHeight: 54)
-            .background(gradient, in: RoundedRectangle(cornerRadius: 12))
+            .background {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(gradient)
+                    .shadow(color: shadow, radius: 0, y: configuration.isPressed ? 1 : 4)
+            }
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(border, lineWidth: 3))
-            .shadow(color: shadow, radius: 0, y: configuration.isPressed ? 1 : 4)
             .offset(y: configuration.isPressed ? 3 : 0)
     }
 

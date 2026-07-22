@@ -150,9 +150,11 @@ public static class GameEndpoints
         if (result is not { ValueKind: JsonValueKind.Object } settlement
             || !settlement.TryGetProperty("baks", out var baks)
             || baks.ValueKind != JsonValueKind.Array) return false;
+        var nativeLabel = code == "pi-bak" ? "피박" : code == "gwang-bak" ? "광박" : code;
         return baks.EnumerateArray().Any(bak =>
-            bak.ValueKind == JsonValueKind.Object
-            && bak.TryGetProperty("code", out var bakCode)
-            && bakCode.GetString() == code);
+            (bak.ValueKind == JsonValueKind.String && bak.GetString() == nativeLabel)
+            || (bak.ValueKind == JsonValueKind.Object
+                && bak.TryGetProperty("code", out var bakCode)
+                && bakCode.GetString() == code));
     }
 }

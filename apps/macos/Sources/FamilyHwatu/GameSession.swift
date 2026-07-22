@@ -31,24 +31,26 @@ final class GameSession: ObservableObject {
     @Published private(set) var pendingChongtong: NativeChongtong?
     @Published private(set) var cardMotion: NativeCardMotion?
     @Published private(set) var ppeokCounts: [PlayerID: Int] = [:]
+    @Published private(set) var openingPpeokTotals: [PlayerID: Int] = [:]
+    @Published private(set) var sweepCounts: [PlayerID: Int] = [:]
     @Published private(set) var lastRuleEvents: [NativeRuleEvent] = []
     @Published private(set) var roundMultiplier: Int
     @Published var difficulty: AIDifficulty
     @Published var pendingMatch: PendingMatch?
     private(set) var missionCards: [HwatuCard] = []
-    private var activePlayedCard: HwatuCard?
-    private var stagedPair: NativeStagedPair?
-    private var shakenMonths: [PlayerID: Set<Int>] = [:]
+    private(set) var activePlayedCard: HwatuCard?
+    private(set) var stagedPair: NativeStagedPair?
+    private(set) var shakenMonths: [PlayerID: Set<Int>] = [:]
     private var undoStack: [NativeGameUndoState] = []
-    private var ppeokOwners: [Int: PlayerID] = [:]
-    private var emptyCaptureStreaks: [PlayerID: Int] = [:]
-    private var turnCounts: [PlayerID: Int] = [:]
-    private var openingPpeokCounts: [PlayerID: Int] = [:]
-    private var interimPointDeltas: [PlayerID: Int] = [:]
-    private var lastGoPlayer: PlayerID?
-    private var gookjinChoiceMade: [PlayerID: Bool] = [:]
-    private var lastDiscardedCardId: String?
-    private var lastDiscardedBy: PlayerID?
+    private(set) var ppeokOwners: [Int: PlayerID] = [:]
+    private(set) var emptyCaptureStreaks: [PlayerID: Int] = [:]
+    private(set) var turnCounts: [PlayerID: Int] = [:]
+    private(set) var openingPpeokCounts: [PlayerID: Int] = [:]
+    private(set) var interimPointDeltas: [PlayerID: Int] = [:]
+    private(set) var lastGoPlayer: PlayerID?
+    private(set) var gookjinChoiceMade: [PlayerID: Bool] = [:]
+    private(set) var lastDiscardedCardId: String?
+    private(set) var lastDiscardedBy: PlayerID?
     private var capturedCountAtTurnStart = 0
     private var currentTurnIsFinalHand = false
     private var animateNextDraw = true
@@ -108,6 +110,8 @@ final class GameSession: ObservableObject {
         emptyCaptureStreaks = Self.playerDictionary(snapshot.emptyCaptureStreaks)
         turnCounts = Self.playerDictionary(snapshot.turnCounts)
         openingPpeokCounts = Self.playerDictionary(snapshot.openingPpeokCounts)
+        openingPpeokTotals = Self.playerDictionary(snapshot.openingPpeokTotals)
+        sweepCounts = Self.playerDictionary(snapshot.sweepCounts)
         interimPointDeltas = Self.playerDictionary(snapshot.interimPointDeltas)
         lastGoPlayer = snapshot.lastGoPlayer
         gookjinChoiceMade = Self.playerDictionary(snapshot.gookjinChoiceMade)
@@ -405,6 +409,8 @@ final class GameSession: ObservableObject {
         emptyCaptureStreaks = state.emptyCaptureStreaks
         turnCounts = state.turnCounts
         openingPpeokCounts = state.openingPpeokCounts
+        openingPpeokTotals = state.openingPpeokTotals
+        sweepCounts = state.sweepCounts
         interimPointDeltas = state.interimPointDeltas
         lastGoPlayer = state.lastGoPlayer
         gookjinChoiceMade = state.gookjinChoiceMade
@@ -416,58 +422,6 @@ final class GameSession: ObservableObject {
         stagedPair = nil
         isAIThinking = false
         undosUsed += 1
-    }
-
-    func snapshot() -> NativeGameSnapshot {
-        let result = phase == .ended ? (winner == nil ? "nagari" : "win") : nil
-        return NativeGameSnapshot(
-            stateVersion: 3,
-            gameUuid: gameUuid,
-            gameMode: mode.rawValue,
-            turnNumber: turnNumber,
-            pointValue: pointValue,
-            computerDifficulty: difficulty,
-            phase: phase.snapshotName,
-            currentPlayer: currentPlayer,
-            humanHand: ids(hands[.human]),
-            computerHand: ids(hands[.computer]),
-            computerAHand: mode == .gostop ? ids(hands[.computerA]) : nil,
-            computerBHand: mode == .gostop ? ids(hands[.computerB]) : nil,
-            floorCards: ids(floorCards), drawPile: ids(drawPile),
-            humanCaptured: ids(captured[.human]),
-            computerCaptured: ids(captured[.computer]),
-            computerACaptured: mode == .gostop ? ids(captured[.computerA]) : nil,
-            computerBCaptured: mode == .gostop ? ids(captured[.computerB]) : nil,
-            humanGoCount: goCounts[.human] ?? 0,
-            computerGoCount: goCounts[.computer] ?? 0,
-            computerAGoCount: mode == .gostop ? goCounts[.computerA] ?? 0 : nil,
-            computerBGoCount: mode == .gostop ? goCounts[.computerB] ?? 0 : nil,
-            winner: winner, roundResult: result, settlement: settlement,
-            lastAction: lastAction, createdAt: createdAt,
-            shakeCounts: stringDictionary(shakeCounts),
-            bombCounts: stringDictionary(bombCounts),
-            bombSkips: stringDictionary(bombSkips),
-            gookjinAsPee: stringDictionary(gookjinAsPee),
-            shakenMonths: stringDictionary(shakenMonths.mapValues(Array.init)),
-            missionCardIds: missionCards.map(\.id),
-            ppeokCounts: stringDictionary(ppeokCounts),
-            ppeokOwners: Dictionary(uniqueKeysWithValues: ppeokOwners.map { (String($0.key), $0.value.rawValue) }),
-            roundMultiplier: roundMultiplier,
-            lastDiscardedCardId: lastDiscardedCardId,
-            lastDiscardedBy: lastDiscardedBy,
-            emptyCaptureStreaks: stringDictionary(emptyCaptureStreaks),
-            turnCounts: stringDictionary(turnCounts),
-            openingPpeokCounts: stringDictionary(openingPpeokCounts),
-            interimPointDeltas: stringDictionary(interimPointDeltas),
-            lastGoPlayer: lastGoPlayer,
-            gookjinChoiceMade: stringDictionary(gookjinChoiceMade),
-            startingPlayer: startingPlayer,
-            phasePlayer: phase.snapshotPlayer,
-            pendingMatchState: pendingMatch.map { .init(cardId: $0.card.id, candidateIds: $0.candidates.map(\.id), player: $0.player, stage: $0.stage) },
-            stagedPairState: stagedPair.map { .init(newCardId: $0.newCard.id, floorCardId: $0.floorCard.id, player: $0.player) },
-            activePlayedCardId: activePlayedCard?.id,
-            pendingChongtongState: pendingChongtong
-        )
     }
 
     private func deal(deck suppliedDeck: [HwatuCard]? = nil) {
@@ -485,6 +439,8 @@ final class GameSession: ObservableObject {
             emptyCaptureStreaks[player] = 0
             turnCounts[player] = 0
             openingPpeokCounts[player] = 0
+            openingPpeokTotals[player] = 0
+            sweepCounts[player] = 0
             interimPointDeltas[player] = 0
             gookjinChoiceMade[player] = false
         }
@@ -598,6 +554,7 @@ final class GameSession: ObservableObject {
                 floorCards.append(card)
                 ppeokOwners[card.month] = currentPlayer
                 ppeokCounts[currentPlayer, default: 0] += 1
+                if mode == .matgo, turnNumber < 2 { openingPpeokTotals[currentPlayer, default: 0] += 1 }
                 let declaration = NativeSpecialRules.ppeokDeclaration(count: ppeokCounts[currentPlayer] ?? 1)
                 appendRuleEvent(.ppeok, label: declaration.notice.replacingOccurrences(of: "!", with: ""), stolen: [])
                 specialNotice = declaration.notice
@@ -816,6 +773,7 @@ final class GameSession: ObservableObject {
         let stolen = stealPee(for: currentPlayer)
         queuePeeTransfer(stolen)
         appendRuleEvent(.sweep, label: "싹쓸이", stolen: stolen)
+        sweepCounts[currentPlayer, default: 0] += 1
         let prefix = specialNotice.map { "\($0.replacingOccurrences(of: "!", with: "")) · " } ?? ""
         specialNotice = "\(prefix)싹쓸이\(stolen.isEmpty ? "!" : " · 피뺏기!")"
         lastAction = "\(currentPlayer.displayName)이 바닥패를 싹쓸이했습니다."
@@ -828,6 +786,7 @@ final class GameSession: ObservableObject {
         if isPpeok {
             if (openingPpeokCounts[currentPlayer] ?? 0) == (turnCounts[currentPlayer] ?? 0) {
                 openingPpeokCounts[currentPlayer, default: 0] += 1
+                openingPpeokTotals[currentPlayer, default: 0] += 1
                 awardImmediatePoints(to: currentPlayer, pointsPerOpponent: (openingPpeokCounts[currentPlayer] ?? 1) * 3)
             }
         } else if (openingPpeokCounts[currentPlayer] ?? 0) == (turnCounts[currentPlayer] ?? 0) {
@@ -916,6 +875,8 @@ final class GameSession: ObservableObject {
             emptyCaptureStreaks: emptyCaptureStreaks,
             turnCounts: turnCounts,
             openingPpeokCounts: openingPpeokCounts,
+            openingPpeokTotals: openingPpeokTotals,
+            sweepCounts: sweepCounts,
             interimPointDeltas: interimPointDeltas,
             lastGoPlayer: lastGoPlayer,
             gookjinChoiceMade: gookjinChoiceMade,

@@ -180,6 +180,13 @@ struct NativeGameSnapshot: Codable {
     var stagedPairState: NativeStagedPairState? = nil
     var activePlayedCardId: String? = nil
     var pendingChongtongState: NativeChongtong? = nil
+    var sweepCounts: [String: Int]? = nil
+    var openingPpeokTotals: [String: Int]? = nil
+    var humanSweepCount: Int? = nil
+    var humanBombCount: Int? = nil
+    var humanShakeCount: Int? = nil
+    var humanPpeokCount: Int? = nil
+    var humanOpeningPpeokCount: Int? = nil
 }
 
 enum GameMoneySyncState: Equatable {

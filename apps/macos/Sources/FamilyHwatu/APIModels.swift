@@ -60,6 +60,7 @@ struct DashboardData: Decodable {
     let user: UserProfile
     let activeSave: ActiveSave?
     let today: Today
+    let gameStats: PlayerGameStatistics?
 }
 
 struct FamilyUser: Decodable, Identifiable {
@@ -117,6 +118,29 @@ struct GostopSettlementRequest: Codable, Equatable {
     let humanPoints: Int
     let computerAPoints: Int
     let computerBPoints: Int
+    let statistics: MatchStatistics?
+
+    init(
+        gameUuid: String,
+        winner: String?,
+        finalScore: Int,
+        pointValue: Int,
+        roundResult: String,
+        humanPoints: Int,
+        computerAPoints: Int,
+        computerBPoints: Int,
+        statistics: MatchStatistics? = nil
+    ) {
+        self.gameUuid = gameUuid
+        self.winner = winner
+        self.finalScore = finalScore
+        self.pointValue = pointValue
+        self.roundResult = roundResult
+        self.humanPoints = humanPoints
+        self.computerAPoints = computerAPoints
+        self.computerBPoints = computerBPoints
+        self.statistics = statistics
+    }
 }
 
 struct GostopSettlementResult: Decodable {

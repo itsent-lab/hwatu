@@ -216,8 +216,11 @@ struct MoneyBadge: View {
         }
         .padding(.horizontal, 15)
         .padding(.vertical, 11)
-        .background(Color(red: 0.12, green: 0.20, blue: 0.11), in: RoundedRectangle(cornerRadius: 12))
+        .background {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(red: 0.12, green: 0.20, blue: 0.11))
+                .shadow(color: .black.opacity(0.28), radius: 5, y: 4)
+        }
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 0.83, green: 0.66, blue: 0.20), lineWidth: 2))
-        .shadow(color: .black.opacity(0.28), radius: 5, y: 4)
     }
 }

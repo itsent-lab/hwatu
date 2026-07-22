@@ -73,14 +73,19 @@ final class HwatuScoringTests: XCTestCase {
         let session = GameSession(snapshot: snapshot)
         session.play(HwatuDeck.byID["m01-01"]!)
         XCTAssertEqual(session.ppeokCounts[.human], 1)
+        XCTAssertEqual(session.openingPpeokTotals[.human], 1)
         XCTAssertEqual(session.specialNotice, "뻑!")
         let effect = NativeMatgoEffectFactory.specialDeclaration(for: session)
         XCTAssertEqual(effect?.kind, .ppeok)
         XCTAssertEqual(effect?.detail, "첫 번째 뻑 · 바닥에 세 장 남김")
         XCTAssertEqual(effect?.durationMilliseconds, 950)
         XCTAssertEqual(session.floorCards.filter { $0.month == 1 }.count, 3)
-        let resumed = GameSession(snapshot: session.snapshot())
+        let saved = session.snapshot()
+        XCTAssertEqual(saved.humanPpeokCount, 1)
+        XCTAssertEqual(saved.humanOpeningPpeokCount, 1)
+        let resumed = GameSession(snapshot: saved)
         XCTAssertEqual(resumed.ppeokCounts[.human], 1)
+        XCTAssertEqual(resumed.openingPpeokTotals[.human], 1)
     }
 
     func testMissionMultiplierParticipatesInSettlement() {

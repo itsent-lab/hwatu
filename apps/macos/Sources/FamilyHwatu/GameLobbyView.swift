@@ -4,68 +4,102 @@ struct GameLobbyView: View {
     @EnvironmentObject private var appState: AppState
     let mode: GameMode
     @State private var data: DashboardData?
+    private let loadDashboardOnAppear: Bool
     private let pointValues = [100, 1_000, 2_000, 5_000, 10_000]
+
+    init(mode: GameMode, initialData: DashboardData? = nil, loadDashboardOnAppear: Bool = true) {
+        self.mode = mode
+        _data = State(initialValue: initialData)
+        self.loadDashboardOnAppear = loadDashboardOnAppear
+    }
 
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            if mode == .gostop {
-                                Text("3인 고스톱")
-                                    .font(.caption.weight(.black))
-                                    .foregroundStyle(HwatuTheme.red)
-                            }
-                            Text(heading)
-                                .font(.system(size: 36, weight: .black, design: .serif))
-                                .foregroundStyle(mode == .gostop ? HwatuTheme.deepGreen : HwatuTheme.ink)
-                        }
-                        Spacer()
-                        if let user = data?.user {
-                            MoneyBadge(title: "내 게임머니", value: user.virtualBalance)
-                        }
-                    }
+                let compactLayout = geometry.size.width < 840
+                VStack(alignment: .leading, spacing: 15) {
+                    lobbySummary(compact: compactLayout)
                     if let user = data?.user, user.virtualBalance <= 0 {
                         emptyBalance
                     } else {
-                        Text(mode == .matgo ? "점당 게임머니" : "점당 게임머니")
+                        Text("점당 게임머니")
                             .font(.callout.weight(.black))
                             .foregroundStyle(HwatuTheme.muted)
-                        HStack(spacing: 13) {
-                            ForEach(Array(pointValues.enumerated()), id: \.offset) { index, value in
-                                PointRoom(value: value, mode: mode, index: index) { enter(value) }
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        if mode == .matgo, let save = data?.activeSave {
-                            Button("저장된 \(save.turnNumber)턴 이어하기") {
-                                appState.route = .matgoGame(pointValue: 100, continueGame: true)
-                            }.buttonStyle(DashboardPrimaryButtonStyle())
-                        }
+                        pointRooms(compact: compactLayout)
                     }
                     if let message = appState.errorMessage { ErrorBanner(message: message) }
-                    HStack {
-                        Spacer()
+                    HStack(spacing: 12) {
+                        if mode == .matgo, let save = data?.activeSave, data?.user.virtualBalance ?? 0 > 0 {
+                            Button("저장된 \(save.turnNumber)턴 이어하기") {
+                                appState.route = .matgoGame(pointValue: 100, continueGame: true)
+                            }
+                            .buttonStyle(DashboardPrimaryButtonStyle())
+                        }
                         Button("게임 모드 선택으로 돌아가기") { appState.route = .home }
                             .buttonStyle(DashboardSecondaryButtonStyle())
-                            .frame(minWidth: 250)
-                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(mode == .gostop ? 44 : 52)
+                .padding(.horizontal, compactLayout ? 20 : 32)
+                .padding(.vertical, compactLayout ? 20 : 26)
                 .frame(width: min(1120, max(0, geometry.size.width - 32)))
-                .frame(minHeight: mode == .gostop ? nil : 530)
-                .background(panelGradient, in: RoundedRectangle(cornerRadius: mode == .gostop ? 24 : 22))
+                .background {
+                    RoundedRectangle(cornerRadius: mode == .gostop ? 24 : 22)
+                        .fill(panelGradient)
+                        .shadow(color: panelShadow.opacity(0.30), radius: 18, y: 16)
+                }
                 .overlay(RoundedRectangle(cornerRadius: mode == .gostop ? 24 : 22).stroke(panelBorder, lineWidth: 3))
-                .shadow(color: panelShadow.opacity(0.30), radius: 18, y: 16)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 30)
+                .padding(.vertical, 18)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: geometry.size.height)
             }
         }
-        .task { data = await appState.loadDashboard() }
+        .task {
+            guard loadDashboardOnAppear else { return }
+            data = await appState.loadDashboard()
+        }
+    }
+
+    @ViewBuilder
+    private func lobbySummary(compact: Bool) -> some View {
+        let statistics = data?.gameStats?.statistics(for: mode)
+        if compact {
+            VStack(alignment: .leading, spacing: 10) {
+                GameStatisticsSummary(mode: mode, statistics: statistics)
+                if let user = data?.user {
+                    MoneyBadge(title: "내 게임머니", value: user.virtualBalance)
+                }
+            }
+        } else {
+            HStack(alignment: .bottom, spacing: 22) {
+                GameStatisticsSummary(mode: mode, statistics: statistics)
+                if let user = data?.user {
+                    MoneyBadge(title: "내 게임머니", value: user.virtualBalance)
+                        .frame(width: 226, alignment: .trailing)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func pointRooms(compact: Bool) -> some View {
+        if compact {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10) {
+                roomViews
+            }
+        } else {
+            HStack(spacing: 13) {
+                roomViews
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var roomViews: some View {
+        ForEach(Array(pointValues.enumerated()), id: \.offset) { index, value in
+            PointRoom(value: value, mode: mode, index: index) { enter(value) }
+        }
     }
 
     private var panelGradient: LinearGradient {
@@ -81,11 +115,6 @@ struct GameLobbyView: View {
 
     private var panelShadow: Color {
         mode == .gostop ? Color(red: 0.216, green: 0.259, blue: 0.157) : Color(red: 0.298, green: 0.180, blue: 0.086)
-    }
-
-    private var heading: String {
-        let name = data?.user.displayName ?? appState.user?.displayName ?? "가족"
-        return mode == .matgo ? "\(name) 님, 한 판 즐겨볼까요?" : "\(name) 님, 점당 금액을 골라 주세요"
     }
 
     private var emptyBalance: some View {
@@ -151,14 +180,18 @@ private struct PointRoom: View {
             }
             .foregroundStyle(.white)
             .padding(11)
-            .frame(maxWidth: .infinity, minHeight: 166)
-            .background(LinearGradient(stops: [.init(color: palettes[index][0], location: 0), .init(color: palettes[index][1], location: 0.57), .init(color: palettes[index][2], location: 0.58), .init(color: palettes[index][1], location: 1)], startPoint: .top, endPoint: .bottom), in: RoundedRectangle(cornerRadius: 24))
+            .frame(maxWidth: .infinity)
+            .frame(height: 166)
+            .background {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(LinearGradient(stops: [.init(color: palettes[index][0], location: 0), .init(color: palettes[index][1], location: 0.57), .init(color: palettes[index][2], location: 0.58), .init(color: palettes[index][1], location: 1)], startPoint: .top, endPoint: .bottom))
+                    .shadow(color: palettes[index][2], radius: 0, y: 7)
+                    .shadow(color: .black.opacity(0.26), radius: 7, y: 9)
+            }
             .overlay(alignment: .topLeading) {
                 Capsule().fill(Color.white.opacity(0.22)).frame(width: 62, height: 15).rotationEffect(.degrees(-7)).offset(x: 10, y: 8)
             }
             .overlay(RoundedRectangle(cornerRadius: 24).stroke(palettes[index][2], lineWidth: 5))
-            .shadow(color: palettes[index][2], radius: 0, y: 7)
-            .shadow(color: .black.opacity(0.26), radius: 7, y: 9)
             .offset(y: hovering ? -3 : 0)
         }
         .buttonStyle(.plain)

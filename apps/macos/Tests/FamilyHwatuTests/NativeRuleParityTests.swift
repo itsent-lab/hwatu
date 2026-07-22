@@ -135,6 +135,29 @@ final class NativeRuleParityTests: XCTestCase {
         XCTAssertEqual(decision.label, "고·스톱을 고민하는 중…")
     }
 
+    @MainActor
+    func testGostopBonusReplacementChangesAutomaticPlayTaskState() throws {
+        let bonus = try XCTUnwrap(HwatuDeck.byID["bonus-double"])
+        var deck = HwatuDeck.gostopCards
+            .filter { $0.id != bonus.id }
+            .sorted { ($0.id.suffix(2), $0.month, $0.id) < ($1.id.suffix(2), $1.month, $1.id) }
+        deck.append(bonus)
+        let session = GameSession(mode: .gostop, pointValue: 100, difficulty: .normal, deck: deck)
+
+        XCTAssertEqual(session.phase, .playing)
+        XCTAssertEqual(session.currentPlayer, .human)
+        XCTAssertTrue(session.humanHand.contains(bonus))
+        let taskStateBeforeBonus = session.automaticPlayTaskStateKey
+        let turnBeforeBonus = session.turnNumber
+
+        session.play(bonus)
+
+        XCTAssertEqual(session.turnNumber, turnBeforeBonus)
+        XCTAssertEqual(session.currentPlayer, .human)
+        XCTAssertFalse(session.humanHand.contains(bonus))
+        XCTAssertNotEqual(session.automaticPlayTaskStateKey, taskStateBeforeBonus)
+    }
+
     func testDifficultyOrderDescriptionsAndCyclingMatchWeb() {
         XCTAssertEqual(AIDifficulty.allCases, [.easy, .normal, .hard, .expert])
         XCTAssertEqual(AIDifficulty.allCases.map(\.title), ["쉬움", "보통", "어려움", "초고수"])
