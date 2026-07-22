@@ -5,7 +5,6 @@
 - [`project-purpose.md`](project-purpose.md): 가족용 프로젝트 목적과 공개 원칙
 - [`reference-and-asset-policy.md`](reference-and-asset-policy.md): 참고 자료와 카드·오디오 자산 정책
 - [`public-release-checklist.md`](public-release-checklist.md): 공개 저장소 점검표
-- [`videos/`](videos/): 로컬 웹앱에서 직접 촬영한 맞고·고스톱 공개 데모
 
 ## 게임과 공통 계약
 
