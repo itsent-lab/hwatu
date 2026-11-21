@@ -21,6 +21,7 @@ public sealed class GostopGameRepository(HwatuDb database)
         await using var connection = database.OpenConnection();
         await connection.OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
+        var gameUuid = Guid.Parse(request.GameUuid);
         var balances = await connection.QuerySingleAsync<GostopPlayerBalances>(
             """
             SELECT virtual_balance AS VirtualBalance,
@@ -38,7 +39,7 @@ public sealed class GostopGameRepository(HwatuDb database)
             WHERE user_id = @UserId AND game_uuid = @GameUuid
             FOR UPDATE
             """,
-            new { UserId = userId, request.GameUuid }, transaction);
+            new { UserId = userId, GameUuid = gameUuid }, transaction);
         if (recordedAmount is not null)
         {
             await transaction.CommitAsync();
@@ -79,12 +80,12 @@ public sealed class GostopGameRepository(HwatuDb database)
             VALUES
                 (@UserId, @GameUuid, 'gostop', @Result, @FinalScore,
                  @SettlementAmount, @BalanceAfter, @ComputerABalance,
-                 @ComputerABalance, @ComputerBBalance, CAST(@SummaryJson AS JSON))
+                 @ComputerABalance, @ComputerBBalance, CAST(@SummaryJson AS jsonb))
             """,
             new
             {
                 UserId = userId,
-                request.GameUuid,
+                GameUuid = gameUuid,
                 Result = roundResult == "nagari" ? "nagari" : request.Winner == "human" ? "win" : "loss",
                 request.FinalScore,
                 SettlementAmount = humanDelta,

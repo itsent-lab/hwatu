@@ -12,6 +12,11 @@
 - [`game-rule-test-vectors.md`](game-rule-test-vectors.md): 플랫폼 공통 JSON 규칙 벡터 운영 방법
 - [`../shared/contracts/README.md`](../shared/contracts/README.md): API 호환성, 오류 코드, 규칙 벡터 원본
 
+## 웹 배포와 데이터베이스
+
+- [공개 배포 설정 예제](../deploy/examples/README.md)
+- [MySQL에서 PostgreSQL로 이관하고 백업을 복원하는 방법](../services/api/database/migrations/README.md)
+
 ## 네이티브 앱 구현 세트
 
 아래 문서는 함께 사용합니다. 하나만 읽고 플랫폼 구현 완료로 판정하지 않습니다.

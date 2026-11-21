@@ -85,7 +85,8 @@ CC BY 4.0 음원은 제목, 권리자, 출처, 라이선스와 변경 여부를 
 | --- | --- | --- | --- |
 | BCrypt.Net-Next | 4.0.3 | MIT | <https://github.com/BcryptNet/bcrypt.net> |
 | Dapper | 2.1.66 | Apache-2.0 | <https://github.com/DapperLib/Dapper> |
-| MySqlConnector | 2.4.0 | MIT | <https://github.com/mysql-net/MySqlConnector> |
+| Npgsql | 10.0.3 | PostgreSQL License | <https://github.com/npgsql/npgsql> |
+| MySqlConnector (이전 도구) | 2.4.0 | MIT | <https://github.com/mysql-net/MySqlConnector> |
 
 ### 웹 개발 및 검증 도구
 

@@ -34,7 +34,7 @@ public sealed class UserRepository(HwatuDb database)
     {
         await using var connection = database.OpenConnection();
         return await connection.QuerySingleOrDefaultAsync<AppUser>(
-            $"SELECT {UserColumns} FROM users WHERE username = @Username LIMIT 1",
+            $"SELECT {UserColumns} FROM users WHERE rtrim(username) = rtrim(@Username) LIMIT 1",
             new { Username = username });
     }
 
@@ -50,7 +50,7 @@ public sealed class UserRepository(HwatuDb database)
     {
         await using var connection = database.OpenConnection();
         var users = await connection.QueryAsync<AppUser>(
-            $"SELECT {UserColumns} FROM users ORDER BY role = 'admin' DESC, display_name ASC");
+            $"SELECT {UserColumns} FROM users ORDER BY (role = 'admin') DESC, display_name ASC");
         return users.AsList();
     }
 
@@ -65,10 +65,11 @@ public sealed class UserRepository(HwatuDb database)
                 (username, display_name, password_hash, role, virtual_balance, opponent_balance)
             VALUES
                 (@Username, @DisplayName, @PasswordHash, @Role, @DefaultBalance, @DefaultBalance)
+            RETURNING id
             """;
         await using var connection = database.OpenConnection();
         await connection.OpenAsync();
-        await connection.ExecuteAsync(sql, new
+        return await connection.ExecuteScalarAsync<long>(sql, new
         {
             Username = username,
             DisplayName = displayName,
@@ -76,7 +77,6 @@ public sealed class UserRepository(HwatuDb database)
             Role = role,
             DefaultBalance
         });
-        return await connection.ExecuteScalarAsync<long>("SELECT LAST_INSERT_ID()");
     }
 
     public async Task<long?> TryCreateInitialAdminAsync(
@@ -84,59 +84,48 @@ public sealed class UserRepository(HwatuDb database)
         string displayName,
         string passwordHash)
     {
-        const string acquireLockSql = "SELECT GET_LOCK(CONCAT(DATABASE(), ':hwatu-bootstrap'), 5)";
-        const string releaseLockSql = "SELECT RELEASE_LOCK(CONCAT(DATABASE(), ':hwatu-bootstrap'))";
         const string insertSql = """
             INSERT INTO users
                 (username, display_name, password_hash, role, virtual_balance, opponent_balance)
             VALUES
                 (@Username, @DisplayName, @PasswordHash, 'admin', @DefaultBalance, @DefaultBalance)
+            RETURNING id
             """;
 
         await using var connection = database.OpenConnection();
         await connection.OpenAsync();
-        if (await connection.ExecuteScalarAsync<int?>(acquireLockSql) != 1)
+        await using var transaction = await connection.BeginTransactionAsync();
+        await connection.ExecuteAsync("SET LOCAL lock_timeout = '5s'", transaction: transaction);
+        await connection.ExecuteAsync(
+            "SELECT pg_advisory_xact_lock(hashtextextended('hwatu-bootstrap', 0))",
+            transaction: transaction);
+        if (await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM users", transaction: transaction) != 0)
         {
-            throw new TimeoutException("첫 관리자 생성 잠금을 얻지 못했습니다.");
+            return null;
         }
 
-        try
+        var id = await connection.ExecuteScalarAsync<long>(insertSql, new
         {
-            await using var transaction = await connection.BeginTransactionAsync();
-            if (await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM users", transaction: transaction) != 0)
-            {
-                await transaction.RollbackAsync();
-                return null;
-            }
-
-            await connection.ExecuteAsync(insertSql, new
-            {
-                Username = username,
-                DisplayName = displayName,
-                PasswordHash = passwordHash,
-                DefaultBalance
-            }, transaction);
-            var id = await connection.ExecuteScalarAsync<long>("SELECT LAST_INSERT_ID()", transaction: transaction);
-            await transaction.CommitAsync();
-            return id;
-        }
-        finally
-        {
-            await connection.ExecuteScalarAsync<int?>(releaseLockSql);
-        }
+            Username = username,
+            DisplayName = displayName,
+            PasswordHash = passwordHash,
+            DefaultBalance
+        }, transaction);
+        await transaction.CommitAsync();
+        return id;
     }
 
     public async Task TouchLoginAsync(long id)
     {
         await using var connection = database.OpenConnection();
-        await connection.ExecuteAsync("UPDATE users SET last_login_at = NOW() WHERE id = @Id", new { Id = id });
+        await connection.ExecuteAsync("UPDATE users SET last_login_at = date_trunc('second', statement_timestamp()::timestamp) WHERE id = @Id", new { Id = id });
     }
 
     public async Task<bool> ToggleActiveAsync(long id)
     {
         await using var connection = database.OpenConnection();
         var affected = await connection.ExecuteAsync(
-            "UPDATE users SET is_active = IF(is_active = 1, 0, 1), auth_version = auth_version + 1 WHERE id = @Id",
+            "UPDATE users SET is_active = NOT is_active, auth_version = auth_version + 1 WHERE id = @Id",
             new { Id = id });
         return affected == 1;
     }
@@ -157,7 +146,7 @@ public sealed class UserRepository(HwatuDb database)
             UPDATE users
             SET profile_image = @Data,
                 profile_image_content_type = @ContentType,
-                profile_image_updated_at = UTC_TIMESTAMP(6)
+                profile_image_updated_at = (clock_timestamp() AT TIME ZONE 'UTC')
             WHERE id = @Id
             """, new { Id = id, Data = data, ContentType = contentType });
         return affected == 1;
@@ -195,10 +184,10 @@ public sealed class UserRepository(HwatuDb database)
     {
         const string sql = """
             SELECT COUNT(*) AS Games,
-                   CAST(COALESCE(SUM(result = 'win'), 0) AS SIGNED) AS Wins,
-                   CAST(COALESCE(SUM(settlement_amount), 0) AS SIGNED) AS Settlement
+                   COUNT(*) FILTER (WHERE result = 'win') AS Wins,
+                   CAST(COALESCE(SUM(settlement_amount), 0) AS bigint) AS Settlement
             FROM match_history
-            WHERE user_id = @UserId AND played_at >= CURDATE()
+            WHERE user_id = @UserId AND played_at >= CURRENT_DATE
             """;
         await using var connection = database.OpenConnection();
         return await connection.QuerySingleAsync<DashboardStats>(sql, new { UserId = userId });

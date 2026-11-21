@@ -9,6 +9,11 @@ process.chdir(repositoryRoot);
 
 const failures = [];
 const warnings = [];
+const publicAuthorEmail = 'itsent@itsent.co.kr';
+const publicAuthorEmailPattern = new RegExp(
+  `(?<![A-Za-z0-9._%+@-])${publicAuthorEmail.replaceAll('.', '\\.')}(?![A-Za-z0-9._%+@-])`,
+  'g'
+);
 
 function git(args, options = {}) {
   return execFileSync('git', args, {
@@ -142,7 +147,11 @@ function collectPrivateValues(path) {
 }
 
 function containsPrivateValue(body, value) {
-  const text = body.toString('utf8');
+  let text = body.toString('utf8');
+  // The published contact can share its local part with a private account name.
+  if (value === publicAuthorEmail.split('@')[0]) {
+    text = text.replace(publicAuthorEmailPattern, ' ');
+  }
   if (/^[A-Za-z0-9._-]+$/.test(value)) {
     const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return new RegExp(`(^|[^A-Za-z0-9._-])${escaped}([^A-Za-z0-9._-]|$)`).test(text);
@@ -223,7 +232,7 @@ if (diffChecks.some(result => result.status !== 0)) {
 
 const authorName = git(['config', '--get', 'user.name']).trim();
 const authorEmail = git(['config', '--get', 'user.email']).trim();
-if (authorName !== 'NSJ' || authorEmail !== 'itsent@itsent.co.kr') {
+if (authorName !== 'NSJ' || authorEmail !== publicAuthorEmail) {
   failures.push('현재 저장소 Git 작성자가 NSJ <itsent@itsent.co.kr>로 설정되지 않았습니다.');
 }
 

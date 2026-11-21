@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MySqlConnector;
+using Npgsql;
 
 namespace Hwatu.Server.Migrations;
 
@@ -67,8 +67,8 @@ public static class MigrationCommand
         }
         catch (Exception exception)
         {
-            var code = exception is MySqlException mySql
-                ? $"mysql-{mySql.Number}"
+            var code = exception is PostgresException postgres
+                ? $"postgres-{postgres.SqlState}"
                 : exception.GetType().Name;
             Console.Error.WriteLine($"Migration command failed ({code}).");
             return 2;

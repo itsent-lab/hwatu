@@ -66,7 +66,7 @@ Unity 같은 범용 게임 엔진도 검토할 수 있지만, 이 프로젝트�
 - 난이도별 AI와 게임 진행 효과
 - 판당 무르기와 게임머니 리필 등 접근성·편의 기능
 - 사용자 로그인, 관리자 계정 관리, 프로필 이미지
-- MySQL 기반 게임 저장과 정산 기록
+- PostgreSQL 기반 게임 저장과 정산 기록
 - 맞고·고스톱별 승률, 최고 점수, 연승과 특수 상황 통계
 - 반응형 UI 및 PWA 정적 자산
 - Vitest 기반 규칙·UI·시뮬레이션 테스트
@@ -94,14 +94,14 @@ https://github.com/user-attachments/assets/600d4926-20c8-4dcf-a01c-a01bddeb0849
 ## 기술 스택
 
 - React 19, TypeScript, Vite
-- ASP.NET Core 10, Dapper, MySqlConnector
-- MySQL 8 이상
+- ASP.NET Core 10, Dapper, Npgsql
+- PostgreSQL 18 (ICU 지원)
 - Vitest
 - 네이티브 앱 예정: Kotlin·Jetpack Compose, Swift·SwiftUI/AppKit, C#·WinUI
 
 ## 로컬 실행
 
-Node.js, .NET 10 SDK, MySQL을 준비합니다.
+Node.js, .NET 10 SDK, PostgreSQL을 준비합니다.
 
 ```bash
 npm install
@@ -116,7 +116,7 @@ cp services/api/appsettings.Local.example.json services/api/appsettings.Local.js
 ```json
 {
   "ConnectionStrings": {
-    "Hwatu": "Server=127.0.0.1;Port=3306;Database=hwatu;User ID=hwatu;Password=change-me;Character Set=utf8mb4;"
+    "Hwatu": "Host=127.0.0.1;Port=5432;Database=hwatu;Username=hwatu;Password=change-me;"
   },
   "Bootstrap": {
     "Token": ""
@@ -126,7 +126,7 @@ cp services/api/appsettings.Local.example.json services/api/appsettings.Local.js
 
 최초 관리자 계정이 외부 방문자에게 선점되지 않도록 `Bootstrap:Token`은 기본적으로 비어 있으며, 이 상태에서는 관리자 생성이 차단됩니다. `openssl rand -hex 32`처럼 암호학적으로 안전한 방법으로 32자 이상의 일회성 토큰을 만들고, Git에서 제외되는 `services/api/appsettings.Local.json`에만 입력합니다. 관리자 생성을 마치면 토큰 값을 다시 비우고 서버를 재시작합니다. 운영 환경에서는 추적되는 설정 파일 대신 환경 변수 `Bootstrap__Token` 또는 별도의 비밀 저장소를 사용하세요.
 
-DB와 사용자를 만든 뒤 서버와 프런트엔드 개발 서버를 각각 실행합니다. 서버 시작 시 `services/api/database/schema.sql`을 적용합니다.
+PostgreSQL DB와 접속 계정을 만든 뒤 서버와 프런트엔드 개발 서버를 각각 실행합니다. 기본 설정으로 서버를 시작하면 `services/api/database/schema.sql`을 적용합니다.
 
 ```bash
 npm run dev:server
@@ -139,7 +139,7 @@ npm run dev
 
 이 저장소는 코드를 제공할 뿐, 누구나 바로 접속할 수 있는 공용 인스턴스나 관리형 호스팅을 제공하지 않습니다. 가족 외의 사람이 이 코드를 가져가 사용하려면 자기 환경에 필요한 조건을 직접 마련하고 운영해야 합니다.
 
-- Node.js, .NET 10 SDK와 MySQL을 직접 설치하고 호환되는 실행 환경을 구성해야 합니다.
+- Node.js, .NET 10 SDK와 PostgreSQL을 직접 설치하고 호환되는 실행 환경을 구성해야 합니다.
 - 데이터베이스, 계정, 연결 문자열과 애플리케이션 설정을 직접 생성하고 안전하게 보관해야 합니다.
 - 외부에서 접속할 서버를 운영한다면 도메인, DNS, HTTPS 인증서, 방화벽, 리버스 프록시와 네트워크 보안을 직접 준비해야 합니다.
 - 배포, 프로세스 관리, 로그 확인, 모니터링, 백업, 복구, 업데이트와 장애 대응을 직접 수행해야 합니다.
@@ -203,6 +203,7 @@ GitHub 공개용 운영 설정 예제는 [`deploy/examples/`](deploy/examples/)�
 - [네이티브 플랫폼 차이·배포·릴리스 기준](docs/native-platform-release.md)
 - [참고 자료 및 자산 사용 정책](docs/reference-and-asset-policy.md)
 - [공개 전 점검표](docs/public-release-checklist.md)
+- [데이터베이스 이관·백업·복원](services/api/database/migrations/README.md)
 - [공개 배포 설정 예제](deploy/examples/)
 - [보안 정책과 운영 보안 경계](SECURITY.md)
 - [저작권 및 제3자 라이선스 고지](THIRD_PARTY_NOTICES.md)

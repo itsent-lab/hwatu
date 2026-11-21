@@ -43,24 +43,27 @@ public sealed class GameRepository(HwatuDb database)
                  turn_number, state_json, device_id)
             VALUES
                 (@UserId, 'matgo-main', @GameUuid, 'matgo', 'active', @StateVersion,
-                 @TurnNumber, @StateJson, @DeviceId)
-            ON DUPLICATE KEY UPDATE
-                game_mode = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(game_mode), game_mode),
-                status = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(status), status),
-                state_version = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(state_version), state_version),
-                turn_number = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(turn_number), turn_number),
-                state_json = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(state_json), state_json),
-                device_id = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(device_id), device_id),
-                updated_at = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), CURRENT_TIMESTAMP, updated_at),
-                game_uuid = IF(game_uuid <> VALUES(game_uuid) OR turn_number <= VALUES(turn_number), VALUES(game_uuid), game_uuid)
+                 @TurnNumber, CAST(@StateJson AS jsonb), @DeviceId)
+            ON CONFLICT (user_id, slot_key) DO UPDATE SET
+                game_uuid = EXCLUDED.game_uuid,
+                game_mode = EXCLUDED.game_mode,
+                status = EXCLUDED.status,
+                state_version = EXCLUDED.state_version,
+                turn_number = EXCLUDED.turn_number,
+                state_json = EXCLUDED.state_json,
+                device_id = EXCLUDED.device_id,
+                updated_at = date_trunc('second', statement_timestamp()::timestamp)
+            WHERE game_saves.game_uuid <> EXCLUDED.game_uuid
+               OR game_saves.turn_number <= EXCLUDED.turn_number
             """;
         await using var connection = database.OpenConnection();
         await connection.OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
+        var gameUuid = Guid.Parse(request.GameUuid);
         await connection.ExecuteAsync(sql, new
         {
             UserId = userId,
-            request.GameUuid,
+            GameUuid = gameUuid,
             request.StateVersion,
             request.TurnNumber,
             StateJson = stateJson,
@@ -99,12 +102,12 @@ public sealed class GameRepository(HwatuDb database)
             WHERE user_id = @UserId AND game_uuid = @GameUuid
             FOR UPDATE
             """,
-            new { UserId = userId, request.GameUuid }, transaction);
+            new { UserId = userId, GameUuid = gameUuid }, transaction);
         if (recorded is not null)
         {
             var opponentBalance = await RefillOpponentIfEmptyAsync(
                 connection, transaction, userId, balances.OpponentBalance);
-            await MarkCompletedAsync(connection, transaction, userId, request.GameUuid);
+            await MarkCompletedAsync(connection, transaction, userId, gameUuid);
             await transaction.CommitAsync();
             return new GameSaveResult(
                 balances.VirtualBalance,
@@ -140,12 +143,12 @@ public sealed class GameRepository(HwatuDb database)
                  settlement_amount, balance_after, opponent_balance_after, summary_json)
             VALUES
                 (@UserId, @GameUuid, 'matgo', @Result, @FinalScore,
-                 @SettlementAmount, @BalanceAfter, @OpponentBalanceAfter, CAST(@SummaryJson AS JSON))
+                 @SettlementAmount, @BalanceAfter, @OpponentBalanceAfter, CAST(@SummaryJson AS jsonb))
             """,
             new
             {
                 UserId = userId,
-                request.GameUuid,
+                GameUuid = gameUuid,
                 settlement.Result,
                 settlement.FinalScore,
                 SettlementAmount = appliedDelta,
@@ -166,7 +169,7 @@ public sealed class GameRepository(HwatuDb database)
                 BalanceAfter = balanceAfter,
                 OpponentBalanceAfter = opponentBalanceAfter
             }, transaction);
-        await MarkCompletedAsync(connection, transaction, userId, request.GameUuid);
+        await MarkCompletedAsync(connection, transaction, userId, gameUuid);
         await transaction.CommitAsync();
         return new GameSaveResult(
             balanceAfter,
@@ -178,8 +181,8 @@ public sealed class GameRepository(HwatuDb database)
     }
 
     private static async Task<long> RefillOpponentIfEmptyAsync(
-        MySqlConnector.MySqlConnection connection,
-        MySqlConnector.MySqlTransaction transaction,
+        Npgsql.NpgsqlConnection connection,
+        Npgsql.NpgsqlTransaction transaction,
         long userId,
         long opponentBalance)
     {
@@ -192,10 +195,10 @@ public sealed class GameRepository(HwatuDb database)
     }
 
     private static Task<int> MarkCompletedAsync(
-        MySqlConnector.MySqlConnection connection,
-        MySqlConnector.MySqlTransaction transaction,
+        Npgsql.NpgsqlConnection connection,
+        Npgsql.NpgsqlTransaction transaction,
         long userId,
-        string gameUuid) => connection.ExecuteAsync(
+        Guid gameUuid) => connection.ExecuteAsync(
             """
             UPDATE game_saves
             SET status = 'completed'

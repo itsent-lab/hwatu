@@ -5,7 +5,7 @@
 ## 사용 순서
 
 1. `services/api/appsettings.Production.example.json`을 `services/api/appsettings.Production.json`으로 복사합니다.
-2. DB 계정과 비밀번호, `AllowedHosts`를 실제 값으로 바꾸고 파일 권한을 제한합니다.
+2. ICU를 지원하는 PostgreSQL 18에 DB와 접속 계정을 만듭니다. 예제의 연결 문자열과 `AllowedHosts`를 배포 환경에 맞게 바꾸고 파일 권한을 제한합니다.
 3. 최초 관리자 생성에만 사용할 32자 이상의 임의 토큰을 비밀 저장소나 환경 변수 `Bootstrap__Token`으로 설정합니다. 관리자 생성 직후 값을 제거하고 서비스를 재시작합니다.
 4. `nginx/hwatu.example.conf`를 서버의 Nginx 설정 위치로 복사해 도메인, 인증서와 배포 경로를 바꿉니다.
 5. `systemd/hwatu.example.service`를 systemd 단위 위치로 복사해 사용자, 그룹과 배포 경로를 바꿉니다.
@@ -20,7 +20,7 @@
 1. 테스트와 빌드를 통과한 배포 산출물을 생성합니다.
 2. 운영 전용 설정, 비공개 음원과 데이터 파일을 동기화의 삭제·덮어쓰기 대상에서 제외합니다.
 3. 교체될 기존 파일의 롤백 백업을 만든 뒤 새 파일을 업로드합니다.
-4. DB 스키마 변경이 있을 때만 프로젝트의 초기화·마이그레이션 절차로 적용합니다.
+4. DB 스키마 변경은 백업을 확보한 뒤 적용합니다. 이관, 마이그레이션과 격리 복원 검증은 [데이터베이스 안내](../../services/api/database/migrations/README.md)를 따릅니다.
 5. 정확한 애플리케이션 서비스만 정상 재시작합니다.
 6. 서비스 상태, 웹, DB 연결 API와 변경된 정적 파일을 외부 주소에서 확인합니다.
 

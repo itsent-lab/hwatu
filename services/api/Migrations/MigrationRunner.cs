@@ -1,4 +1,4 @@
-using MySqlConnector;
+using Npgsql;
 
 namespace Hwatu.Server.Migrations;
 
@@ -8,11 +8,11 @@ public sealed record MigrationPlan(
 
 public sealed class MigrationRunner(
     LoadedMigrationManifest manifest,
-    MySqlConnectionStringBuilder connectionSettings)
+    NpgsqlConnectionStringBuilder connectionSettings)
 {
     public async Task<MigrationPlan> PlanAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = new MySqlConnection(connectionSettings.ConnectionString);
+        await using var connection = new NpgsqlConnection(connectionSettings.ConnectionString);
         await connection.OpenAsync(cancellationToken);
         var store = new MigrationStore(connection);
         return BuildPlan(await store.LoadLatestAsync(cancellationToken));
@@ -23,7 +23,7 @@ public sealed class MigrationRunner(
         CancellationToken cancellationToken = default)
     {
         ValidateRunId(runId);
-        await using var connection = new MySqlConnection(connectionSettings.ConnectionString);
+        await using var connection = new NpgsqlConnection(connectionSettings.ConnectionString);
         await connection.OpenAsync(cancellationToken);
         var store = new MigrationStore(connection);
         await store.AcquireLockAsync(cancellationToken);
@@ -83,7 +83,7 @@ public sealed class MigrationRunner(
         CancellationToken cancellationToken = default)
     {
         ValidateRunId(runId);
-        await using var connection = new MySqlConnection(connectionSettings.ConnectionString);
+        await using var connection = new NpgsqlConnection(connectionSettings.ConnectionString);
         await connection.OpenAsync(cancellationToken);
         var store = new MigrationStore(connection);
         await store.AcquireLockAsync(cancellationToken);
@@ -115,7 +115,7 @@ public sealed class MigrationRunner(
 
     public async Task VerifyAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = new MySqlConnection(connectionSettings.ConnectionString);
+        await using var connection = new NpgsqlConnection(connectionSettings.ConnectionString);
         await connection.OpenAsync(cancellationToken);
         var store = new MigrationStore(connection);
         var plan = BuildPlan(await store.LoadLatestAsync(cancellationToken));
@@ -130,7 +130,7 @@ public sealed class MigrationRunner(
     }
 
     public static async Task BaselineNewDatabaseAsync(
-        MySqlConnection connection,
+        NpgsqlConnection connection,
         string contentRoot,
         CancellationToken cancellationToken = default)
     {
@@ -175,7 +175,7 @@ public sealed class MigrationRunner(
     }
 
     private static async Task<bool> RollbackTargetsAsync(
-        MySqlConnection connection,
+        NpgsqlConnection connection,
         MigrationStore store,
         IReadOnlyList<(LoadedMigration Migration, long AttemptId)> targets,
         CancellationToken cancellationToken)
@@ -212,11 +212,11 @@ public sealed class MigrationRunner(
     }
 
     private static async Task ExecuteScriptAsync(
-        MySqlConnection connection,
+        NpgsqlConnection connection,
         string path,
         CancellationToken cancellationToken)
     {
-        await using var command = new MySqlCommand(await File.ReadAllTextAsync(path, cancellationToken), connection)
+        await using var command = new NpgsqlCommand(await File.ReadAllTextAsync(path, cancellationToken), connection)
         {
             CommandTimeout = 300
         };
@@ -224,11 +224,11 @@ public sealed class MigrationRunner(
     }
 
     private static async Task VerifyScriptAsync(
-        MySqlConnection connection,
+        NpgsqlConnection connection,
         string path,
         CancellationToken cancellationToken)
     {
-        await using var command = new MySqlCommand(await File.ReadAllTextAsync(path, cancellationToken), connection)
+        await using var command = new NpgsqlCommand(await File.ReadAllTextAsync(path, cancellationToken), connection)
         {
             CommandTimeout = 60
         };
@@ -239,8 +239,8 @@ public sealed class MigrationRunner(
         }
     }
 
-    private static string FailureCode(Exception exception) => exception is MySqlException mySql
-        ? $"mysql-{mySql.Number}"
+    private static string FailureCode(Exception exception) => exception is PostgresException postgres
+        ? $"postgres-{postgres.SqlState}"
         : exception.GetType().Name;
 
     private static void ValidateRunId(string runId)

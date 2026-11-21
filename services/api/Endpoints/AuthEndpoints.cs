@@ -3,7 +3,7 @@ using Hwatu.Server.Data;
 using Hwatu.Server.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
-using MySqlConnector;
+using Npgsql;
 
 namespace Hwatu.Server.Endpoints;
 
@@ -81,7 +81,7 @@ public static class AuthEndpoints
             await sessions.SignInAsync(context, user, true);
             return ApiResults.Ok(ToClient(user), StatusCodes.Status201Created);
         }
-        catch (MySqlException exception) when (exception.Number == 1062)
+        catch (PostgresException exception) when (exception.SqlState == PostgresErrorCodes.UniqueViolation)
         {
             return ApiResults.Error("USERNAME_EXISTS", "이미 사용 중인 아이디입니다.", 409);
         }
